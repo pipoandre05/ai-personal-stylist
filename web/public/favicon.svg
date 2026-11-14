@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Prendie">
+  <!-- Prendie · favicon (D-01). Cabeza h-firma-s de web/public/mascota/mascota.svg sobre tinta #121412.
+       Autocontenido: copia solo las piezas que usa. Cabeza centrada y a 420 px de alto: variante para favicon.ico (16, 32 y 48 px), sin zona segura maskable.
+       Trazos engrosados como pide mascota.svg para cabeza chica (40 px o menos). -->
+  <defs>
+    <path id="p-etq" d="M61.2 67.2 L120 14 L178.8 67.2 V188.8 Q178.8 211.6 153.6 211.6 H86.4 Q61.2 211.6 61.2 188.8 Z"/>
+    <g id="pupila-s"><ellipse cx="0" cy="0" rx="7.4" ry="10.6" fill="#121412"/><circle cx="2.6" cy="-4.4" r="2.8" fill="#FFFFFF"/></g>
+  </defs>
+  <rect width="512" height="512" fill="#121412"/>
+  <g transform="translate(47.2 73.3) scale(1.74)" style="--w-o:13px;--w-e:7px;--w-b:10px;--w-m:8px" stroke-linecap="round" stroke-linejoin="round">
+    <use href="#p-etq" fill="#C9F24D"/>
+    <use href="#p-etq" fill="none" stroke="#121412" stroke-width="13"/>
+    <circle cx="120" cy="78" r="17" fill="#121412"/>
+    <path d="M120 78 C 118 56, 114 44, 120 30 C 124 20, 134 14, 142 10" fill="none" stroke="#121412" stroke-width="10"/>
+    <ellipse cx="98" cy="142" rx="16" ry="21" fill="#FFFFFF" stroke="#121412" stroke-width="7"/>
+    <ellipse cx="144" cy="142" rx="16" ry="21" fill="#FFFFFF" stroke="#121412" stroke-width="7"/>
+    <use href="#pupila-s" x="101" y="145"/><use href="#pupila-s" x="147" y="145"/>
+    <path d="M80 112 Q96 106 114 111" fill="none" stroke="#121412" stroke-width="10"/>
+    <path d="M128 96 Q144 82 162 96" fill="none" stroke="#121412" stroke-width="10"/>
+    <path d="M100 182 Q124 202 152 176" fill="none" stroke="#121412" stroke-width="8"/>
+  </g>
+</svg>
