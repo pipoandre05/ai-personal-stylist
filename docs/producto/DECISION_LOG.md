@@ -7,7 +7,7 @@
 >
 > Estados: `tomada` · `tomada-reversible` · `requiere aprobación` · `abierta`.
 
-Versión 0.1 — 2026-11-14.
+Versión 0.4 — 2026-11-14.
 
 ## 1. Decisiones de producto
 
@@ -16,7 +16,7 @@ Versión 0.1 — 2026-11-14.
 | DP-01 | El producto es un **Asesor de Imagen Digital con Personal Shopper integrado**, no un buscador de moda. Promesa: "Te ayudo a verte como quieres verte, con lo que ya tienes y con lo que realmente vale la pena comprar". | [INV] §1, [FELIPE] | tomada | Un shopping agent generalista compite con Amazon/Google/Meta/Mercado Libre. |
 | DP-02 | La unidad de valor es el **outfit completo para una ocasión**, nunca la prenda suelta. Toda recomendación (incluida una compra) se presenta dentro de un outfit. | [INV] §1, [FELIPE] | tomada | — |
 | DP-03 | Canal del MVP: **PWA mobile-first**. WhatsApp pasa a V2 como segundo canal sobre el mismo agente (la API del agente no conoce el canal). | [FELIPE] contra [INV] §7 y §15 (WhatsApp-first) | tomada | La investigación recomienda WhatsApp-first; Felipe pidió PWA. La PWA resuelve mejor clóset, paleta y visualización de outfits, que la propia investigación reserva a "app o web como capa de profundidad". Riesgo aceptado: mayor fricción de adquisición. Se mantiene la hipótesis H-07. |
-| DP-04 | Cuña del MVP: **"¿Qué me pongo?" con tu clóset real**. Activación = primer outfit explicado en la primera sesión, con ≥ 5 prendas. | [PS] sobre [INV] §13 | tomada | Es el caso de uso de mayor frecuencia (diario) y no depende de catálogos de terceros, que es la dependencia más riesgosa. |
+| DP-04 | Cuña del MVP: **"¿Qué me pongo?" con tu clóset real**. Activación = primer outfit útil en la primera sesión (mínimo 3 prendas para generarlo; 5 es la meta del onboarding, DP-06). | [PS] sobre [INV] §13 | tomada | Es el caso de uso de mayor frecuencia (diario) y no depende de catálogos de terceros, que es la dependencia más riesgosa. |
 | DP-05 | **Colorimetría entra al MVP como "paleta preliminar"** (una selfie → estación tentativa + colores, con nivel de confianza y corrección manual). El análisis profundo y de silueta queda en V2. | [PS], diverge de [INV] §13 (la ubica en V2) | tomada-reversible | Es el gancho de onboarding más barato de construir con un modelo de visión y el que entrega valor antes de digitalizar el clóset (referente: Style DNA). Se presenta siempre como orientación, no diagnóstico. |
 | DP-06 | El clóset parte con **pocas prendas**: meta de 5 en onboarding (mínimo 3 para generar un outfit). Una foto = una prenda en el MVP; el agente pide prendas faltantes a medida que las necesita. Video del clóset, foto con varias prendas e importación desde correo → V2. | [PS] sobre riesgo crítico [INV] §14 | tomada | La digitalización es la mayor barrera de entrada identificada. |
 | DP-07 | Personal Shopper en tres pasos. **MVP (hoy):** el agente detecta la *prenda faltante* y la describe (categoría, color, por qué desbloquea outfits), sin productos. **V1.1:** "¿vale la pena comprar esto?" sobre un link o foto que entrega el usuario + búsqueda en vivo con citas en dominios chilenos permitidos. **V2:** catálogo propio vía feeds/afiliación. | [PS] sobre [INV] §13–14 | tomada-reversible | No existen hoy feeds ni acuerdos. No se asume ninguna API. Ver DT-09 y H-05. |
@@ -28,6 +28,8 @@ Versión 0.1 — 2026-11-14.
 | DP-13 | Segmento inicial: personas de 25 a 45, urbanas, Santiago, presupuesto medio. Sin segmentar por género en el modelo de datos: el usuario declara qué secciones de ropa usa. | [INV] §9–10, [PS] | tomada | — |
 | DP-14 | Modelo de negocio objetivo: freemium + premium + afiliación transparente. **Nada de monetización en el MVP**; se instrumenta para medir la disposición a pagar. | [INV] §12 | tomada | No inventar precios ni conversiones sin evidencia. |
 | DP-15 | Nombre de trabajo del proyecto y del repo: `ai-personal-stylist`. La marca se define después; la UI usa el nombre provisional **"Estilo"** hasta entonces. | [FELIPE] (nombre), [PS] (provisional) | abierta (marca) | — |
+| DP-17 | **Conversación primero.** El producto es una conversación con el asesor, no una app con un chat. La pantalla principal es el hilo; no hay barra de pestañas. El onboarding es la primera conversación (el asesor pregunta de a una cosa y ofrece respuestas sugeridas; no hay formulario por pasos). Las fotos se envían en el chat y el asesor decide qué hacer con ellas (prenda del clóset, selfie para la paleta, algo que la persona evalúa). Looks, prendas y paleta se muestran como tarjetas dentro del hilo. Clóset, Looks y perfil son "Tu espacio": vistas secundarias de consulta, a las que se entra desde el encabezado. **Reemplaza** la navegación de 4 pestañas y la ruta `/bienvenida`. | [FELIPE] al revisar la maqueta (2026-11-14) | tomada | La primera maqueta se sentía como "interacción de app". Consecuencia técnica: el agente gana herramientas (`update_profile`, `add_garment`, `analyze_palette`, `suggest_replies`) y RF-16 (foto en el chat) pasa al corte de hoy. |
+| DP-18 | **Un solo asesor, que también es personal shopper.** El Personal Shopper con productos reales deja de ser V1.1 y pasa al núcleo del MVP: evaluar una compra (foto o link) y buscar opciones en tiendas chilenas, siempre dentro de un look. Ajusta DP-07. Sigue siendo un único agente con más herramientas (DT-06). | [FELIPE] 2026-11-14 | tomada; la búsqueda en vivo espera A-01 | La investigación define el producto como asesor **y** shopper; diferir la compra dejaba medio producto. El catálogo por feeds sigue en V2. |
 
 ## 2. Decisiones técnicas
 
@@ -85,8 +87,43 @@ Versión 0.1 — 2026-11-14.
 | A-04 | Crear carpeta y listas en ClickUp, y proyecto en Vercel. | Acciones externas no autorizadas hoy. | Autorizar al cierre de hoy. |
 | A-05 | Marca y nombre definitivo (DP-15). | Identidad. | Sesión de marca con `ckm-brand` antes de abrir a público. |
 
-## 6. Historial
+## 6. Resoluciones de inception (observaciones de los agentes)
+
+Cada observación levantada por los agentes de backlog/specs se resolvió así. Las que cambian código quedan como tarea del integrador.
+
+| ID | Tema | Resolución | Estado |
+|---|---|---|---|
+| R-01 | Clima (RF-13) | `get_weather` entra hoy; mostrarlo en la UI de Asesor es MVP posterior. Si el agente consultó el clima en el turno, el servidor lo adjunta al outfit (el modelo no lo envía). | tomada |
+| R-02 | Borrado | `delete_my_data()` borra también `analytics_events` de la persona. Se agrega `delete_my_account()` (`security definer`, borra la fila propia de `auth.users` y todo por cascada) para eliminar la cuenta sin service role. | tomada |
+| R-03 | Consentimiento | El onboarding registra `terms` y `photo_processing` en `consents`; la selfie registra `face_photo`. Textos legales definitivos: A-02. | tomada |
+| R-04 | **Selfie no se conserva** (DP-16) | La foto del rostro se borra de Storage apenas termina el análisis; `color_analyses.photo_path` queda nulo. Minimización: solo se guarda el resultado. | tomada |
+| R-05 | Composición de outfit (RN-G1) | Solo prendas `ready` y no archivadas. [1–2 top + 1 bottom] o [1 dress, con 0–1 top como capa, sin bottom]; máx. 1 outerwear, 1 shoes, 1 bag, 2 accessory; 2 a 7 prendas. | tomada |
+| R-06 | Prenda `failed` | Si la persona completa los datos a mano pasa a `ready` y cuenta para outfits. | tomada |
+| R-07 | Foto sin rostro / sin prenda | `422` con mensaje amable; no se crea paleta; la prenda no reconocible se guarda como `failed` para completarla a mano (si no es una prenda, la persona la descarta). | tomada |
+| R-08 | Paleta manual | Paletas predefinidas por estación en `lib/domain/palettes.ts`; `source: 'manual'`, `confidence: 'media'`, mostrada como "elegida por ti". | tomada |
+| R-09 | Ciudad | Texto libre, geocodificado en Open-Meteo con país CL; si no resuelve, sin clima. Lista de ciudades: V1.1. | tomada-reversible |
+| R-10 | Borrar prenda | En la UI las prendas se **archivan**, no se borran, para no romper looks guardados. Borrado físico solo al borrar todos los datos. | tomada |
+| R-11 | Falta una categoría base | No hay tarjeta de look: el asesor lo dice en texto, describe la prenda faltante y pide agregarla (RN-G2). | tomada |
+| R-12 | Feedback → memoria | Lo hace la acción `rateOutfit` en el servidor (un `no` con motivo crea un `memory_fact` de origen `feedback`). | tomada |
+| R-13 | Onboarding "≤ 6 pasos" | Son las preguntas de perfil. Selfie y primeras prendas son etapas aparte, ambas saltables. | tomada |
+| R-14 | Eventos faltantes | Se agregan `onboarding_step_skipped`, `outfit_discarded`, `color_palette_corrected`, `data_deleted`, `pwa_installed`. | tomada |
+| R-15 | Tope de uso antes de A-03 | Límite diario de mensajes de chat por persona (`CHAT_DAILY_LIMIT`, default 60), contado en `messages`. | tomada-reversible |
+| R-16 | Historial de conversaciones | El MVP muestra una sola conversación continua. "Nueva conversación" y lista: V1.1. | tomada |
+| R-17 | Foto del chat como prenda | Abierta; se define con RF-16. | abierta |
+| R-18 | Carga masiva de prendas | Evolución de RF-06 en V2; no necesita RF propio todavía. | tomada |
+| R-19 | Referencias cruzadas entre personas (hallazgo de arquitectura) | FK compuestas `(id, user_id)` en `outfit_items`, `outfit_feedback`, `messages` y `outfits.conversation_id`. Migración `20261114010000_integridad_y_borrado.sql`. | tomada |
+| R-20 | Medir S-01 | `garments.ai_recognition` guarda lo que propuso la IA para compararlo con la corrección. | tomada |
+| R-21 | `outfits.saved_at` | Se registra cuándo se guardó un look. | tomada |
+| R-22 | Eventos falseables desde el cliente y paleta activa no atómica | Aceptado en el piloto (los eventos son para aprender, no para cobrar). Se revisa antes de abrir a público. | tomada-reversible |
+| R-23 | Preview de Vercel "solo lectura" sin service role | Los Preview corren con `AI_MODE=mock` y, antes de testers externos, contra un proyecto Supabase separado. Se define al crear el proyecto en Vercel (A-04). | requiere aprobación |
+| R-24 | `runbook.md` y `estrategia-git-deploy.md` | Siguen siendo plantillas del toolkit con supuestos de service role; se adaptan al desplegar (A-04). | abierta |
+| R-25 | Consentimiento para revisión humana de conversaciones (evaluaciones) | Se incluye en los textos legales de A-02; hasta entonces solo se revisan conversaciones de Felipe. | requiere aprobación |
+
+## 7. Historial
 
 | Fecha | Cambio |
 |---|---|
+| 2026-11-14 | v0.4 — DP-18: un solo asesor que también es personal shopper; RF-17 y RF-18 pasan al MVP (RF-18 sujeto a A-01). |
+| 2026-11-14 | v0.3 — DP-17 Conversación primero (feedback de Felipe a la maqueta): sin pestañas, onboarding conversacional real, fotos en el chat, nuevas herramientas del agente. |
+| 2026-11-14 | v0.2 — Resoluciones R-01…R-18; DP-16 (la selfie no se conserva); activación precisada en DP-04. |
 | 2026-11-14 | v0.1 — Inception. Decisiones DP-01…15, DT-01…17, supuestos e hipótesis iniciales. |
