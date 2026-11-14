@@ -1,0 +1,14 @@
+# PROPUESTA para .github/workflows/ci.yml (lo agrega la sesión integradora; .github/ está fuera de la frontera del equipo).
+# Un tercer control de la frontera, además del freno (al editar) y de condiciones-merge.sh (antes del merge):
+# corre en todo PR que venga de una rama equipo/* y falla si el diff toca rutas prohibidas.
+# Agregar como job hermano de `verify`, y `paths` de pull_request debe incluir también 'docs/**'
+# (si no, un PR del equipo que solo toca docs/superpowers no dispara la CI y este job no corre).
+
+  frontera:
+    if: startsWith(github.head_ref, 'equipo/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - run: bash agentes/scripts/verificar-frontera.sh --base "origin/${{ github.base_ref }}" "origin/${{ github.head_ref }}"

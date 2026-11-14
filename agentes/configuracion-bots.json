@@ -1,0 +1,37 @@
+{
+  "_que_es": "Lo que el archivo de equipo (openmaus.team v2) NO transporta y hay que fijar a mano en OpenMausBot tras importar. Evidencia: server/team-manifest.js y server/package-import.js de OpenMausBot 0.1.158 (el import solo copia nombre, título, descripción, SOUL y color; modelo = selección por defecto; aprobación = la por defecto, que en un espacio personal es 'full' según shared/approval-mode.js).",
+  "seccion": "Estilo — Equipo de interfaz",
+  "chief_of_staff": "productor",
+  "carpetas": {
+    "torre": "/Users/pipoandre/Documents/claude.nosync/ai-personal-stylist-torre",
+    "linea_1": "/Users/pipoandre/Documents/claude.nosync/ai-personal-stylist-linea-1"
+  },
+  "bots": {
+    "productor":   { "nombre": "Productor Estilo",   "modelo": "claude-sonnet-5-5", "esfuerzo": "medium", "aprobacion": "full", "cwd": "torre",   "mcp": [], "subagentes": "ninguno por defecto" },
+    "diseno":      { "nombre": "Diseño Estilo",      "modelo": "claude-sonnet-5-5", "esfuerzo": "medium", "aprobacion": "full", "cwd": "linea_1", "mcp": [], "subagentes": "1 validador model: opus por maqueta" },
+    "constructor": { "nombre": "Constructor Estilo", "modelo": "claude-sonnet-5-5", "esfuerzo": "high",   "aprobacion": "full", "cwd": "linea_1", "mcp": [], "subagentes": "sonnet (constructores y revisor por tarea) solo si la historia toca más de 3 archivos" },
+    "revisor":     { "nombre": "Revisor Estilo",     "modelo": "claude-sonnet-5-5", "esfuerzo": "high",   "aprobacion": "full", "cwd": "linea_1", "mcp": [], "subagentes": "ninguno" },
+    "qa":          { "nombre": "QA Estilo",          "modelo": "claude-sonnet-5-5", "esfuerzo": "medium", "aprobacion": "full", "cwd": "linea_1", "mcp": [], "subagentes": "ninguno", "navegador": "navegador de la app contra http://localhost:3210 (verificar en el humo del equipo)" },
+    "devops":      { "nombre": "DevOps Estilo",      "modelo": "claude-sonnet-5-5", "esfuerzo": "medium", "aprobacion": "full", "cwd": "torre",   "mcp": [], "subagentes": "ninguno" }
+  },
+  "skills": {
+    "_como_llegan": "Copiadas por agentes/scripts/preparar-carpetas.sh a .claude/skills/ de las dos carpetas (los bots corren con --setting-sources project y las ven solas, sin prefijo). Nada que encender en la app; i-have-adhd es opcional desde la biblioteca ya importada.",
+    "productor":   ["estilo-equipo", "brainstorming", "write-spec", "sprint-planning"],
+    "diseno":      ["estilo-equipo", "frontend-design", "ui-ux-pro-max", "emil-design-eng", "stageshow", "design-critique", "accessibility-review", "ux-copy", "design-handoff", "impeccable"],
+    "constructor": ["estilo-equipo", "frontend-design", "ui-ux-pro-max", "emil-design-eng", "impeccable", "subagent-driven-development", "dispatching-parallel-agents", "test-driven-development", "requesting-code-review", "receiving-code-review", "verification-before-completion", "systematic-debugging"],
+    "revisor":     ["estilo-equipo", "requesting-code-review", "impeccable", "testing-strategy", "agent-security", "code-review (nativa, verificar)", "security-review (nativa, verificar)"],
+    "qa":          ["estilo-equipo", "testing-strategy", "verification-before-completion", "systematic-debugging", "accessibility-review"],
+    "devops":      ["torre", "estilo-equipo", "finishing-a-development-branch"]
+  },
+  "sala": {
+    "nombre": "Estilo — taller",
+    "miembros": ["productor", "diseno", "constructor", "revisor", "qa", "devops"],
+    "respondedor_por_defecto": "productor",
+    "carpeta": "ninguna (si la sala fija carpeta, todos sus turnos corren ahí y el Constructor perdería su línea: server/room-cwd.js, store.pinGroupCwd)",
+    "boletin": "Sala del equipo de interfaz de Estilo. Felipe habla con Productor Estilo; el resto trabaja por encargos (coordinate_bots) y deja todo en docs/superpowers/hilos/<id>.md. Aquí el Productor publica el inicio y el cierre de cada historia. Para detener al equipo: crear ai-personal-stylist-torre/.torre/PAUSA. Plan: docs/superpowers/plans/2026-11-14-equipo-mausbot.md."
+  },
+  "rutinas": [
+    { "bot": "productor", "nombre": "Avanzar el equipo", "cuando": "lunes a viernes 09:00 y 15:00, America/Santiago, 20 min", "texto": "Mira /torre estado (pídeselo a DevOps) y hilo.sh estado de la historia en curso. Si la línea está libre y no hay pausa, abre la siguiente historia del plan. Si una historia lleva más de 2 horas sin turnos nuevos en el hilo, destrábala. Si no hay novedad, no le escribas a Felipe." },
+    { "bot": "devops", "nombre": "Vigilar main", "cuando": "lunes a viernes cada 60 min entre 09:00 y 21:00, America/Santiago, 10 min", "texto": "Corre vigilar-main.sh. Si dice ROJO por un PR del equipo: revertir.sh <N> y avisa al Productor. Si está verde o no hubo merges, termina sin escribir." }
+  ]
+}
