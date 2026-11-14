@@ -124,3 +124,26 @@ Inspeccionado en navegador a 390x844 y 375x812 (dev server puerto 3220, ruta /no
 - Verbo y objeto en CTA: "Volver al asesor" enlazando a /asesor.
 
 Veredicto visual: Conforme sin observaciones. Cero hallazgos abiertos.
+
+### 2026-11-14 13:44 · QA · veredicto · vuelta 0
+
+Humo ejecutado en build de producción con AI_MODE=mock, PORT=3210 contra el asesor simulado en navegador móvil (390x844 y 375x812).
+
+## Humo
+- HTTP 404 en /no-existe.json y /robots.txt → OK (renderiza not-found.tsx con status 404)
+- Redirección 307 a /entrar en /ruta-que-no-existe → OK (comportamiento esperado sin sesión por proxy-rules.ts, declarado)
+- h1 único exacto: "No encuentro esta página." con font-display text-4xl → OK
+- Texto de apoyo exacto: "Puede que el enlace esté mal escrito o que ya no exista. Volvamos a la conversación y seguimos con tu look." con mt-3 max-w-sm text-tinta-suave → OK
+- Ausencia de "Error 404", jerga técnica o emojis → OK (eliminado por completo)
+- CTA único: ButtonLink fullWidth hacia /asesor con texto "Volver al asesor" (h-12 = 48 px >= 44 px táctil) → OK
+- Navegación al tocar CTA: redirige a /entrar sin sesión (proxy) → OK
+- Filete decorativo: w-10 h-0.5 bg-acento (40x2 px, rgb(122, 46, 42)) con aria-hidden="true" → OK
+- Tokens estrictos de globals.css (fondo, tinta, tinta-suave, acento, superficie, font-display): cero hex o px arbitrarios hardcodeados → OK
+- Viewport móvil 390x844 y 375x812: sin scroll horizontal (hasHorizontalOverflow: false), centrado vertical → OK
+- Accesibilidad: foco visible con outline acento 2px solid en CTA, contraste AA (tinta 15.5:1, tinta-suave 7.1:1, superficie/tinta 17.5:1) → OK
+- Zoom 200%: sin desbordamiento horizontal ni recorte de texto en 375 px y 390 px → OK
+- Navegación: recarga mantiene la página 404; botón atrás regresa a la página previa → OK
+- Regresión y frontera: / y /entrar responden 200 OK; npm run verify (lint, typecheck, vitest 11/11 tests) en verde; solo web/src/app/not-found.tsx modificado → OK
+- Servidor de pruebas en puerto 3210 detenido tras finalizar las pruebas → OK
+
+VEREDICTO: QA aprobado sha=7323424cdca769fc0f367a5f9b8259a0f6fd567c
