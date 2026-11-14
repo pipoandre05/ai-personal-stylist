@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { isPublicPath, proxyRedirect } from "@/lib/auth/proxy-rules";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { isDevPath, isPublicPath, proxyRedirect } from "@/lib/auth/proxy-rules";
 
 describe("reglas del proxy", () => {
   it("rutas públicas", () => {
@@ -27,5 +27,29 @@ describe("reglas del proxy", () => {
   it("la API nunca se redirige (responde 401 por sí misma)", () => {
     expect(proxyRedirect({ pathname: "/api/chat", hasSession: false })).toBeNull();
     expect(proxyRedirect({ pathname: "/api/garments", hasSession: true })).toBeNull();
+  });
+
+  describe("vistas previas /dev", () => {
+    afterEach(() => vi.unstubAllEnvs());
+
+    it("fuera de producción son públicas (sin sesión)", () => {
+      vi.stubEnv("NODE_ENV", "development");
+      expect(isPublicPath("/dev/hilo-v2")).toBe(true);
+      expect(proxyRedirect({ pathname: "/dev/hilo-v2", hasSession: false })).toBeNull();
+      expect(isDevPath("/dev")).toBe(true);
+    });
+
+    it("en producción no lo son: el proxy manda a /entrar", () => {
+      vi.stubEnv("NODE_ENV", "production");
+      expect(isPublicPath("/dev/hilo-v2")).toBe(false);
+      expect(proxyRedirect({ pathname: "/dev/hilo-v2", hasSession: false })).toBe("/entrar");
+    });
+
+    it("no abre rutas parecidas", () => {
+      vi.stubEnv("NODE_ENV", "development");
+      expect(isDevPath("/developer")).toBe(false);
+      expect(isPublicPath("/developer")).toBe(false);
+      expect(isPublicPath("/devx/hilo")).toBe(false);
+    });
   });
 });
