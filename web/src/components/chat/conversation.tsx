@@ -50,7 +50,7 @@ export function Conversation({
       // En la pantalla de inicio, en pantallas anchas, el campo va suelto bajo el saludo: sin franja ni borde superior.
       className={
         showStartScreen
-          ? "md:rounded-tarjeta md:border md:px-3 md:pb-2.5"
+          ? "escritorio:rounded-tarjeta escritorio:border escritorio:px-3 escritorio:pb-2.5"
           : undefined
       }
     />

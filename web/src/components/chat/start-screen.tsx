@@ -61,7 +61,7 @@ export function StartScreen({
       <div
         role="group"
         aria-label="Sugerencias para empezar"
-        className="mt-8 flex w-full max-w-lg flex-col gap-2.5 px-6 pb-10 sm:flex-row sm:flex-wrap sm:justify-center md:order-3 md:mt-6 md:mb-auto"
+        className="mt-8 flex w-full max-w-lg flex-col gap-2.5 px-6 pb-10 sm:flex-row sm:flex-wrap sm:justify-center escritorio:order-3 escritorio:mt-6 escritorio:mb-auto"
       >
         {START_SUGGESTIONS.map((text) => (
           <button
@@ -79,7 +79,7 @@ export function StartScreen({
       {/* Móvil: último y pegado abajo (los márgenes automáticos centran el saludo en el espacio que queda).
           Pantallas anchas: sube bajo el saludo y las sugerencias quedan después. */}
       {composer ? (
-        <div className="sticky bottom-0 z-20 mt-auto w-full bg-fondo text-left md:static md:order-2 md:mt-8 md:px-6">{composer}</div>
+        <div className="sticky bottom-0 z-20 mt-auto w-full bg-fondo text-left escritorio:static escritorio:order-2 escritorio:mt-8 escritorio:px-6">{composer}</div>
       ) : null}
     </section>
   );
