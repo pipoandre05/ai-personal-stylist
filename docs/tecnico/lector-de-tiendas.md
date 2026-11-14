@@ -152,3 +152,11 @@ Se probaron los 89 dominios de los dos directorios de Felipe (hombre y mujer) co
 - **Sin catálogo legible por estas dos vías (el resto):** Falabella, Ripley, Paris, Tricot, Zara, H&M, Mango, Nike, Adidas, Puma, Levi's, Lacoste, Guess, Forever 21, Dafiti, Shein, The North Face, Timberland, Skechers, New Balance, Converse, Billabong, Volcom, Rip Curl, Maui and Sons, entre otras. Dominios que no resuelven: antiunderwear.cl, armente.cl, carocriado.cl, catlifestyle.cl, corona.cl (con `www`).
 
 **Tope:** `MAX_STORES = 20` por configuración. Con 40 tiendas válidas hay que elegir 20, o (pendiente) elegir las tiendas según género y categoría de la búsqueda antes de consultar.
+
+## Directorio de tiendas y elección por búsqueda (2026-11-14)
+
+- `web/src/lib/shopping/store-directory.ts` guarda, por tienda, para quién vende (mujer, hombre o ambos), qué categorías de prenda tiene sentido buscarle y su especialidad. Son las 40 tiendas que funcionaron en la prueba de arriba. Seis no venían en los directorios de Felipe (Hush Puppies, Saville Row, Rockford, Bold, Caterpillar, Pilgrim): están marcadas `unverified` y su clasificación está por confirmar.
+- **`SHOP_STORES=directorio`** carga esas 40 sin escribir la lista. Una lista explícita sigue funcionando; el tope de configuración subió a 60.
+- **Cada búsqueda consulta como máximo 12 tiendas**: las que venden esa categoría y, si el asesor indica `audience` (mujer u hombre), las que le venden a esa persona. Una tienda fuera del directorio no se descarta, va al final. La afiliación no participa.
+- **El asesor recibe el directorio en su prompt de sistema** (nombre, público y especialidad; sin dominios ni enlaces) para saber qué se puede encontrar. No es catálogo: productos, precios y tallas solo salen de la búsqueda.
+- Prueba real (tres búsquedas, 2026-11-14): camisa de lino para hombre, vestido midi para mujer y mocasines de cuero; entre 0,8 y 1,5 s cada una, con 9 a 11 tiendas respondiendo de 12. `fashionspark.com` falló las tres veces al leer su `robots.txt`; Guante, Bestias, Muth y Cierva fallaron una vez cada una por lo mismo.

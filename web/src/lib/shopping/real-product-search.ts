@@ -7,6 +7,7 @@ import { TtlCache } from "./query-cache";
 import { pickDiverse, scoreCandidate, toCandidate, type Scored } from "./rank";
 import { LIMITS, type Fetcher } from "./safe-fetch";
 import { RequestBudget, searchStore } from "./store-search";
+import { selectStores } from "./store-directory";
 import type { FailureReason, SearchSummary, Store, StoreOutcome } from "./types";
 
 // Lector real de tiendas (DT-18). NO usa un modelo de lenguaje: son adaptadores deterministas contra los catálogos
@@ -23,6 +24,8 @@ export type RealSearchOptions = {
   skipDns?: boolean;
   limits?: Partial<{ storeMs: number; totalMs: number; maxRequests: number; maxBytes: number }>;
   cacheTtlMs?: number;
+  /** `all` consulta a todas las tiendas configuradas, sin elegir por categoría y público (pruebas del lector). */
+  selection?: "directory" | "all";
   /** Recibe el resumen de cada búsqueda (solo conteos y motivos, nunca contenido de tiendas). */
   onSummary?: (s: SearchSummary) => void;
 };
@@ -58,14 +61,17 @@ export function createRealProductSearch(opts: RealSearchOptions): ProductSearch 
       const q = buildQuery(request);
       if (!q || opts.stores.length === 0) return { ok: false, reason: "unavailable" };
 
-      const key = JSON.stringify([q.text, q.term, fold(request.color ?? ""), request.max_price_clp ?? null, fold(request.size ?? ""), request.category, [...allowedHosts].sort()]);
+      const key = JSON.stringify([q.text, q.term, fold(request.color ?? ""), request.max_price_clp ?? null, fold(request.size ?? ""), request.category, request.audience ?? null, [...allowedHosts].sort()]);
       const hit = cache.get(key);
       if (hit) return hit;
 
       const overall = AbortSignal.timeout(limits.totalMs);
       const budget = new RequestBudget(limits.maxRequests);
+      // No se consulta a todas: solo a las que venden esa categoría para esa persona (store-directory.ts).
+      const chosen = opts.selection === "all" ? [...opts.stores] : selectStores(opts.stores, { category: request.category, audience: request.audience ?? null });
+      if (chosen.length === 0) return { ok: false, reason: "unavailable" };
       const outcomes: StoreOutcome[] = await Promise.all(
-        opts.stores.map((store) => {
+        chosen.map((store) => {
           const failed = (reason: FailureReason): StoreOutcome => ({ ok: false, store, reason, requests: 0 });
           const signal = AbortSignal.any([overall, AbortSignal.timeout(limits.storeMs)]);
           return deadline(
@@ -80,7 +86,7 @@ export function createRealProductSearch(opts: RealSearchOptions): ProductSearch 
       const failedOutcomes = outcomes.filter((o): o is Extract<StoreOutcome, { ok: false }> => !o.ok);
       const all = okOutcomes.flatMap((o) => o.candidates);
       const summary: SearchSummary = {
-        stores_queried: opts.stores.length,
+        stores_queried: chosen.length,
         stores_ok: okOutcomes.length,
         results: all.length,
         failed: failedOutcomes.map((o) => ({ domain: o.store.domain, reason: o.reason })),

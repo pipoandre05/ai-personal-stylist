@@ -16,6 +16,8 @@ export type ProductSearchRequest = {
   /** Pesos chilenos enteros. */
   max_price_clp?: number;
   size?: string;
+  /** Para quién es la pieza, si se sabe. El lector real lo usa para elegir tiendas; no es un dato del cuerpo. */
+  audience?: "mujer" | "hombre";
 };
 
 export type ProductSearchResult =

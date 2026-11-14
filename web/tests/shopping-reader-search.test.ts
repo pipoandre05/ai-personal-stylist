@@ -17,7 +17,7 @@ function makeSearch(over: Partial<RealSearchOptions> & { overrides?: Parameters<
   const { overrides, ...opts } = over;
   const { fetcher, calls } = fixtureFetcher(overrides);
   const summaries: SearchSummary[] = [];
-  const search = createRealProductSearch({ stores: ALL_STORES, fetcher, skipDns: true, onSummary: (s) => summaries.push(s), ...opts });
+  const search = createRealProductSearch({ stores: ALL_STORES, fetcher, skipDns: true, selection: "all", onSummary: (s) => summaries.push(s), ...opts });
   return { search, calls, summaries };
 }
 
@@ -188,7 +188,7 @@ describe("degradación y límites", () => {
 
   it("si fallan todas las tiendas, la búsqueda queda no disponible (el asesor lo dice, no inventa)", async () => {
     const fetcher: Fetcher = async () => new Response("down", { status: 503 });
-    const search = createRealProductSearch({ stores: ALL_STORES, fetcher, skipDns: true });
+    const search = createRealProductSearch({ stores: ALL_STORES, fetcher, skipDns: true, selection: "all" });
     expect(await search.search(SCENARIOS[0].request, NOW)).toEqual({ ok: false, reason: "unavailable" });
   });
 

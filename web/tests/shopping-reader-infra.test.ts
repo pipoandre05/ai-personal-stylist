@@ -33,9 +33,9 @@ describe("registro de tiendas (SHOP_STORES)", () => {
     expect(s.map((x) => x.domain)).toEqual(["ok.cl"]);
   });
 
-  it("no pasa de 20 tiendas", () => {
-    const raw = Array.from({ length: 30 }, (_, i) => `tienda${i}.cl`).join(",");
-    expect(parseStores(raw)).toHaveLength(20);
+  it("no pasa de 60 tiendas", () => {
+    const raw = Array.from({ length: 70 }, (_, i) => `tienda${i}.cl`).join(",");
+    expect(parseStores(raw)).toHaveLength(60);
   });
 });
 
