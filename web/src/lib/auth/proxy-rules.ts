@@ -3,7 +3,16 @@
 const PUBLIC_EXACT = new Set(["/", "/entrar", "/manifest.webmanifest", "/sw.js", "/favicon.ico", "/robots.txt"]);
 const ASSET = /\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?|txt|json|js|css|map|webmanifest)$/i;
 
+/**
+ * `/dev/**` son vistas previas de desarrollo (sin sesión). Solo existen fuera de producción: en producción nunca son
+ * públicas y además cada página responde 404 por sí misma.
+ */
+export function isDevPath(pathname: string): boolean {
+  return pathname === "/dev" || pathname.startsWith("/dev/");
+}
+
 export function isPublicPath(pathname: string): boolean {
+  if (isDevPath(pathname) && process.env.NODE_ENV !== "production") return true;
   return PUBLIC_EXACT.has(pathname) || pathname.startsWith("/_next/") || ASSET.test(pathname);
 }
 
