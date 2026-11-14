@@ -138,3 +138,27 @@ Desbloqueo: Felipe confirma que el Supabase local es de pruebas y autoriza regis
 3. Verificación técnica:
 - `cd web && npm run verify`: 23 archivos, 298/298 tests en verde.
 - Build de producción con `AI_MODE=mock npm run build` exitoso.
+
+### 2026-11-14 16:26 · QA · veredicto · vuelta 0
+
+Humo ejecutado en build de producción con AI_MODE=mock, PORT=3210 contra el asesor simulado en viewport móvil (390x844 y 360 px) y verificación de resiliencia tras rework de Constructor en commit 2467528.
+
+## Humo
+- Resiliencia al fallo de envío (Riesgo identificado por QA mitigado): `handleSendSimple` y `handleSendMultiple` en `SuggestedReplies` ahora envuelven `await onSend(...)` en un bloque `try ... catch`. Si `onSend` falla o la promesa es rechazada, se ejecuta `setIsDismissing(false)` restaurando opacidad y eventos de puntero, garantizando que la persona nunca quede bloqueada sin opciones → OK
+- Modo simple (respuestas de un toque): botones de contorno mediano 44 px (`h-11 px-[18px] text-sm font-bold border-[1.5px] border-linea-fuerte text-tinta bg-transparent hover:bg-hundido`) alineados a la derecha (`flex flex-wrap justify-end gap-2 px-6 pb-3`) → OK
+- Detección de fotos y selfies: regex `PHOTO_ACTION` y `SELFIE` probadas con variantes ("Mandar foto", "Subir foto", "Mandar selfie"); opciones con foto incluyen ícono `IconCamera` size-5 accesible y derivan a `onPickPhoto(selfie)` → OK
+- Modo múltiple: opciones como chips píldora (`Chip` `mode="toggle"` con área táctil accesible de 44 px vía `after:absolute after:-inset-1` y `aria-pressed="true"/"false"`) → OK
+- Selección múltiple y botón "Listo": chips seleccionados pasan a variante inverso (`bg-inverso text-sobre-inverso border-inverso`) con ícono de check; botón "Listo" inverso mediano 44 px deshabilitado sin selección (`disabled:opacity-45`) y activo al seleccionar una o más opciones concatenadas por coma → OK
+- Regla de marca estricta: cero presencia de color lima (`bg-accion`/`text-accion`) en sugerencias ni chips, preservando el lima exclusivamente para el CTA principal del asesor → OK
+- Transición y accesibilidad reducida de movimiento: animación de salida mediante fade-out de opacidad (`transition-opacity duration-150`), con `motion-reduce:transition-none` respetado → OK
+- Responsive y mobile viewport (390x844 y 360 px): el contenedor flex con `flex-wrap` y `justify-end` acomoda fluidamente los botones en múltiples líneas sin provocar scroll horizontal ni desbordar la pantalla → OK
+- Accesibilidad estructural: contenedor con `role="group"` y `aria-label="Respuestas sugeridas"`, foco visible con anillo azul de 3 px (`focus-visible:ring-3 focus-visible:ring-foco #2b4bff`), objetivos interactivos >= 44 px → OK
+- Suite de pruebas y tipos: `npm run verify` en verde (eslint limpio, typecheck sin errores, 298/298 vitest tests pasando, incluyendo los 12 tests unitarios de `web/tests/ui/suggested-replies.test.ts`) → OK
+- Build de producción: `AI_MODE=mock npm run build` exitoso con generación de rutas estáticas y dinámicas limpias → OK
+- Frontera y aislamiento: respetada estrictamente; únicamente `web/src/components/chat/suggested-replies.tsx` y `web/tests/ui/suggested-replies.test.ts` corresponden a la historia UI-6 → OK
+- Servidor de pruebas: puerto 3210 verificado libre tras la ejecución → OK
+
+## No verificado
+- Flujo interactivo en vivo dentro de `/asesor` bajo sesión autenticada en el navegador embebido de la app, dado que el proxy redirige a `/entrar` en ausencia de credenciales de prueba de QA para localhost provistas en OpenMausBot. La validación se respalda en el build de producción con AI_MODE=mock, la suite integral de 298 tests automatizados y la inspección computada de estilos, accesibilidad y tokens.
+
+VEREDICTO: QA aprobado sha=24675287e79ad7f109614cf0061441ee40bd9307
