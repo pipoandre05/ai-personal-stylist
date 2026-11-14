@@ -7,7 +7,7 @@
 >
 > Estados: `tomada` · `tomada-reversible` · `requiere aprobación` · `abierta`.
 
-Versión 0.6 — 2026-11-14.
+Versión 0.7 — 2026-11-14.
 
 ## 1. Decisiones de producto
 
@@ -33,6 +33,7 @@ Versión 0.6 — 2026-11-14.
 | DP-19 | **Caso de uso que manda:** "saber qué ponerme el fin de semana para un evento y, si en mi clóset no hay algo que me sirva, que me busque opciones". Todo se prioriza contra ese recorrido (`PLAN_GENERAL.md` §1). | [FELIPE] 2026-11-14 | tomada | Da un criterio único para decidir qué entra. Implica búsqueda de opciones de compra: A-01 queda **aprobada en principio** ("que me busque opciones"); falta la lista de tiendas. |
 | DP-20 | **Bases fijas de la arquitectura del asesor** BF-01 a BF-14 (`PLAN_GENERAL.md` §3): invariantes que no dependen de cómo se decida que piense el asesor ni del framework. Cómo razona, un agente o varios, y el framework quedan abiertos hasta cerrar la investigación de `docs/investigacion-agentes/`. | [FELIPE] + [PS] 2026-11-14 | tomada | Permite construir interfaz y equipo sin esperar la definición del razonamiento. |
 | DP-21 | **Equipo de bots en OpenMausBot** al estilo Prendie, con tres cambios: el Productor solo escala a Felipe dudas funcionales que no sepa resolver; los bots conversan entre ellos (Constructor ↔ QA); DevOps crea ramas y mergea por condiciones objetivas, sin aprobación humana por historia. Permisos full; el control va en mecanismos (freno y frontera de archivos). | [FELIPE] 2026-11-14 | tomada; instalación en curso | Reduce a Felipe a lo funcional. Riesgo asumido: merge automático con permisos full (ver `docs/superpowers/plans/2026-11-14-equipo-mausbot.md`). |
+| DP-22 | **Diseño del MVP: tratamiento A ("Atelier segunda edición") del rediseño v3, más el fondo de color del tratamiento B en el look recién propuesto.** Se aceptan los dos cambios de reglas que trae: la fuente de lectura Newsreader para la voz del asesor y sombras cortas en las tarjetas. Después del MVP se migra a la versión de diseño de Prendie. Fuente: `docs/superpowers/mockups/2026-11-14-conversacion-v3.html` y `docs/superpowers/specs/2026-11-14-rediseno-hilo-v3.md`. | [FELIPE] 2026-11-14 | tomada | Reemplaza la ejecución anterior del Atelier editorial. `DESIGN.MD` y `UX_UI_SPEC.md` deben actualizarse a v3 antes de construir. |
 
 ## 2. Decisiones técnicas
 
@@ -130,6 +131,7 @@ Cada observación levantada por los agentes de backlog/specs se resolvió así. 
 
 | Fecha | Cambio |
 |---|---|
+| 2026-11-14 | v0.7 — DT-21 reutilización del SDK de OpenAir autorizada; DP-22 diseño v3 tratamiento A con fondo de B. |
 | 2026-11-14 | v0.6 — DT-18 lector de tiendas aislado; DT-19 excepción acotada a DT-02 para estado de ejecución; DT-20 trazas en Supabase. |
 | 2026-11-14 | v0.5 — DP-19 caso de uso que manda; DP-20 bases fijas BF-01…14; DP-21 equipo de bots con merge propio. |
 | 2026-11-14 | v0.4 — DP-18: un solo asesor que también es personal shopper; RF-17 y RF-18 pasan al MVP (RF-18 sujeto a A-01). |
