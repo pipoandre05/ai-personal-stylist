@@ -1,4 +1,5 @@
 import "server-only";
+import { checkOutfitFormality, closetFit, type ClosetFit, type FitGarment } from "@/lib/domain/closet-fit";
 import { titleFromEvent } from "@/lib/domain/conversation-title";
 import { track } from "@/lib/analytics";
 import { logError } from "@/lib/server/log";
@@ -77,6 +78,8 @@ export type ToolState = {
   /** Última revisión del clóset: sirve para marcar qué prendas eligió el asesor. */
   closet: { stepId: string; garments: ClosetItem[] } | null;
   chosenGarmentIds: Set<string>;
+  /** N4 (D-03): resultado de comparar el clóset completo con la formalidad del marco, si el asesor la indicó en este turno. */
+  fit: { verdict: ClosetFit; closet: FitGarment[] } | null;
   /** Par de looks en curso (seguro + atrevido) de este turno. */
   pair: { id: string; looks: { variant: OutfitVariant; garmentIds: string[] }[] } | null;
   proposals: Map<string, { title: string; missing_piece: MissingPiece | null }>;
@@ -101,6 +104,7 @@ export function newToolState(allowedImages: Iterable<string> = [], init: ToolSta
     recentUserTexts: init.recentUserTexts ?? [],
     stepSeq: 0,
     closet: null,
+    fit: null,
     chosenGarmentIds: new Set(),
     pair: null,
     proposals: new Map(),
@@ -174,17 +178,50 @@ export async function fetchCloset(
     }));
 }
 
+/** Qué debe hacer el asesor con el resultado de N4 (D-03). */
+function fitNote(fit: ClosetFit): string {
+  const shoes = fit.no_shoes_loaded
+    ? " El clóset no tiene calzado cargado: propón el look sin calzado, di que todavía no has visto sus zapatos y pídele una foto; no lo trates como pieza que falta ni ofrezcas comprar por eso."
+    : "";
+  if (fit.result === "alcanza") {
+    return `El clóset alcanza. Arma el look con prendas de prendas_que_llegan en las categorías base (arriba, abajo o vestido, calzado).${shoes}`;
+  }
+  if (fit.result === "falta_una_pieza") {
+    return `Falta una pieza. Muestra primero el mejor look con lo que hay, declara esa pieza en missing_piece y ofrece buscarla con offer_search.${shoes}`;
+  }
+  return `No hay base para esa formalidad. Dilo sin rodeos, muestra lo más cercano si se puede armar un look válido (con missing_piece) y describe qué necesitaría.${shoes}`;
+}
+
 async function execGetCloset(input: unknown, t: ToolContext): Promise<ToolOutput> {
   const parsed = GetClosetInput.safeParse(input);
   if (!parsed.success) return fail("Entrada inválida para get_closet.");
   try {
-    const garments = await fetchCloset(t.ctx, parsed.data);
+    const { formality, ...filter } = parsed.data;
+    const garments = await fetchCloset(t.ctx, filter);
     if (t.stepId) t.state.closet = { stepId: t.stepId, garments };
     const info = closetStepInfo(garments, { weather: t.state.weather, event: t.state.event }, t.state.chosenGarmentIds);
-    if (garments.length === 0) {
-      return ok({ count: 0, garments: [], note: "El clóset no tiene prendas para ese filtro." }, info);
+
+    // N4 (D-03): la regla mira el clóset COMPLETO, aunque la lista venga filtrada.
+    let viabilidad: Record<string, unknown> | undefined;
+    if (formality) {
+      const all = filter.category || filter.occasion ? await fetchCloset(t.ctx) : garments;
+      const fitGarments: FitGarment[] = all.map((g) => ({ id: g.id, name: g.name, category: g.category, formality: g.formality }));
+      const verdict = closetFit(fitGarments, formality);
+      t.state.fit = { verdict, closet: fitGarments };
+      viabilidad = {
+        formalidad_del_marco: verdict.target,
+        resultado: verdict.result,
+        no_llega: verdict.gaps,
+        prendas_que_llegan: verdict.reaching,
+        sin_calzado_cargado: verdict.no_shoes_loaded,
+        note: fitNote(verdict),
+      };
     }
-    return ok({ count: garments.length, garments }, info);
+
+    if (garments.length === 0) {
+      return ok({ count: 0, garments: [], note: "El clóset no tiene prendas para ese filtro.", ...(viabilidad ? { viabilidad } : {}) }, info);
+    }
+    return ok({ count: garments.length, garments, ...(viabilidad ? { viabilidad } : {}) }, info);
   } catch (err) {
     logError("tools.get_closet", err);
     return fail("No pude leer el clóset ahora. Intenta de nuevo o responde sin él.");
@@ -261,6 +298,17 @@ async function execProposeOutfit(input: unknown, t: ToolContext): Promise<ToolOu
   const ordered = garment_ids.map((id) => byId.get(id) as OwnedGarment);
   const rule = validateOutfitComposition(ordered);
   if (!rule.ok) return fail(rule.reason);
+
+  // N4 (D-03): si el asesor indicó la formalidad del marco en este turno, el look debe respetar la regla.
+  if (t.state.fit) {
+    const formalityOf = new Map(t.state.fit.closet.map((g) => [g.id, g.formality]));
+    const outfitFit: FitGarment[] = ordered.flatMap((g) => {
+      const f = formalityOf.get(g.id);
+      return f === undefined ? [] : [{ id: g.id, name: g.name, category: g.category, formality: f }];
+    });
+    const formalityIssue = checkOutfitFormality(outfitFit, t.state.fit.closet, t.state.fit.verdict, missing_piece?.category ?? null);
+    if (formalityIssue) return fail(formalityIssue);
+  }
 
   // Dos looks para elegir (D-04): el segundo debe ser el otro de la variante y diferir en al menos dos prendas.
   if (variant) {
