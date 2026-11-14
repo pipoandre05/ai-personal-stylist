@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import type { ActionResult } from "@/lib/domain/types";
+import { logError } from "@/lib/server/log";
 import { getUserCtx, GENERIC_ERROR, NO_SESSION_ERROR } from "@/lib/server/action-helpers";
 import type { Db } from "@/lib/server/types";
 
@@ -16,11 +17,17 @@ async function removeAllPhotos(db: Db, userId: string): Promise<boolean> {
     for (;;) {
       // Siempre se lista desde 0: lo borrado ya no aparece, así que no hay que paginar con offset.
       const { data, error } = await db.storage.from(BUCKET).list(prefix, { limit: PAGE });
-      if (error) return false;
+      if (error) {
+        logError("actions.privacy.list_photos", error);
+        return false;
+      }
       const files = (data ?? []).filter((f) => f.id).map((f) => `${prefix}/${f.name}`);
       if (files.length === 0) break;
       const { error: removeError } = await db.storage.from(BUCKET).remove(files);
-      if (removeError) return false;
+      if (removeError) {
+        logError("actions.privacy.remove_photos", removeError);
+        return false;
+      }
       if (files.length < PAGE) break;
     }
   }
@@ -40,11 +47,15 @@ export async function deleteMyData(): Promise<ActionResult> {
     return { ok: false, error: "No pudimos borrar tus fotos. No se eliminó nada; intenta de nuevo en un momento." };
   }
   const { error } = await ctx.supabase.rpc("delete_my_account");
-  if (error) return { ok: false, error: GENERIC_ERROR };
+  if (error) {
+    logError("actions.privacy.1", error);
+    return { ok: false, error: GENERIC_ERROR };
+  }
 
   try {
     await ctx.supabase.auth.signOut();
-  } catch {
+  } catch (err) {
+    logError("actions.privacy.sign_out", err);
     // los datos ya se borraron; la sesión caduca sola
   }
   redirect("/");

@@ -1,6 +1,7 @@
 import "server-only";
 import type { OutfitStatus, OutfitView } from "@/lib/domain/types";
 import type { Db } from "@/lib/server/types";
+import { logError } from "@/lib/server/log";
 import { signPaths } from "./media";
 import { OUTFIT_SELECT, outfitPhotoPaths, toOutfitView, type OutfitRow } from "./mappers";
 
@@ -15,7 +16,10 @@ export async function loadOutfitViews(
   if (filter.status) q = q.eq("status", filter.status);
   if (filter.limit) q = q.limit(filter.limit);
   const { data, error } = await q.returns<OutfitRow[]>();
-  if (error || !data) return [];
+  if (error || !data) {
+    logError("data.loadOutfitViews", error ?? "sin datos");
+    return [];
+  }
   const urls = await signPaths(db, outfitPhotoPaths(data));
   return data.map((row) => toOutfitView(row, urls));
 }

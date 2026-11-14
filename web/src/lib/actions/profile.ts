@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { track } from "@/lib/analytics";
 import type { ActionResult, StyleProfile } from "@/lib/domain/types";
+import { logError } from "@/lib/server/log";
 import { getUserCtx, GENERIC_ERROR, NO_SESSION_ERROR } from "@/lib/server/action-helpers";
 
 const tags = z.array(z.string().trim().min(1).max(60)).max(20);
@@ -41,13 +42,20 @@ export async function saveProfile(input: SaveProfileInput): Promise<ActionResult
       if (display_name !== undefined) patch.display_name = display_name || null;
       if (city !== undefined) patch.city = city;
       const { error } = await ctx.supabase.from("profiles").update(patch).eq("id", ctx.userId);
-      if (error) return { ok: false, error: GENERIC_ERROR };
+      if (error) {
+    logError("actions.profile.1", error);
+    return { ok: false, error: GENERIC_ERROR };
+  }
     }
     if (Object.keys(style).length > 0) {
       const { error } = await ctx.supabase.from("style_profiles").upsert({ user_id: ctx.userId, ...style }, { onConflict: "user_id" });
-      if (error) return { ok: false, error: GENERIC_ERROR };
+      if (error) {
+    logError("actions.profile.2", error);
+    return { ok: false, error: GENERIC_ERROR };
+  }
     }
-  } catch {
+  } catch (err) {
+    logError("actions.profile.catch", err);
     return { ok: false, error: GENERIC_ERROR };
   }
   revalidatePath("/yo");
@@ -63,7 +71,10 @@ export async function completeOnboarding(): Promise<ActionResult> {
     .update({ onboarding_completed_at: new Date().toISOString() })
     .eq("id", ctx.userId)
     .is("onboarding_completed_at", null);
-  if (error) return { ok: false, error: GENERIC_ERROR };
+  if (error) {
+    logError("actions.profile.3", error);
+    return { ok: false, error: GENERIC_ERROR };
+  }
   void track("onboarding_completed", {}, ctx);
   revalidatePath("/", "layout");
   return { ok: true };

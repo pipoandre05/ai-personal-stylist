@@ -7,6 +7,7 @@ import { siteUrl } from "@/lib/env";
 import type { ActionResult } from "@/lib/domain/types";
 import { GENERIC_ERROR } from "@/lib/server/action-helpers";
 import { createClient } from "@/lib/supabase/server";
+import { logError } from "@/lib/server/log";
 
 const Credentials = z.object({
   email: z.string().trim().toLowerCase().email("Ese correo no parece válido."),
@@ -40,6 +41,7 @@ export async function signUp(_prev: ActionResult | null | undefined, formData: F
       if (error.status === 429 || error.code === "over_email_send_rate_limit") {
         return { ok: false, error: "Hiciste muchos intentos seguidos. Espera un momento e intenta de nuevo." };
       }
+      logError("actions.auth.sign_up", error);
       return { ok: false, error: "No pudimos crear tu cuenta. Intenta de nuevo en un momento." };
     }
     // Con confirmación de correo activa, un correo ya registrado vuelve sin identidades y sin error.
@@ -48,7 +50,8 @@ export async function signUp(_prev: ActionResult | null | undefined, formData: F
     }
     hasSession = Boolean(data.session);
     if (hasSession) void track("signup_completed", {});
-  } catch {
+  } catch (err) {
+    logError("actions.auth.sign_up_catch", err);
     return { ok: false, error: GENERIC_ERROR };
   }
 
@@ -71,9 +74,11 @@ export async function signIn(_prev: ActionResult | null | undefined, formData: F
       if (error?.code === "email_not_confirmed") {
         return { ok: false, error: "Falta confirmar tu correo. Revisa tu bandeja y vuelve a intentar." };
       }
+      if (error && error.code !== "invalid_credentials") logError("actions.auth.sign_in", error);
       return { ok: false, error: "Correo o contraseña incorrectos." };
     }
-  } catch {
+  } catch (err) {
+    logError("actions.auth.sign_in_catch", err);
     return { ok: false, error: GENERIC_ERROR };
   }
   // El onboarding ocurre dentro del chat (DP-17): siempre se entra a /asesor.
@@ -84,7 +89,8 @@ export async function signOut(): Promise<void> {
   try {
     const supabase = await createClient();
     await supabase.auth.signOut();
-  } catch {
+  } catch (err) {
+    logError("actions.auth.sign_out", err);
     // aun si falla, se manda a la portada
   }
   redirect("/");

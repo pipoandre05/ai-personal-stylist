@@ -1,5 +1,6 @@
 import "server-only";
 import { track } from "@/lib/analytics";
+import { logError } from "@/lib/server/log";
 import { describeGarment, analyzeColor } from "@/lib/ai/vision";
 import { normalizeColorVision, normalizeGarmentVision } from "@/lib/ai/normalize";
 import { MEDIA_BUCKET } from "@/lib/ai/image";
@@ -100,7 +101,10 @@ export async function fetchCloset(
     .limit(150);
   if (filter.category) q = q.eq("category", filter.category);
   const { data, error } = await q.returns<(Omit<Garment, "colors"> & { colors: { name: string }[] })[]>();
-  if (error || !data) throw new Error("closet");
+  if (error || !data) {
+    logError("tools.fetchCloset", error ?? "sin datos");
+    throw new Error("closet");
+  }
   const occasion = filter.occasion?.trim().toLowerCase();
   return data
     .filter((g) => !occasion || g.occasions.some((o) => o.toLowerCase().includes(occasion)))
@@ -127,7 +131,8 @@ async function execGetCloset(input: unknown, t: ToolContext): Promise<ToolOutput
       return ok({ count: 0, garments: [], note: "El clóset no tiene prendas para ese filtro." });
     }
     return ok({ count: garments.length, garments });
-  } catch {
+  } catch (err) {
+    logError("tools.get_closet", err);
     return fail("No pude leer el clóset ahora. Intenta de nuevo o responde sin él.");
   }
 }
@@ -159,7 +164,10 @@ async function execProposeOutfit(input: unknown, t: ToolContext): Promise<ToolOu
     .eq("status", "ready")
     .in("id", garment_ids)
     .returns<Pick<Garment, "id" | "category">[]>();
-  if (error) return fail("No pude validar las prendas ahora. Intenta de nuevo.");
+  if (error) {
+    logError("tools.propose_outfit.validate", error);
+    return fail("No pude validar las prendas ahora. Intenta de nuevo.");
+  }
 
   const found = new Set((owned ?? []).map((g) => g.id));
   const unknown = garment_ids.filter((id) => !found.has(id));
@@ -188,18 +196,30 @@ async function execProposeOutfit(input: unknown, t: ToolContext): Promise<ToolOu
     })
     .select("id")
     .single<{ id: string }>();
-  if (insertError || !outfit) return fail("No pude guardar el look ahora. Intenta de nuevo.");
+  if (insertError || !outfit) {
+    logError("tools.propose_outfit.insert_outfit", insertError ?? "sin datos");
+    return fail("No pude guardar el look ahora. Intenta de nuevo.");
+  }
 
   const { error: itemsError } = await supabase.from("outfit_items").insert(
     garment_ids.map((garment_id, position) => ({ outfit_id: outfit.id, garment_id, user_id: userId, position })),
   );
   if (itemsError) {
-    await supabase.from("outfits").delete().eq("id", outfit.id);
+    logError("tools.propose_outfit.insert_items", itemsError);
+    const { error: cleanupError } = await supabase.from("outfits").delete().eq("id", outfit.id);
+    if (cleanupError) logError("tools.propose_outfit.cleanup", cleanupError);
     return fail("No pude guardar el look ahora. Intenta de nuevo.");
   }
 
   const [view] = await loadOutfitViews(supabase, { ids: [outfit.id] });
-  if (view) t.emit({ type: "outfit", outfit: view });
+  if (!view) {
+    // El look quedó guardado pero no se pudo leer: no se promete una tarjeta que no llegará.
+    logError("tools.propose_outfit.load_view", "outfit guardado pero no legible");
+    const { error: dropError } = await supabase.from("outfits").delete().eq("id", outfit.id);
+    if (dropError) logError("tools.propose_outfit.cleanup", dropError);
+    return fail("No pude mostrar el look ahora. Intenta de nuevo; no le digas a la persona que ya se lo propusiste.");
+  }
+  t.emit({ type: "outfit", outfit: view });
   t.state.outfitIds.push(outfit.id);
   void track("outfit_proposed", { occasion, items: garment_ids.length }, t.ctx);
 
@@ -225,21 +245,29 @@ async function execRemember(input: unknown, t: ToolContext): Promise<ToolOutput>
     .maybeSingle();
   if (dup) return ok({ ok: true, note: "Ya lo tenía anotado." });
 
-  const { error } = await supabase.from("memory_facts").insert({ user_id: userId, fact, kind, source: "chat" });
-  if (error) return fail("No pude guardar la nota ahora. Sigue sin ella.");
-  t.emit({ type: "memory", fact });
+  const { data: saved, error } = await supabase
+    .from("memory_facts")
+    .insert({ user_id: userId, fact, kind, source: "chat" })
+    .select("id")
+    .single<{ id: string }>();
+  if (error || !saved) {
+    logError("tools.remember", error ?? "sin datos");
+    return fail("No pude guardar la nota ahora. Sigue sin ella.");
+  }
+  t.emit({ type: "memory", id: saved.id, fact, kind });
   void track("memory_added", { kind }, t.ctx);
   return ok({ ok: true });
 }
 
 
 async function countReadyGarments(t: ToolContext): Promise<number> {
-  const { count } = await t.ctx.supabase
+  const { count, error } = await t.ctx.supabase
     .from("garments")
     .select("id", { count: "exact", head: true })
     .eq("user_id", t.ctx.userId)
     .is("archived_at", null)
     .eq("status", "ready");
+  if (error) logError("tools.countReadyGarments", error);
   return count ?? 0;
 }
 
@@ -265,11 +293,13 @@ async function execUpdateProfile(input: unknown, t: ToolContext): Promise<ToolOu
     if (display_name !== undefined) patch.display_name = display_name;
     if (city !== undefined) patch.city = city;
     const { error } = await supabase.from("profiles").update(patch).eq("id", userId);
+    if (error) logError("tools.update_profile.profiles", error);
     if (error) return fail("No pude guardar el perfil ahora. Intenta de nuevo.");
     if (city !== undefined) t.city = city;
   }
   if (Object.keys(style).length > 0) {
     const { error } = await supabase.from("style_profiles").upsert({ user_id: userId, ...style }, { onConflict: "user_id" });
+    if (error) logError("tools.update_profile.style_profiles", error);
     if (error) return fail("No pude guardar el perfil ahora. Intenta de nuevo.");
   }
 
@@ -287,6 +317,7 @@ async function execUpdateProfile(input: unknown, t: ToolContext): Promise<ToolOu
       .update({ onboarding_completed_at: new Date().toISOString() })
       .eq("id", userId)
       .is("onboarding_completed_at", null);
+    if (error) logError("tools.update_profile.onboarding", error);
     if (!error) {
       onboardingCompleted = true;
       await recordConsents(t.ctx, ["terms", "photo_processing"]);
@@ -327,6 +358,7 @@ async function execAddGarment(input: unknown, t: ToolContext): Promise<ToolOutpu
     .insert({ user_id: userId, photo_path: checked.path, ...fields, status: "ready", ai_recognition: vision.data })
     .select("*")
     .single<Garment>();
+  if (error || !garment) logError("tools.add_garment.insert", error ?? "sin datos");
   if (error || !garment) return fail("No pude guardar la prenda ahora. Intenta de nuevo.");
 
   const urls = await signPaths(supabase, [garment.photo_path]);
@@ -368,6 +400,7 @@ async function execAnalyzePalette(input: unknown, t: ToolContext): Promise<ToolO
     .maybeSingle<{ id: string }>();
   if (previous) {
     const { error } = await supabase.from("color_analyses").update({ is_active: false }).eq("id", previous.id);
+    if (error) logError("tools.analyze_palette.deactivate", error);
     if (error) return fail("No pude guardar la paleta ahora. Intenta de nuevo.");
   }
   // R-04: la selfie no se conserva, así que `photo_path` queda nulo.
@@ -377,12 +410,13 @@ async function execAnalyzePalette(input: unknown, t: ToolContext): Promise<ToolO
     .select("*")
     .single<ColorAnalysis>();
   if (error || !analysis) {
+    logError("tools.analyze_palette.insert", error ?? "sin datos");
     if (previous) await supabase.from("color_analyses").update({ is_active: true }).eq("id", previous.id);
     return fail("No pude guardar la paleta ahora. Intenta de nuevo.");
   }
 
   const removal = await supabase.storage.from(MEDIA_BUCKET).remove([checked.path]);
-  if (removal.error) console.error("[palette] no se pudo borrar la selfie");
+  if (removal.error) logError("tools.analyze_palette.remove_selfie", removal.error);
   await recordConsents(t.ctx, ["face_photo"]);
 
   t.emit({ type: "palette", analysis });
@@ -431,7 +465,8 @@ export async function runTool(name: string, input: unknown, t: ToolContext): Pro
   if (visible) t.emit({ type: "tool", name, status: "start" });
   try {
     return await EXECUTORS[name](input, t);
-  } catch {
+  } catch (err) {
+    logError(`tools.${name}`, err);
     return fail("La herramienta falló. Sigue sin ella.");
   } finally {
     if (visible) t.emit({ type: "tool", name, status: "end" });

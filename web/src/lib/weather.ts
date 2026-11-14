@@ -1,5 +1,6 @@
 import type { Weather } from "@/lib/domain/types";
 import { todayInSantiago } from "@/lib/format";
+import { logError } from "@/lib/server/log";
 
 const TIMEOUT_MS = 4000;
 const CACHE_TTL_MS = 30 * 60 * 1000;
@@ -85,7 +86,9 @@ export async function getWeather(city: string, date: string = todayInSantiago())
     const value = parseForecast(forecast, name, date);
     if (value) cache.set(key, { at: Date.now(), value }); // una falla no se cachea
     return value;
-  } catch {
+  } catch (err) {
+    // Solo el nombre del error: el mensaje podría traer la URL con la ciudad (dato de la persona).
+    logError("weather.getWeather", { name: err instanceof Error ? err.name : "unknown" });
     return null;
   }
 }

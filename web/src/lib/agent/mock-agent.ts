@@ -3,8 +3,9 @@ import { hashString } from "@/lib/ai/mock";
 import { CATEGORY_LABELS, COLOR_SEASON_LABELS, type ChatEvent, type ColorSeason, type GarmentCategory } from "@/lib/domain/types";
 import type { LoadedContext } from "./context";
 import { CHAT_REPLY_OPTIONS, INVITE_TEXT, parseProfileAnswer, planMockTurn, questionFor } from "./mock-script";
-import { pickMockOutfit } from "./pick-outfit";
+import { EMPTY_CLOSET_TEXT, isFormalRequest, missingPieceText, planMockLook } from "./pick-outfit";
 import { fetchCloset, runTool, type ToolContext } from "./tools";
+import { logError } from "@/lib/server/log";
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -55,28 +56,47 @@ export async function runMockAgent(input: MockTurnInput, t: ToolContext, signal?
   const plan = planMockTurn({ text: userText, hasImage: input.hasImage, start: input.start, missing: person.missing });
   const seed = hashString(userText || imagePath || "inicio");
 
-  const proposeLook = async (intro: string): Promise<boolean> => {
+  /**
+   * Intenta proponer un look. Devuelve "outfit" si lo propuso; "empty" o "missing" (con el texto ya dicho) si no
+   * había con qué: en esos casos no hay tarjeta y el texto explica qué hacer o qué prenda falta.
+   */
+  const proposeLook = async (intro: string): Promise<"outfit" | "empty" | "missing" | "failed"> => {
     await runTool("get_closet", {}, t);
-    const closet = await fetchCloset(t.ctx).catch(() => []);
+    const closet = await fetchCloset(t.ctx).catch((err) => {
+      logError("mock.fetchCloset", err);
+      return [];
+    });
     await runTool("get_weather", {}, t);
-    const items = pickMockOutfit(closet, seed, t.state.weather);
-    if (!items) return false;
+    const formal = isFormalRequest(userText);
+    const look = planMockLook(closet, seed, t.state.weather, { formal });
+    const sep = intro.match(/^\n+/)?.[0] ?? "";
+    if (look.kind === "empty") {
+      await say(sep + EMPTY_CLOSET_TEXT);
+      return "empty";
+    }
+    if (look.kind === "missing") {
+      await say(sep + missingPieceText(look.piece));
+      return "missing";
+    }
+    const items = look.items;
     const names = items.map((g) => g.name.toLowerCase()).join(", ");
     const result = await runTool(
       "propose_outfit",
       {
-        title: "Look del día",
+        title: formal ? "Look para tu evento" : "Look del día",
         occasion: userText.trim().slice(0, 60) || "día a día",
         garment_ids: items.map((g) => g.id),
         rationale: `Combina ${names}. Las prendas comparten un nivel de formalidad parecido y los colores se acompañan sin competir, así que el conjunto se ve coherente y cómodo para usar.`,
       },
       t,
     );
-    if (result.isError) return false;
+    if (result.isError) return "failed";
+    // Solo se dice que se propuso el look si la tarjeta realmente salió.
+    if (t.state.outfitIds.length === 0) return "failed";
     await say(
       `${intro}Te propuse un look con ${names}. Funciona porque las prendas tienen una formalidad parecida y los colores se complementan, así que se ve armado sin esfuerzo. Si quieres, lo ajusto para otra ocasión.`,
     );
-    return true;
+    return "outfit";
   };
 
   switch (plan.kind) {
@@ -128,8 +148,8 @@ export async function runMockAgent(input: MockTurnInput, t: ToolContext, signal?
         .select("id", { count: "exact", head: true })
         .eq("user_id", t.ctx.userId);
       if (ready >= 3 && (count ?? 0) === 0) {
-        if (!(await proposeLook("\n\nYa tengo prendas suficientes para armarte algo. "))) {
-          await say("Mándame otra prenda de abajo o un vestido y te armo el primer look.");
+        if ((await proposeLook("\n\nYa tengo prendas suficientes para armarte algo. ")) === "failed") {
+          await say("\n\nNo pude armar el look ahora. Pídemelo de nuevo en un momento.");
         }
       } else if (ready < 3) {
         await say(`Llevas ${ready} de 3 a 5. Mándame otra cuando quieras.`);
@@ -139,23 +159,34 @@ export async function runMockAgent(input: MockTurnInput, t: ToolContext, signal?
 
     case "look": {
       await say("Dame un segundo, reviso tu clóset. ");
-      if (!(await proposeLook("\n\n"))) {
-        await say(
-          "Todavía no me alcanzan las prendas para armar un look completo: necesito al menos una parte de arriba y una de abajo, o un vestido. Mándame fotos de tus prendas y lo armamos.",
-        );
+      if ((await proposeLook("\n\n")) === "failed") {
+        await say("\n\nNo pude armar el look ahora. ¿Me lo pides de nuevo en un momento?");
       }
       break;
     }
 
     case "missing": {
       await runTool("get_closet", {}, t);
-      const closet = await fetchCloset(t.ctx).catch(() => []);
+      const closet = await fetchCloset(t.ctx).catch((err) => {
+        logError("mock.fetchCloset", err);
+        return [];
+      });
       const have = new Set<GarmentCategory>(closet.map((g) => g.category));
       const gap = (["shoes", "outerwear", "bag"] as const).find((c) => !have.has(c));
       await say(
         gap
           ? `Lo que más te ayudaría sumar es ${CATEGORY_LABELS[gap].toLowerCase()}: hoy no tienes ninguna en tu clóset y es lo que más looks te desbloquearía.`
           : "Tu clóset ya cubre las categorías básicas. Lo que más sumaría es una prenda de un color de tu paleta para variar tus looks.",
+      );
+      break;
+    }
+
+    case "remember": {
+      const saved = await runTool("remember", { fact: plan.fact, kind: plan.memoryKind }, t);
+      await say(
+        saved.isError
+          ? "No pude anotarlo ahora, pero lo tendré en cuenta en esta conversación."
+          : "Anotado, lo tendré en cuenta en tus próximos looks. Lo puedes ver o borrar en Tu espacio.",
       );
       break;
     }

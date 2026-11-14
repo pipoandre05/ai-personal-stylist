@@ -6,6 +6,7 @@ import type { LoadedImage } from "@/lib/ai/image";
 import { aiConfig, isMockAI } from "@/lib/env";
 import type { ChatEvent, ChatMessagePart, QuickReplies } from "@/lib/domain/types";
 import type { UserCtx } from "@/lib/server/types";
+import { logError } from "@/lib/server/log";
 import { loadPersonContext } from "./context";
 import { HISTORY_LIMIT, toMessageParams, type StoredMessage } from "./history";
 import { runMockAgent } from "./mock-agent";
@@ -41,23 +42,25 @@ export type AgentRunResult = {
 type HistoryRow = { role: "user" | "assistant"; text: string; parts: ChatMessagePart[] | null };
 
 async function loadHistory(ctx: UserCtx, conversationId: string) {
-  const { data } = await ctx.supabase
+  const { data, error } = await ctx.supabase
     .from("messages")
     .select("role, text, parts")
     .eq("conversation_id", conversationId)
     .order("created_at", { ascending: false })
     .limit(HISTORY_LIMIT)
     .returns<HistoryRow[]>();
+  if (error) logError("run.loadHistory.messages", error);
   const rows = [...(data ?? [])].reverse();
 
   const outfitIds = [...new Set(rows.flatMap((r) => (r.parts ?? []).flatMap((p) => (p.type === "outfit" ? [p.outfit_id] : []))))];
   const titles = new Map<string, string>();
   if (outfitIds.length) {
-    const { data: outfits } = await ctx.supabase
+    const { data: outfits, error: outfitsError } = await ctx.supabase
       .from("outfits")
       .select("id, title")
       .in("id", outfitIds)
       .returns<{ id: string; title: string }[]>();
+    if (outfitsError) logError("run.loadHistory.outfits", outfitsError);
     for (const o of outfits ?? []) titles.set(o.id, o.title);
   }
 

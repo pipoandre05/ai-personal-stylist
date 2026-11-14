@@ -22,12 +22,15 @@ export type MockPlan =
   | { kind: "photo"; tool: "add_garment" | "analyze_palette" }
   | { kind: "look" }
   | { kind: "missing" }
+  | { kind: "remember"; fact: string; memoryKind: "preference" | "dislike" }
   | { kind: "profile_answer"; field: ProfileField }
   | { kind: "chat" };
 
 const PALETTE_WORDS = /\b(selfie|paleta|cara|rostro|color(es)?)\b/i;
 const LOOK_WORDS = /(qu[eé] me pongo|\blook\b|outfit|[aá]rmame|conjunto|tenida|qu[eé] uso)/i;
 const MISSING_WORDS = /(\bfalta\b|me faltan?|vers[aá]til)/i;
+const DISLIKE_WORDS = /\b(no me gusta(n)?|no uso|odio|evito)\b/i;
+const PREFER_WORDS = /\b(recuerda que|anota que|siempre uso|me encanta(n)?|prefiero)\b/i;
 
 /** Decide qué hace el asesor simulado con el mensaje de la persona. */
 export function planMockTurn(input: MockInput): MockPlan {
@@ -35,6 +38,11 @@ export function planMockTurn(input: MockInput): MockPlan {
   if (input.hasImage) return { kind: "photo", tool: PALETTE_WORDS.test(input.text) ? "analyze_palette" : "add_garment" };
   if (LOOK_WORDS.test(input.text)) return { kind: "look" };
   if (MISSING_WORDS.test(input.text)) return { kind: "missing" };
+  // Preferencias dichas al pasar: el asesor las anota (herramienta `remember`).
+  const fact = input.text.trim().slice(0, 280);
+  // (solo con el perfil completo: durante el onboarding esas frases son respuestas a las preguntas)
+  if (input.missing.length === 0 && fact.length >= 3 && DISLIKE_WORDS.test(fact)) return { kind: "remember", fact, memoryKind: "dislike" };
+  if (input.missing.length === 0 && fact.length >= 3 && PREFER_WORDS.test(fact)) return { kind: "remember", fact, memoryKind: "preference" };
   if (input.missing.length > 0) return { kind: "profile_answer", field: input.missing[0] };
   return { kind: "chat" };
 }

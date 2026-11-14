@@ -4,6 +4,7 @@ import { normalizeGarmentVision } from "@/lib/ai/normalize";
 import { describeGarment } from "@/lib/ai/vision";
 import { signPaths } from "@/lib/data/media";
 import { toGarmentView } from "@/lib/data/mappers";
+import { logError } from "@/lib/server/log";
 import { isOwnPhotoPath } from "@/lib/domain/photo-path";
 import type { Garment } from "@/lib/domain/types";
 import { apiError, authenticate, BAD_INPUT, INTERNAL, json, readJson, UNAUTHORIZED } from "@/lib/server/route-helpers";
@@ -27,12 +28,16 @@ export async function POST(request: Request) {
     .insert({ user_id: ctx.userId, photo_path: photoPath, status: "processing" })
     .select("*")
     .single<Garment>();
-  if (error || !created) return apiError(INTERNAL, 500);
+  if (error || !created) {
+    logError("api.garments.insert", error ?? "sin datos");
+    return apiError(INTERNAL, 500);
+  }
 
   const vision = await describeGarment(ctx, photoPath);
 
   if (!vision.ok && vision.reason === "not_recognized") {
-    await ctx.supabase.from("garments").delete().eq("id", created.id);
+    const { error: dropError } = await ctx.supabase.from("garments").delete().eq("id", created.id);
+    if (dropError) logError("api.garments.drop_unrecognized", dropError);
     return apiError(
       "No logro ver una prenda en esa foto. Prueba con una foto donde se vea la prenda completa y con buena luz.",
       422,
@@ -49,6 +54,7 @@ export async function POST(request: Request) {
     .eq("user_id", ctx.userId)
     .select("*")
     .single<Garment>();
+  if (updateError) logError("api.garments.update", updateError);
   const garment = updateError || !updated ? { ...created, status: "failed" as const } : updated;
 
   void track("garment_added", { category: garment.category, recognized: garment.status === "ready" }, ctx);

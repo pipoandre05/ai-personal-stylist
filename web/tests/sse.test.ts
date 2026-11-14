@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createSSEParser, encodeSSE } from "@/lib/chat/sse";
-import type { ChatEvent } from "@/lib/domain/types";
+import { CHAT_EVENT_TYPES, type ChatEvent, type ColorAnalysis, type GarmentView, type OutfitView } from "@/lib/domain/types";
 
 function collect(chunks: string[]): ChatEvent[] {
   const out: ChatEvent[] = [];
@@ -46,5 +46,25 @@ describe("SSE", () => {
 
   it("flush entrega una trama final sin línea en blanco", () => {
     expect(collect(['event: done\ndata: {"type":"done","message_id":"z"}'])).toEqual([{ type: "done", message_id: "z" }]);
+  });
+
+  it("el parser acepta todos los tipos de ChatEvent (regresión: garment, palette y quick_replies se descartaban)", () => {
+    // Record exhaustivo: si se agrega un tipo a ChatEvent sin muestra aquí, no compila.
+    const samples: Record<ChatEvent["type"], ChatEvent> = {
+      conversation: { type: "conversation", id: "c" },
+      text_delta: { type: "text_delta", text: "t" },
+      tool: { type: "tool", name: "get_closet", status: "end" },
+      outfit: { type: "outfit", outfit: { id: "o" } as OutfitView },
+      garment: { type: "garment", garment: { id: "g" } as GarmentView },
+      palette: { type: "palette", analysis: { id: "a" } as ColorAnalysis },
+      quick_replies: { type: "quick_replies", options: ["a", "b"], multiple: false },
+      memory: { type: "memory", id: "m", fact: "f", kind: "preference" },
+      done: { type: "done", message_id: "d" },
+      error: { type: "error", message: "e" },
+    };
+    expect([...CHAT_EVENT_TYPES].sort()).toEqual(Object.keys(samples).sort());
+    for (const type of CHAT_EVENT_TYPES) {
+      expect(collect([encodeSSE(samples[type])]), `tipo ${type}`).toEqual([samples[type]]);
+    }
   });
 });

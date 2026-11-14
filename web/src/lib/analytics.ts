@@ -2,6 +2,7 @@ import "server-only";
 import { createClient, getSessionUser } from "@/lib/supabase/server";
 import type { AnalyticsEventName } from "@/lib/domain/types";
 import type { UserCtx } from "@/lib/server/types";
+import { logError } from "@/lib/server/log";
 
 type Props = Record<string, string | number | boolean | null>;
 
@@ -20,9 +21,11 @@ export async function track(name: AnalyticsEventName, props: Props = {}, ctx?: U
       userId = user.id;
       supabase = await createClient();
     }
-    await supabase.from("analytics_events").insert({ user_id: userId, name, props });
-  } catch {
-    // la analítica jamás debe romper el flujo
+    const { error } = await supabase.from("analytics_events").insert({ user_id: userId, name, props });
+    if (error) logError("analytics.track", error, { event: name });
+  } catch (err) {
+    // la analítica jamás debe romper el flujo, pero tampoco falla en silencio
+    logError("analytics.track", err, { event: name });
   }
 }
 

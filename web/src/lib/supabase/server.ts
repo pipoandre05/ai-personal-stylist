@@ -1,12 +1,18 @@
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { io } from "next/cache";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import { supabaseEnv } from "@/lib/env";
 
 export async function createClient() {
   const cookieStore = await cookies();
+  // El cliente de Supabase lee la hora (Date.now() al validar la expiración del JWT) cuando se usa. Con Cache
+  // Components, leerla durante el prerenderizado del shell es un error ("unstable value Date.now()"). `io()`
+  // marca que lo que sigue es IO de la request: suspende en el prerender y resuelve al instante al atender
+  // la request real. Ver node_modules/next/dist/docs/01-app/03-api-reference/04-functions/io.md.
+  await io();
   const { url, publishableKey } = supabaseEnv();
   return createServerClient(url, publishableKey, {
     cookies: {

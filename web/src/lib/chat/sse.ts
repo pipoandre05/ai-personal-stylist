@@ -1,11 +1,12 @@
-import type { ChatEvent } from "@/lib/domain/types";
+import { CHAT_EVENT_TYPES, type ChatEvent } from "@/lib/domain/types";
 
 /** Serializa un evento como trama SSE: `event: <tipo>` + `data: <json>`. Pura. */
 export function encodeSSE(event: ChatEvent): string {
   return `event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`;
 }
 
-const EVENT_TYPES = new Set(["conversation", "text_delta", "tool", "outfit", "memory", "done", "error"]);
+// Se deriva de la lista única junto a `ChatEvent` (types.ts): no mantener otra copia aquí.
+const EVENT_TYPES: ReadonlySet<string> = new Set(CHAT_EVENT_TYPES);
 
 /**
  * Parser SSE incremental (los chunks de red pueden cortar una trama a la mitad).

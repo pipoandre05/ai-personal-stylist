@@ -10,6 +10,7 @@ import {
 } from "@/lib/domain/types";
 import { CATEGORY_LABELS_SHORT } from "@/lib/domain/types";
 import { longDateInSantiago, todayInSantiago } from "@/lib/format";
+import { logError } from "@/lib/server/log";
 import { missingProfileFields, type ProfileField } from "@/lib/domain/profile-completeness";
 
 export type PersonContextInput = {
@@ -133,6 +134,14 @@ export async function loadPersonContext(
       .limit(300)
       .returns<Pick<Garment, "name" | "category">[]>(),
   ]);
+  const failed: [string, { error: unknown }][] = [
+    ["profile", profile],
+    ["style", style],
+    ["palette", palette],
+    ["facts", facts],
+    ["closet", closet],
+  ];
+  for (const [name, r] of failed) if (r.error) logError(`context.loadPersonContext.${name}`, r.error);
   const city = profile.data?.city || "Santiago";
   return {
     city,

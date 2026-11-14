@@ -5,6 +5,7 @@ import { z } from "zod";
 import { track } from "@/lib/analytics";
 import { sanitizeColors } from "@/lib/domain/palettes";
 import { GARMENT_CATEGORIES, SEASONS, type ActionResult } from "@/lib/domain/types";
+import { logError } from "@/lib/server/log";
 import { getUserCtx, GENERIC_ERROR, NO_SESSION_ERROR } from "@/lib/server/action-helpers";
 
 const Id = z.string().uuid();
@@ -52,10 +53,37 @@ export async function updateGarment(id: string, patch: GarmentPatch): Promise<Ac
     .eq("user_id", ctx.userId)
     .select("id")
     .maybeSingle();
-  if (error) return { ok: false, error: GENERIC_ERROR };
+  if (error) {
+    logError("actions.garments.1", error);
+    return { ok: false, error: GENERIC_ERROR };
+  }
   if (!data) return { ok: false, error: "No encontramos esa prenda." };
   void track("garment_edited", {}, ctx);
   refresh(parsedId.data);
+  return { ok: true };
+}
+
+/**
+ * "Está bien": la persona confirma lo que reconoció la IA sin corregir nada. Solo registra `garment_confirmed`;
+ * NO marca `user_edited` (la métrica de correcciones S-01 debe seguir limpia) ni cambia la prenda.
+ */
+export async function confirmGarment(id: string): Promise<ActionResult> {
+  const ctx = await getUserCtx();
+  if (!ctx) return { ok: false, error: NO_SESSION_ERROR };
+  const parsedId = Id.safeParse(id);
+  if (!parsedId.success) return { ok: false, error: "No encontramos esa prenda." };
+  const { data, error } = await ctx.supabase
+    .from("garments")
+    .select("id, category, user_edited")
+    .eq("id", parsedId.data)
+    .eq("user_id", ctx.userId)
+    .maybeSingle<{ id: string; category: string; user_edited: boolean }>();
+  if (error) {
+    logError("actions.confirmGarment", error);
+    return { ok: false, error: GENERIC_ERROR };
+  }
+  if (!data) return { ok: false, error: "No encontramos esa prenda." };
+  await track("garment_confirmed", { category: data.category, previously_edited: data.user_edited }, ctx);
   return { ok: true };
 }
 
@@ -71,7 +99,10 @@ export async function archiveGarment(id: string): Promise<ActionResult> {
     .eq("user_id", ctx.userId)
     .select("id")
     .maybeSingle();
-  if (error) return { ok: false, error: GENERIC_ERROR };
+  if (error) {
+    logError("actions.garments.2", error);
+    return { ok: false, error: GENERIC_ERROR };
+  }
   if (!data) return { ok: false, error: "No encontramos esa prenda." };
   refresh(parsedId.data);
   return { ok: true };
@@ -94,7 +125,10 @@ export async function toggleFavorite(id: string): Promise<ActionResult> {
     .update({ favorite: !current.favorite })
     .eq("id", parsedId.data)
     .eq("user_id", ctx.userId);
-  if (error) return { ok: false, error: GENERIC_ERROR };
+  if (error) {
+    logError("actions.garments.3", error);
+    return { ok: false, error: GENERIC_ERROR };
+  }
   refresh(parsedId.data);
   return { ok: true };
 }

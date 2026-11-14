@@ -71,6 +71,11 @@ export function toOutfitView(row: OutfitRow, urls: Map<string, string>): OutfitV
   };
 }
 
+/**
+ * La migración 20261114010000 agregó FK compuestas (id, user_id) además de las simples: PostgREST ve dos
+ * relaciones entre las mismas tablas (PGRST201) y no sabe cuál embeber. Cada embed nombra su restricción.
+ */
 export const OUTFIT_SELECT =
   "id, title, occasion, rationale, status, weather, missing_piece, created_at, " +
-  "outfit_items(position, garments(id, name, category, photo_path)), outfit_feedback(rating)";
+  "outfit_items!outfit_items_outfit_id_fkey(position, garments!outfit_items_garment_id_fkey(id, name, category, photo_path)), " +
+  "outfit_feedback!outfit_feedback_outfit_id_fkey(rating)";

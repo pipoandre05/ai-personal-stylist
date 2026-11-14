@@ -175,7 +175,12 @@ export type ChatMessagePart =
   | { type: "image"; path: string }
   | { type: "garment"; garment_id: string }
   | { type: "palette"; analysis_id: string }
-  | { type: "quick_replies"; options: string[]; multiple: boolean };
+  | { type: "quick_replies"; options: string[]; multiple: boolean }
+  /** Nota que el asesor anotó en este mensaje. Mensajes antiguos pueden no traerla (se ignora). */
+  | { type: "memory"; memory_id: string; fact: string };
+
+/** Nota de memoria anotada durante un mensaje; `id` sirve para `deleteMemoryFact(id)` ("Deshacer"). */
+export type MemoryNote = { id: string; fact: string };
 
 export type QuickReplies = { options: string[]; multiple: boolean };
 
@@ -192,6 +197,8 @@ export type ChatMessageView = {
   image_url: string | null;
   /** Respuestas de un toque: solo en el último mensaje del hilo, si es del asistente. */
   quick_replies: QuickReplies | null;
+  /** Notas de memoria anotadas durante este mensaje, con `id` para ofrecer "Deshacer". */
+  memory_notes: MemoryNote[];
   created_at: string;
 };
 
@@ -204,9 +211,27 @@ export type ChatEvent =
   | { type: "garment"; garment: GarmentView }
   | { type: "palette"; analysis: ColorAnalysis }
   | { type: "quick_replies"; options: string[]; multiple: boolean }
-  | { type: "memory"; fact: string }
+  | { type: "memory"; id: string; fact: string; kind: MemoryFactKind }
   | { type: "done"; message_id: string }
   | { type: "error"; message: string };
+
+/**
+ * Única fuente de los tipos de evento SSE. `Record<ChatEvent["type"], true>` obliga (en compilación) a listar
+ * todos los tipos de `ChatEvent`; el parser (`lib/chat/sse.ts`) valida contra esta lista, así que no puede desincronizarse.
+ */
+const CHAT_EVENT_TYPE_MAP: Record<ChatEvent["type"], true> = {
+  conversation: true,
+  text_delta: true,
+  tool: true,
+  outfit: true,
+  garment: true,
+  palette: true,
+  quick_replies: true,
+  memory: true,
+  done: true,
+  error: true,
+};
+export const CHAT_EVENT_TYPES = Object.keys(CHAT_EVENT_TYPE_MAP) as ChatEvent["type"][];
 
 export type AgentToolName =
   | "get_closet"
@@ -312,6 +337,7 @@ export type AnalyticsEventName =
   | "color_analysis_completed"
   | "garment_added"
   | "garment_edited"
+  | "garment_confirmed"
   | "chat_message_sent"
   | "outfit_proposed"
   | "outfit_saved"

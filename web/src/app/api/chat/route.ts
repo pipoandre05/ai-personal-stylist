@@ -4,6 +4,7 @@ import { friendlyAiError } from "@/lib/ai/errors";
 import { downloadImage } from "@/lib/ai/image";
 import { runStylistTurn, type AgentRunInput } from "@/lib/agent/run";
 import { encodeSSE } from "@/lib/chat/sse";
+import { logError } from "@/lib/server/log";
 import { isOwnPhotoPath } from "@/lib/domain/photo-path";
 import type { ChatEvent, ChatMessagePart, QuickReplies } from "@/lib/domain/types";
 import { chatDailyLimit, isMockAI } from "@/lib/env";
@@ -20,6 +21,13 @@ const Body = z
     text: z.string().trim().max(2000).default(""),
     image_path: z.string().max(200).optional(),
     start: z.boolean().optional(),
+    /**
+     * Idempotencia (opcional). El cliente genera un uuid (`crypto.randomUUID()`) POR MENSAJE DE LA PERSONA y lo
+     * envía igual en cada reintento de ese mismo mensaje (no uno nuevo por request). El servidor lo usa como `id`
+     * del mensaje: si ya existe, no lo vuelve a guardar; si el turno del asesor ya terminó devuelve su `done`, y si
+     * el turno se cortó lo reintenta. Así un reintento tras un error no duplica el mensaje.
+     */
+    client_message_id: z.string().uuid().optional(),
   })
   .refine((b) => b.start || b.text.length > 0 || b.image_path, { message: "empty" });
 
@@ -50,21 +58,49 @@ export async function POST(request: Request) {
 
   const body = Body.safeParse(await readJson(request));
   if (!body.success) return apiError(BAD_INPUT, 400);
-  const { text, image_path, start } = body.data;
+  const { text, image_path, start, client_message_id } = body.data;
   if (image_path !== undefined && !isOwnPhotoPath(image_path, ctx.userId)) return apiError(BAD_INPUT, 400);
   const { supabase, userId } = ctx;
 
   let conversationId: string;
 
-  if (start) {
+  // Reintento de un mensaje ya guardado (RLS: solo ve los propios).
+  let previous: { id: string; conversation_id: string; created_at: string } | null = null;
+  if (!start && client_message_id) {
+    previous = await findOwnMessage(ctx, client_message_id);
+    if (previous) {
+      // El turno del asesor ya terminó: no se vuelve a ejecutar, se entrega su cierre.
+      const { data: reply, error: replyError } = await supabase
+        .from("messages")
+        .select("id")
+        .eq("conversation_id", previous.conversation_id)
+        .eq("role", "assistant")
+        .gt("created_at", previous.created_at)
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle<{ id: string }>();
+      if (replyError) logError("chat.retry.lookup_reply", replyError);
+      if (reply) {
+        return staticStream([
+          { type: "conversation", id: previous.conversation_id },
+          { type: "done", message_id: reply.id },
+        ]);
+      }
+    }
+  }
+
+  if (previous) {
+    conversationId = previous.conversation_id;
+  } else if (start) {
     // Saludo inicial: solo si la persona no tiene mensajes. Es idempotente (doble clic, doble render).
-    const { data: existing } = await supabase
+    const { data: existing, error: existingError } = await supabase
       .from("messages")
       .select("id, conversation_id")
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle<{ id: string; conversation_id: string }>();
+    if (existingError) logError("chat.start.lookup", existingError);
     if (existing) {
       return staticStream([
         { type: "conversation", id: existing.conversation_id },
@@ -76,21 +112,23 @@ export async function POST(request: Request) {
     conversationId = created;
   } else {
     // Tope diario antes de gastar inferencia (R-15). El saludo inicial no cuenta.
-    const { count } = await supabase
+    const { count, error: countError } = await supabase
       .from("messages")
       .select("id", { count: "exact", head: true })
       .eq("user_id", userId)
       .eq("role", "user")
       .gte("created_at", startOfTodayInSantiagoISO());
+    if (countError) logError("chat.daily_limit", countError);
     if ((count ?? 0) >= chatDailyLimit()) return apiError(LIMIT_REACHED, 429);
 
     if (body.data.conversation_id) {
-      const { data } = await supabase
+      const { data, error: convError } = await supabase
         .from("conversations")
         .select("id")
         .eq("id", body.data.conversation_id)
         .eq("user_id", userId)
         .maybeSingle();
+      if (convError) logError("chat.conversation.lookup", convError);
       if (!data) return apiError(BAD_INPUT, 400);
       conversationId = body.data.conversation_id;
     } else {
@@ -105,22 +143,48 @@ export async function POST(request: Request) {
   if (image_path) {
     try {
       image = { path: image_path, loaded: isMockAI() ? null : await downloadImage(ctx, image_path) };
-    } catch {
+    } catch (err) {
+      logError("chat.download_image", err);
       return apiError("No pude leer esa foto. Intenta enviarla de nuevo.", 400);
     }
   }
 
-  if (!start) {
+  if (!start && !previous) {
     // El mensaje de la persona se guarda antes de llamar al modelo: si el modelo falla no se pierde.
     const parts: ChatMessagePart[] = image_path ? [{ type: "image", path: image_path }] : [];
-    const { error } = await supabase
-      .from("messages")
-      .insert({ conversation_id: conversationId, user_id: userId, role: "user", text, parts });
-    if (error) return apiError(INTERNAL, 500);
-    void track("chat_message_sent", { has_image: Boolean(image_path) }, ctx);
+    const { error } = await supabase.from("messages").insert({
+      ...(client_message_id ? { id: client_message_id } : {}),
+      conversation_id: conversationId,
+      user_id: userId,
+      role: "user",
+      text,
+      parts,
+    });
+    if (error) {
+      // 23505: otro request con el mismo client_message_id ganó la carrera (doble toque): ya está guardado.
+      const duplicate = client_message_id && error.code === "23505" && (await findOwnMessage(ctx, client_message_id));
+      if (!duplicate) {
+        logError("chat.insert_user_message", error);
+        return apiError(INTERNAL, 500);
+      }
+    } else {
+        void track("chat_message_sent", { has_image: Boolean(image_path) }, ctx);
+    }
   }
 
   return streamTurn({ ctx, conversationId, userText: text, image, start: Boolean(start), request });
+}
+
+async function findOwnMessage(ctx: UserCtx, id: string) {
+  const { data, error } = await ctx.supabase
+    .from("messages")
+    .select("id, conversation_id, created_at")
+    .eq("id", id)
+    .eq("user_id", ctx.userId)
+    .eq("role", "user")
+    .maybeSingle<{ id: string; conversation_id: string; created_at: string }>();
+  if (error) logError("chat.find_message", error);
+  return data ?? null;
 }
 
 async function createConversation(ctx: UserCtx, title: string): Promise<string | null> {
@@ -129,7 +193,11 @@ async function createConversation(ctx: UserCtx, title: string): Promise<string |
     .insert({ user_id: ctx.userId, title })
     .select("id")
     .single<{ id: string }>();
-  return error || !data ? null : data.id;
+  if (error || !data) {
+    logError("chat.create_conversation", error ?? "sin datos");
+    return null;
+  }
+  return data.id;
 }
 
 function streamTurn(args: {
@@ -152,12 +220,14 @@ function streamTurn(args: {
       const garmentIds: string[] = [];
       let paletteId: string | null = null;
       let quickReplies: QuickReplies | null = null;
+      const memoryNotes: { id: string; fact: string }[] = [];
 
       const emit = (event: ChatEvent) => {
         if (event.type === "text_delta") reply += event.text;
         if (event.type === "outfit") outfitIds.push(event.outfit.id);
         if (event.type === "garment") garmentIds.push(event.garment.id);
         if (event.type === "palette") paletteId = event.analysis.id;
+        if (event.type === "memory") memoryNotes.push({ id: event.id, fact: event.fact });
         if (event.type === "quick_replies") quickReplies = { options: event.options, multiple: event.multiple };
         if (!open) return;
         try {
@@ -184,15 +254,21 @@ function streamTurn(args: {
         ...outfitIds.map((outfit_id): ChatMessagePart => ({ type: "outfit", outfit_id })),
         ...garmentIds.map((garment_id): ChatMessagePart => ({ type: "garment", garment_id })),
         ...(paletteId ? [{ type: "palette", analysis_id: paletteId } as const] : []),
+        ...memoryNotes.map((m): ChatMessagePart => ({ type: "memory", memory_id: m.id, fact: m.fact })),
         ...(quickReplies ? [{ type: "quick_replies", ...(quickReplies as QuickReplies) } as const] : []),
       ];
       if (finalText || parts.length) {
-        const { data: saved } = await supabase
+        const { data: saved, error: saveError } = await supabase
           .from("messages")
           .insert({ conversation_id: conversationId, user_id: userId, role: "assistant", text: finalText, parts })
           .select("id")
           .single<{ id: string }>();
-        await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", conversationId);
+        if (saveError) logError("chat.save_assistant_message", saveError);
+        const { error: touchError } = await supabase
+          .from("conversations")
+          .update({ updated_at: new Date().toISOString() })
+          .eq("id", conversationId);
+        if (touchError) logError("chat.touch_conversation", touchError);
         if (finalText !== reply.trim()) emit({ type: "text_delta", text: finalText });
         if (saved && !failure) emit({ type: "done", message_id: saved.id });
       }

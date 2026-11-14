@@ -4,6 +4,7 @@ import { MEDIA_BUCKET } from "@/lib/ai/image";
 import { recordConsents } from "@/lib/data/consents";
 import { normalizeColorVision } from "@/lib/ai/normalize";
 import { analyzeColor } from "@/lib/ai/vision";
+import { logError } from "@/lib/server/log";
 import { isOwnPhotoPath } from "@/lib/domain/photo-path";
 import type { ColorAnalysis } from "@/lib/domain/types";
 import { apiError, authenticate, BAD_INPUT, INTERNAL, json, readJson, UNAUTHORIZED } from "@/lib/server/route-helpers";
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
   const vision = await analyzeColor(ctx, photoPath);
   // R-04: la selfie no se conserva, salga bien o mal el análisis.
   const removal = await ctx.supabase.storage.from(MEDIA_BUCKET).remove([photoPath]);
-  if (removal.error) console.error("[color-analysis] no se pudo borrar la selfie");
+  if (removal.error) logError("api.color_analysis.remove_selfie", removal.error);
   if (!vision.ok) {
     return vision.reason === "not_recognized"
       ? apiError("No logro ver bien tu rostro en esa foto. Prueba con una selfie de frente, con luz natural y sin filtros.", 422)
@@ -41,7 +42,10 @@ export async function POST(request: Request) {
     .maybeSingle<{ id: string }>();
   if (previous) {
     const { error } = await ctx.supabase.from("color_analyses").update({ is_active: false }).eq("id", previous.id);
-    if (error) return apiError(INTERNAL, 500);
+    if (error) {
+      logError("api.color_analysis.deactivate", error);
+      return apiError(INTERNAL, 500);
+    }
   }
 
   const { data: analysis, error } = await ctx.supabase
@@ -50,7 +54,11 @@ export async function POST(request: Request) {
     .select("*")
     .single<ColorAnalysis>();
   if (error || !analysis) {
-    if (previous) await ctx.supabase.from("color_analyses").update({ is_active: true }).eq("id", previous.id);
+    logError("api.color_analysis.insert", error ?? "sin datos");
+    if (previous) {
+      const { error: restoreError } = await ctx.supabase.from("color_analyses").update({ is_active: true }).eq("id", previous.id);
+      if (restoreError) logError("api.color_analysis.restore", restoreError);
+    }
     return apiError(INTERNAL, 500);
   }
 

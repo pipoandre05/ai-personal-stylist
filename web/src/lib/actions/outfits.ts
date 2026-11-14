@@ -5,6 +5,7 @@ import { z } from "zod";
 import { track } from "@/lib/analytics";
 import type { ActionResult, OutfitRating } from "@/lib/domain/types";
 import { getUserCtx, GENERIC_ERROR, NO_SESSION_ERROR } from "@/lib/server/action-helpers";
+import { logError } from "@/lib/server/log";
 
 const Id = z.string().uuid();
 
@@ -22,7 +23,10 @@ export async function setOutfitStatus(id: string, status: "saved" | "discarded")
     .eq("user_id", ctx.userId)
     .select("id")
     .maybeSingle();
-  if (error) return { ok: false, error: GENERIC_ERROR };
+  if (error) {
+    logError("actions.outfits.1", error);
+    return { ok: false, error: GENERIC_ERROR };
+  }
   if (!data) return { ok: false, error: "No encontramos ese look." };
   void track(status === "saved" ? "outfit_saved" : "outfit_discarded", {}, ctx);
   revalidatePath("/looks");
@@ -54,7 +58,10 @@ export async function rateOutfit(id: string, rating: OutfitRating, reason?: stri
       { user_id: ctx.userId, outfit_id: outfit.id, rating: parsedRating.data, reason: cleanReason },
       { onConflict: "user_id,outfit_id" },
     );
-  if (error) return { ok: false, error: GENERIC_ERROR };
+  if (error) {
+    logError("actions.outfits.2", error);
+    return { ok: false, error: GENERIC_ERROR };
+  }
   void track("outfit_feedback", { rating: parsedRating.data }, ctx);
 
   if (parsedRating.data === "no" && cleanReason.length >= 3) {

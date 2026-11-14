@@ -45,9 +45,13 @@ export async function createColorAnalysis(photo_path: string): Promise<ColorAnal
  * Resuelve al terminar el flujo; lanza `Error` si la request falla antes de empezar.
  * Con `signal` abortado resuelve en silencio.
  * `{ text: "", start: true }` pide el saludo inicial; es idempotente si la persona ya tiene mensajes.
+ *
+ * Reintentos: genera `client_message_id = crypto.randomUUID()` UNA vez por mensaje de la persona (al crearlo en la
+ * interfaz) y reenvía el MISMO valor al reintentar ese mensaje. Si el servidor ya lo guardó, no lo duplica: devuelve el
+ * cierre del turno si el asesor ya respondió, o retoma el turno si se cortó. Un mensaje nuevo lleva un uuid nuevo.
  */
 export async function streamChat(
-  input: { conversation_id?: string; text: string; image_path?: string; start?: boolean },
+  input: { conversation_id?: string; text: string; image_path?: string; start?: boolean; client_message_id?: string },
   onEvent: (e: ChatEvent) => void,
   signal?: AbortSignal,
 ): Promise<void> {

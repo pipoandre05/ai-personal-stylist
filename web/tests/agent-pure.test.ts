@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { toMessageParams } from "@/lib/agent/history";
-import { pickMockOutfit } from "@/lib/agent/pick-outfit";
+import { EMPTY_CLOSET_TEXT, isFormalRequest, missingPieceText, pickMockOutfit, planMockLook } from "@/lib/agent/pick-outfit";
+import { planMockTurn } from "@/lib/agent/mock-script";
 import { validateOutfitComposition } from "@/lib/domain/outfit-rules";
 import { parseForecast, describeWeatherCode } from "@/lib/weather";
 import { fmtCLP, fmtDate, fmtDateOnly, startOfTodayInSantiagoISO, todayInSantiago } from "@/lib/format";
@@ -109,6 +110,54 @@ describe("selección del agente simulado", () => {
     expect(pickMockOutfit([item("t", "top")], 0, null)).toBeNull();
     expect(pickMockOutfit([item("d", "dress")], 0, null)).toBeNull();
     expect(pickMockOutfit([item("t", "top"), item("s", "shoes")], 0, null)).toBeNull();
+  });
+});
+
+describe("asesor simulado: recorrido central", () => {
+  const closetOk = [item("t", "top"), item("b", "bottom"), item("s", "shoes")];
+
+  it("'tengo un evento el fin de semana, ¿qué me pongo?' se reconoce como pedido de look formal", () => {
+    const text = "Tengo un evento el fin de semana, ¿qué me pongo?";
+    expect(planMockTurn({ text, hasImage: false, start: false, missing: [] })).toEqual({ kind: "look" });
+    expect(isFormalRequest(text)).toBe(true);
+  });
+
+  it("anota preferencias dichas al pasar solo con el perfil completo", () => {
+    const t = "No me gusta el rojo";
+    expect(planMockTurn({ text: t, hasImage: false, start: false, missing: [] })).toEqual({ kind: "remember", fact: t, memoryKind: "dislike" });
+    expect(planMockTurn({ text: t, hasImage: false, start: false, missing: ["current_style"] })).toEqual({ kind: "profile_answer", field: "current_style" });
+  });
+
+  it("con clóset suficiente propone un look válido", () => {
+    const plan = planMockLook(closetOk, 3, null, { formal: true });
+    expect(plan.kind).toBe("outfit");
+    if (plan.kind === "outfit") expect(validateOutfitComposition(plan.items)).toEqual({ ok: true });
+  });
+
+  it("si hay vestido y también arriba+abajo, nunca devuelve null por elegir la base equivocada", () => {
+    const closet = [item("d", "dress"), item("t", "top"), item("b", "bottom")];
+    for (let seed = 0; seed < 6; seed++) expect(pickMockOutfit(closet, seed, null)).not.toBeNull();
+  });
+
+  it("al clóset al que le falta una parte de abajo le describe la prenda y no arma look", () => {
+    const plan = planMockLook([item("t", "top"), item("s", "shoes"), item("g", "bag")], 0, null);
+    expect(plan.kind).toBe("missing");
+    if (plan.kind !== "missing") return;
+    expect(plan.piece.category).toBe("bottom");
+    const text = missingPieceText(plan.piece);
+    expect(text).toContain("te falta una parte de abajo");
+    expect(text).toContain(plan.piece.description.charAt(0).toLowerCase());
+    expect(text).not.toMatch(/compra|comprar|tienda|\$/i);
+  });
+
+  it("al que le falta una parte de arriba también", () => {
+    const plan = planMockLook([item("b", "bottom"), item("s", "shoes")], 0, null);
+    expect(plan.kind === "missing" && plan.piece.category).toBe("top");
+  });
+
+  it("con clóset vacío pide fotos", () => {
+    expect(planMockLook([], 0, null)).toEqual({ kind: "empty" });
+    expect(EMPTY_CLOSET_TEXT).toMatch(/fotos/);
   });
 });
 

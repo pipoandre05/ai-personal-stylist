@@ -7,7 +7,7 @@
 >
 > Estados: `tomada` · `tomada-reversible` · `requiere aprobación` · `abierta`.
 
-Versión 0.4 — 2026-11-14.
+Versión 0.5 — 2026-11-14.
 
 ## 1. Decisiones de producto
 
@@ -30,6 +30,9 @@ Versión 0.4 — 2026-11-14.
 | DP-15 | Nombre de trabajo del proyecto y del repo: `ai-personal-stylist`. La marca se define después; la UI usa el nombre provisional **"Estilo"** hasta entonces. | [FELIPE] (nombre), [PS] (provisional) | abierta (marca) | — |
 | DP-17 | **Conversación primero.** El producto es una conversación con el asesor, no una app con un chat. La pantalla principal es el hilo; no hay barra de pestañas. El onboarding es la primera conversación (el asesor pregunta de a una cosa y ofrece respuestas sugeridas; no hay formulario por pasos). Las fotos se envían en el chat y el asesor decide qué hacer con ellas (prenda del clóset, selfie para la paleta, algo que la persona evalúa). Looks, prendas y paleta se muestran como tarjetas dentro del hilo. Clóset, Looks y perfil son "Tu espacio": vistas secundarias de consulta, a las que se entra desde el encabezado. **Reemplaza** la navegación de 4 pestañas y la ruta `/bienvenida`. | [FELIPE] al revisar la maqueta (2026-11-14) | tomada | La primera maqueta se sentía como "interacción de app". Consecuencia técnica: el agente gana herramientas (`update_profile`, `add_garment`, `analyze_palette`, `suggest_replies`) y RF-16 (foto en el chat) pasa al corte de hoy. |
 | DP-18 | **Un solo asesor, que también es personal shopper.** El Personal Shopper con productos reales deja de ser V1.1 y pasa al núcleo del MVP: evaluar una compra (foto o link) y buscar opciones en tiendas chilenas, siempre dentro de un look. Ajusta DP-07. Sigue siendo un único agente con más herramientas (DT-06). | [FELIPE] 2026-11-14 | tomada; la búsqueda en vivo espera A-01 | La investigación define el producto como asesor **y** shopper; diferir la compra dejaba medio producto. El catálogo por feeds sigue en V2. |
+| DP-19 | **Caso de uso que manda:** "saber qué ponerme el fin de semana para un evento y, si en mi clóset no hay algo que me sirva, que me busque opciones". Todo se prioriza contra ese recorrido (`PLAN_GENERAL.md` §1). | [FELIPE] 2026-11-14 | tomada | Da un criterio único para decidir qué entra. Implica búsqueda de opciones de compra: A-01 queda **aprobada en principio** ("que me busque opciones"); falta la lista de tiendas. |
+| DP-20 | **Bases fijas de la arquitectura del asesor** BF-01 a BF-14 (`PLAN_GENERAL.md` §3): invariantes que no dependen de cómo se decida que piense el asesor ni del framework. Cómo razona, un agente o varios, y el framework quedan abiertos hasta cerrar la investigación de `docs/investigacion-agentes/`. | [FELIPE] + [PS] 2026-11-14 | tomada | Permite construir interfaz y equipo sin esperar la definición del razonamiento. |
+| DP-21 | **Equipo de bots en OpenMausBot** al estilo Prendie, con tres cambios: el Productor solo escala a Felipe dudas funcionales que no sepa resolver; los bots conversan entre ellos (Constructor ↔ QA); DevOps crea ramas y mergea por condiciones objetivas, sin aprobación humana por historia. Permisos full; el control va en mecanismos (freno y frontera de archivos). | [FELIPE] 2026-11-14 | tomada; instalación en curso | Reduce a Felipe a lo funcional. Riesgo asumido: merge automático con permisos full (ver `docs/superpowers/plans/2026-11-14-equipo-mausbot.md`). |
 
 ## 2. Decisiones técnicas
 
@@ -123,6 +126,7 @@ Cada observación levantada por los agentes de backlog/specs se resolvió así. 
 
 | Fecha | Cambio |
 |---|---|
+| 2026-11-14 | v0.5 — DP-19 caso de uso que manda; DP-20 bases fijas BF-01…14; DP-21 equipo de bots con merge propio. |
 | 2026-11-14 | v0.4 — DP-18: un solo asesor que también es personal shopper; RF-17 y RF-18 pasan al MVP (RF-18 sujeto a A-01). |
 | 2026-11-14 | v0.3 — DP-17 Conversación primero (feedback de Felipe a la maqueta): sin pestañas, onboarding conversacional real, fotos en el chat, nuevas herramientas del agente. |
 | 2026-11-14 | v0.2 — Resoluciones R-01…R-18; DP-16 (la selfie no se conserva); activación precisada en DP-04. |
