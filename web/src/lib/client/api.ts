@@ -1,5 +1,5 @@
 import { createSSEParser } from "@/lib/chat/sse";
-import type { ChatEvent, ColorAnalysis, GarmentView } from "@/lib/domain/types";
+import type { ChatEvent, ChatIntent, ColorAnalysis, GarmentView } from "@/lib/domain/types";
 
 const NETWORK_ERROR = "No pudimos conectarnos. Revisa tu conexión e intenta de nuevo.";
 const GENERIC_ERROR = "Algo salió mal. Intenta de nuevo en un momento.";
@@ -46,12 +46,22 @@ export async function createColorAnalysis(photo_path: string): Promise<ColorAnal
  * Con `signal` abortado resuelve en silencio.
  * `{ text: "", start: true }` pide el saludo inicial; es idempotente si la persona ya tiene mensajes.
  *
+ * Botones: para un refinamiento u oferta pasa `intent` (el `intent` del botón, tal cual vino en `refinements` o en la
+ * oferta) y en `text` el rótulo del botón, que es lo que la persona ve en el hilo. Requiere `conversation_id`.
+ *
  * Reintentos: genera `client_message_id = crypto.randomUUID()` UNA vez por mensaje de la persona (al crearlo en la
  * interfaz) y reenvía el MISMO valor al reintentar ese mensaje. Si el servidor ya lo guardó, no lo duplica: devuelve el
  * cierre del turno si el asesor ya respondió, o retoma el turno si se cortó. Un mensaje nuevo lleva un uuid nuevo.
  */
 export async function streamChat(
-  input: { conversation_id?: string; text: string; image_path?: string; start?: boolean; client_message_id?: string },
+  input: {
+    conversation_id?: string;
+    text: string;
+    image_path?: string;
+    start?: boolean;
+    client_message_id?: string;
+    intent?: ChatIntent;
+  },
   onEvent: (e: ChatEvent) => void,
   signal?: AbortSignal,
 ): Promise<void> {
