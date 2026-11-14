@@ -7,7 +7,7 @@ import { getActiveColorAnalysis } from "@/lib/data/queries";
 import { COLOR_SEASON_LABELS } from "@/lib/domain/types";
 import PaletaSkeleton from "./skeleton";
 
-export const metadata: Metadata = { title: "Tu paleta — Estilo" };
+export const metadata: Metadata = { title: "Tu paleta — Prendie" };
 
 async function PaletaContent() {
   const analysis = await getActiveColorAnalysis();

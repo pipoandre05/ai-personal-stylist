@@ -55,7 +55,7 @@ La prenda sigue siendo la protagonista: recortada sobre `hundido`, nunca un bloq
 | La etiqueta colgante es el recurso de marca de Prendie | No se usa. Las etiquetas sobre la foto de la persona usan la forma de **insignia** (`rounded-insignia`) de Prendie. |
 | Campos en `hundido` sin borde: el campo del compositor tiene poco contraste de borde sobre `fondo` | El compositor va sobre una barra `superficie`; verificar con `accessibility-review` (§14). |
 | Prendie define tema Noche | Estilo parte solo con Día (razones en `DESIGN.MD` §1); tokens listos para sumarlo. |
-| El logotipo de Prendie es la marca de otro producto | Wordmark provisional "Estilo" en Bricolage 800 hasta definir marca (A-05, §14). |
+| El asesor se llama Prendie y usa su mascota (DP-25) | Wordmark "Prendie" en Bricolage 800. La mascota es la cara del asesor: cabeza de 32 px en la firma de cada turno, cuerpo entero en portada, hilo vacío y errores. Lo anterior ("Estilo", asesor sin avatar) queda reemplazado. |
 | Voz de Prendie (chilenismos, "apañe", "círculo") | No se adopta: Estilo mantiene su voz (`CLAUDE.md`, §13). |
 
 ## 2. Principios de experiencia

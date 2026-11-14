@@ -95,7 +95,7 @@ describe("UI-20: Sesiones, inicio de cero y respuestas rápidas", () => {
         }),
       );
       expect(out).toContain('aria-label="Sesiones"');
-      expect(out).toContain("Estilo");
+      expect(out).toContain("Prendie");
       expect(out).toContain("Tu espacio");
       expect(out).toContain("size-11");
     });

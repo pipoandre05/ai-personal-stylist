@@ -6,7 +6,7 @@ import { cn } from "./cn";
 type TopBarProps = {
   /** Título de la pantalla (font-display). */
   title?: ReactNode;
-  /** Muestra el wordmark "Estilo" en cursiva en vez de un título. */
+  /** Muestra el wordmark "Prendie" en cursiva en vez de un título. */
   wordmark?: boolean;
   /** Ruta de la flecha. Por defecto "/asesor": el hogar es siempre la conversación. */
   backHref?: string;
@@ -35,7 +35,7 @@ export function TopBar({ title, wordmark, backHref = "/asesor", backLabel = "Vol
             </Link>
           ) : null}
           {wordmark ? (
-            <span className="font-display text-2xl italic">Estilo</span>
+            <span className="font-display text-2xl italic">Prendie</span>
           ) : title ? (
             <span className="truncate font-display text-xl">{title}</span>
           ) : null}

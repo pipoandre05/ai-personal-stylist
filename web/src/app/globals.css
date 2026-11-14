@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
- * Estilo — tokens de diseño (fuente de verdad: DESIGN.MD en la raíz del repo).
+ * Prendie (asesor de imagen) — tokens de diseño (fuente de verdad: DESIGN.MD en la raíz del repo).
  * Identidad visual de Prendie con estructura propia (DP-23). Solo tema Día en el MVP: no hay
  * variante oscura y no se responde a prefers-color-scheme.
  * La paleta por defecto de Tailwind se elimina: solo existen los colores de abajo.
@@ -98,6 +98,8 @@
   --animate-subir: subir 280ms var(--ease-estilo) both;
   --animate-respirar: respirar 1.2s var(--ease-viaje) infinite;
   --animate-esqueleto: respirar 1.6s var(--ease-viaje) infinite;
+  /* Mascota: cuelga del agujero de la etiqueta y se balancea mientras el asesor trabaja. Solo transform. */
+  --animate-balanceo: balanceo 1.2s ease-in-out infinite alternate;
 
   @keyframes aparecer {
     from { opacity: 0; transform: translateY(6px); }
@@ -106,6 +108,10 @@
   @keyframes subir {
     from { opacity: 0; transform: translateY(100%); }
     to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes balanceo {
+    from { transform: rotate(-4deg); }
+    to { transform: rotate(4deg); }
   }
   @keyframes respirar {
     0%, 100% { opacity: 0.25; }

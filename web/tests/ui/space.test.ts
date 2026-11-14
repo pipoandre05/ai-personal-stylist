@@ -96,7 +96,7 @@ describe("UI-15 y UI-18: Tu espacio (Hoja y vistas secundarias)", () => {
         }),
       );
 
-      expect(html).toContain("Estilo");
+      expect(html).toContain("Prendie");
       expect(html).toContain("Tu espacio");
       expect(html).toContain('aria-haspopup="dialog"');
       expect(html).toContain('aria-expanded="false"');

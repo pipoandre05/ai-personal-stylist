@@ -55,7 +55,7 @@ export function AdvisorMessage({ text, streaming, hideSignature = false, classNa
       )}
     >
       {!hideSignature ? (
-        <span className="mb-1 block text-sobretitulo uppercase text-tinta-suave">Estilo</span>
+        <span className="mb-1 block text-sobretitulo uppercase text-tinta-suave">Prendie</span>
       ) : null}
       {paragraphs.map((p, i) => (
         <p key={i} className="whitespace-pre-line break-words">
