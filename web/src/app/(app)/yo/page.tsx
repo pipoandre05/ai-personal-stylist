@@ -1,110 +1,123 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
-import { ButtonLink, buttonStyles, Screen, TopBar } from "@/components/ui";
+import { buttonStyles, Screen, SpaceHeader } from "@/components/ui";
 import { DeleteAccount } from "@/components/espacio/delete-account";
-import { overlineClass } from "@/components/espacio/labels";
+import { capitalize } from "@/components/espacio/labels";
 import { MemoryList } from "@/components/espacio/memory-list";
-import { PaletteBadges, PaletteSwatches, PaletteTitle } from "@/components/espacio/palette-swatches";
-import { ProfileSummary } from "@/components/espacio/profile-summary";
 import { signOut } from "@/lib/actions/auth";
-import { countGarments, getActiveColorAnalysis, getProfile, getStyleProfile, listMemoryFacts } from "@/lib/data/queries";
+import { getActiveColorAnalysis, getStyleProfile, listMemoryFacts } from "@/lib/data/queries";
 import YoSkeleton from "./skeleton";
 
 export const metadata: Metadata = { title: "Tu perfil — Estilo" };
 
-function Section({ title, id, children }: { title: string; id: string; children: React.ReactNode }) {
-  return (
-    <section aria-labelledby={id} className="border-t border-linea pt-8">
-      <h2 id={id} className="font-display text-2xl">
-        {title}
-      </h2>
-      <div className="mt-4">{children}</div>
-    </section>
-  );
-}
-
 async function YoContent() {
-  const [profile, style, palette, facts, garments] = await Promise.all([
-    getProfile(),
+  const [style, palette, facts] = await Promise.all([
     getStyleProfile(),
     getActiveColorAnalysis(),
     listMemoryFacts(),
-    countGarments(),
   ]);
-  const name = profile?.display_name?.trim() || null;
-  const initial = (name ?? profile?.city ?? "T").charAt(0).toUpperCase();
+
+  const recommendedColors = palette?.recommended ?? [];
+  const stylesList = style?.current_style ?? [];
 
   return (
-    <div className="space-y-10">
+    <div className="pt-2">
       <header>
-        <p className={overlineClass}>Tu espacio</p>
-        <h1 className="mt-1 font-display text-3xl">Tu perfil</h1>
-        <div className="mt-5 flex items-center gap-4 rounded-md border border-linea bg-superficie p-4">
-          <span aria-hidden="true" className="flex size-14 shrink-0 items-center justify-center rounded-full bg-acento-suave font-display text-2xl italic text-acento">
-            {initial}
-          </span>
-          <div className="min-w-0">
-            <p className="truncate font-display text-xl">{name ?? "Tu perfil de imagen"}</p>
-            <p className="text-sm text-tinta-suave">
-              {[profile?.city, `${garments} ${garments === 1 ? "prenda" : "prendas"}`].filter(Boolean).join(" · ")}
-            </p>
-          </div>
-        </div>
+        <h1 className="font-display text-titulo font-extrabold tracking-[-0.02em] text-tinta">
+          Tu perfil
+        </h1>
       </header>
 
-      <Section id="paleta" title="Tu paleta">
-        {palette ? (
-          <div>
-            <PaletteTitle analysis={palette} as="p" className="text-2xl" />
-            <div className="mt-2">
-              <PaletteBadges analysis={palette} />
-            </div>
-            <div className="mt-5">
-              <PaletteSwatches analysis={palette} compact />
-            </div>
-            <ButtonLink href="/yo/paleta" variant="secondary" className="mt-6">
-              Ver tu paleta
-            </ButtonLink>
+      {/* Tu paleta */}
+      <section className="mt-8 border-t border-linea pt-8">
+        <h2 className="font-display text-titulo-s font-extrabold tracking-[-0.01em] text-tinta">
+          Tu paleta
+        </h2>
+        {recommendedColors.length > 0 ? (
+          <div className="my-3 flex gap-2">
+            {recommendedColors.slice(0, 5).map((c, i) => (
+              <i
+                key={i}
+                className="size-9 rounded-full not-italic"
+                style={{ backgroundColor: c.hex }}
+              />
+            ))}
           </div>
         ) : (
-          <div>
-            <p className="max-w-sm text-base text-tinta-suave">
-              Aún no tienes paleta. Mándale una selfie a tu asesor y te doy una orientación de los colores que tienden a iluminarte.
-            </p>
-            <ButtonLink href="/asesor" className="mt-5">
-              Mandar una selfie al asesor
-            </ButtonLink>
-          </div>
+          <p className="my-3 font-body text-cuerpo text-tinta-suave">
+            Aún no tienes paleta calculada.
+          </p>
         )}
-      </Section>
+        <Link
+          href="/yo/paleta"
+          className={buttonStyles({ variant: "contorno", size: "mediano" })}
+        >
+          Ver mi paleta
+        </Link>
+      </section>
 
-      <Section id="estilo" title="Lo que tu asesor sabe de ti">
-        <ProfileSummary profile={profile} style={style} />
-      </Section>
+      {/* Tu estilo */}
+      <section className="mt-8 border-t border-linea pt-8">
+        <h2 className="font-display text-titulo-s font-extrabold tracking-[-0.01em] text-tinta">
+          Tu estilo
+        </h2>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {stylesList.length > 0 ? (
+            stylesList.map((s) => (
+              <span
+                key={s}
+                className="inline-flex h-8 items-center rounded-insignia bg-hundido px-3 font-body text-sm font-bold text-tinta"
+              >
+                {capitalize(s)}
+              </span>
+            ))
+          ) : (
+            <span className="font-body text-cuerpo text-tinta-suave">Aún no me lo cuentas.</span>
+          )}
+        </div>
+      </section>
 
-      <Section id="memoria" title="Lo que tu asesor recuerda de ti">
+      {/* Lo que sé de ti */}
+      <section id="memoria" className="mt-8 border-t border-linea pt-8">
+        <h2 className="mb-3 font-display text-titulo-s font-extrabold tracking-[-0.01em] text-tinta">
+          Lo que sé de ti
+        </h2>
         <MemoryList facts={facts} />
-      </Section>
+      </section>
 
-      <Section id="privacidad" title="Privacidad">
-        <ul className="space-y-2 text-base text-tinta">
-          <li>Tus fotos están en un espacio privado: solo tú puedes verlas.</li>
-          <li>Tu selfie se usa solo para el análisis y se borra apenas termino; guardo solo el resultado.</li>
-          <li>Tu asesor nunca compra ni paga nada por ti.</li>
-        </ul>
-        <form action={signOut} className="mt-6">
-          <button type="submit" className={buttonStyles({ variant: "secondary" })}>
+      {/* Privacidad */}
+      <section className="mt-8 border-t border-linea pt-8">
+        <h2 className="font-display text-titulo-s font-extrabold tracking-[-0.01em] text-tinta">
+          Privacidad
+        </h2>
+        <p className="mt-2 font-body text-cuerpo text-tinta">
+          Tus fotos son privadas y solo las ves tú. Puedes borrar tu cuenta cuando quieras.
+        </p>
+      </section>
+
+      {/* Borrar mi cuenta */}
+      <section className="mt-8 border-t border-linea pt-8">
+        <h2 className="font-display text-titulo-s font-extrabold tracking-[-0.01em] text-tinta">
+          Borrar mi cuenta
+        </h2>
+        <p className="mt-2 mb-4 font-body text-cuerpo text-tinta">
+          Se borran tu clóset, tus looks y lo que sé de ti. No se puede deshacer.
+        </p>
+        <DeleteAccount />
+      </section>
+
+      {/* Cerrar sesión */}
+      <div className="mt-8 border-t border-linea pt-6">
+        <form action={signOut}>
+          <button
+            type="submit"
+            className={buttonStyles({ variant: "contorno", size: "mediano" })}
+          >
             Cerrar sesión
           </button>
         </form>
-      </Section>
-
-      <Section id="borrar" title="Borrar mis datos">
-        <p className="mb-4 max-w-sm text-base text-tinta-suave">
-          Puedes borrar tu cuenta y todo lo que guardé de ti cuando quieras.
-        </p>
-        <DeleteAccount />
-      </Section>
+      </div>
     </div>
   );
 }
@@ -112,8 +125,8 @@ async function YoContent() {
 export default function YoPage() {
   return (
     <Screen>
-      <TopBar />
-      <div className="px-5 pt-2 pb-12">
+      <SpaceHeader backHref="/asesor" backLabel="Volver a la conversación" />
+      <div className="px-6 pb-12">
         <Suspense fallback={<YoSkeleton />}>
           <YoContent />
         </Suspense>

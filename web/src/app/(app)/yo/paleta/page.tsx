@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
-import { ButtonLink, Screen, TopBar } from "@/components/ui";
-import { overlineClass } from "@/components/espacio/labels";
+import { buttonStyles, Screen, SpaceHeader } from "@/components/ui";
 import { PaletteAdjust } from "@/components/espacio/palette-adjust";
-import { PaletteBadges, PaletteSwatches, PaletteTitle } from "@/components/espacio/palette-swatches";
 import { getActiveColorAnalysis } from "@/lib/data/queries";
+import { COLOR_SEASON_LABELS } from "@/lib/domain/types";
 import PaletaSkeleton from "./skeleton";
 
 export const metadata: Metadata = { title: "Tu paleta — Estilo" };
@@ -14,74 +14,100 @@ async function PaletaContent() {
 
   if (!analysis) {
     return (
-      <>
+      <div className="pt-2">
         <header>
-          <p className={overlineClass}>Tu espacio</p>
-          <h1 className="mt-1 font-display text-3xl">Tu paleta</h1>
+          <h1 className="font-display text-titulo font-extrabold tracking-[-0.02em] text-tinta">
+            Tu paleta
+          </h1>
+          <p className="mt-1 font-body text-meta text-tinta-suave">Aún sin calcular</p>
         </header>
         <div className="mt-8">
-          <h2 className="font-display text-2xl">Aún no tienes paleta</h2>
-          <p className="mt-3 max-w-sm text-base text-tinta-suave">
-            Mándale una selfie a tu asesor y te doy una orientación de los colores que tienden a iluminarte la cara. Es solo una
-            orientación a partir de una foto, no un diagnóstico.
-          </p>
-          <ButtonLink href="/asesor" className="mt-5">
-            Mandar una selfie al asesor
-          </ButtonLink>
-        </div>
-        <section aria-labelledby="a-mano" className="mt-12 border-t border-linea pt-8">
-          <h2 id="a-mano" className="font-display text-xl">
-            ¿Ya conoces tu estación?
+          <h2 className="font-display text-titulo-s font-extrabold text-tinta">
+            Aún no tienes paleta
           </h2>
-          <p className="mt-2 mb-4 max-w-sm text-sm text-tinta-suave">Puedes elegirla tú y la guardo como tu paleta.</p>
-          <PaletteAdjust current={null} label="Elegir mi estación" />
-        </section>
-      </>
+          <p className="mt-2 font-body text-cuerpo text-tinta-suave">
+            Mándale una selfie a tu asesor y te doy una orientación de los colores que tienden a iluminarte la cara.
+            Es solo una orientación, no un diagnóstico.
+          </p>
+          <Link
+            href="/asesor"
+            className={buttonStyles({ variant: "contorno", size: "mediano", className: "mt-4" })}
+          >
+            Mandar una foto al asesor
+          </Link>
+        </div>
+      </div>
     );
   }
 
+  const seasonLabel = COLOR_SEASON_LABELS[analysis.season] ?? "Tu estación";
+  const recommended = analysis.recommended ?? [];
+
   return (
-    <>
+    <div className="pt-2">
       <header>
-        <p className={overlineClass}>Tu espacio · orientativa</p>
-        <PaletteTitle analysis={analysis} as="h1" className="mt-1 text-4xl leading-[1.05]" />
-        <div className="mt-3">
-          <PaletteBadges analysis={analysis} />
-        </div>
+        <h1 className="font-display text-titulo font-extrabold tracking-[-0.02em] text-tinta">
+          Tu paleta
+        </h1>
+        <p className="mt-1 font-body text-meta text-tinta-suave">
+          {seasonLabel} · orientativa
+        </p>
       </header>
 
-      {analysis.rationale ? <p className="mt-6 max-w-prose text-base text-tinta">{analysis.rationale}</p> : null}
-
-      {!analysis.lighting_ok ? (
-        <p className="mt-5 rounded-sm bg-alerta-suave px-3 py-2 text-sm text-alerta">
-          La luz de la foto no era pareja. Tómalo como punto de partida.
-        </p>
+      {/* Muestras principales en fila */}
+      {recommended.length > 0 ? (
+        <div className="mt-5 flex gap-2">
+          {recommended.slice(0, 5).map((c, i) => (
+            <i
+              key={i}
+              className="size-9 rounded-full not-italic"
+              style={{ backgroundColor: c.hex }}
+            />
+          ))}
+        </div>
       ) : null}
 
-      <div className="mt-8">
-        <PaletteSwatches analysis={analysis} />
-      </div>
+      {/* Colores que te favorecen */}
+      <section className="mt-8 border-t border-linea pt-8">
+        <h2 className="font-display text-titulo-s font-extrabold tracking-[-0.01em] text-tinta">
+          Colores que te favorecen
+        </h2>
+        <div className="mt-4 grid grid-cols-4 gap-3">
+          {recommended.map((c) => (
+            <div key={`${c.name}-${c.hex}`} className="flex flex-col items-center gap-1.5">
+              <i
+                className="size-12 rounded-full border border-linea not-italic"
+                style={{ backgroundColor: c.hex }}
+              />
+              <span className="w-full truncate text-center font-body text-meta text-tinta-suave">
+                {c.name}
+              </span>
+            </div>
+          ))}
+        </div>
+      </section>
 
-      <p className="mt-8 text-sm text-tinta-suave">
-        Es una orientación a partir de una foto, no un diagnóstico.
-        {analysis.source === "ai" ? " Tu selfie ya se borró." : ""} Si algo no te calza, ajústala.
-      </p>
-
-      <div className="mt-6 flex flex-col items-start gap-3">
-        <PaletteAdjust current={analysis.season} />
-        <ButtonLink href="/asesor" variant="text">
-          Mandar otra selfie
-        </ButtonLink>
-      </div>
-    </>
+      {/* Cómo la calculé */}
+      <section className="mt-8 border-t border-linea pt-8">
+        <h2 className="font-display text-titulo-s font-extrabold tracking-[-0.01em] text-tinta">
+          Cómo la calculé
+        </h2>
+        <p className="mt-2 font-body text-cuerpo text-tinta">
+          Mira tu foto y lo que me contaste. Es una orientación, no un diagnóstico.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <PaletteAdjust current={analysis.season} />
+        </div>
+      </section>
+    </div>
   );
 }
 
 export default function PaletaPage() {
   return (
     <Screen>
-      <TopBar backHref="/yo" backLabel="Volver a tu perfil" />
-      <div className="px-5 pt-2 pb-12">
+      <SpaceHeader backHref="/yo" backLabel="Volver a tu perfil" />
+      <div className="px-6 pb-12">
         <Suspense fallback={<PaletaSkeleton />}>
           <PaletaContent />
         </Suspense>

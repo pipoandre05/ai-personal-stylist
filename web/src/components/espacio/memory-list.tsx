@@ -1,18 +1,14 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Button, useToast } from "@/components/ui";
+import { useToast } from "@/components/ui";
 import { deleteMemoryFact } from "@/lib/actions/memory";
 import type { MemoryFact } from "@/lib/domain/types";
-import { fmtDate } from "@/lib/format";
 
-const SOURCE_LABELS: Record<MemoryFact["source"], string> = {
-  onboarding: "De tu primera conversación",
-  chat: "De la conversación",
-  feedback: "De tu opinión sobre un look",
-};
-
-/** Lo que el asesor recuerda: cada hecho con origen, fecha y "Borrar". */
+/**
+ * Lo que el asesor sabe de ti (UI-18):
+ * Hechos con punto lavanda (bg-memoria) y botón de texto "Borrar" accesible.
+ */
 export function MemoryList({ facts }: { facts: MemoryFact[] }) {
   const { toast } = useToast();
   const [hidden, setHidden] = useState<ReadonlySet<string>>(new Set());
@@ -37,25 +33,28 @@ export function MemoryList({ facts }: { facts: MemoryFact[] }) {
 
   if (visible.length === 0) {
     return (
-      <p className="text-base text-tinta-suave">
+      <p className="font-body text-cuerpo text-tinta-suave">
         Aún no recuerdo nada de ti. Lo que me cuentes en la conversación y lo que opines de mis looks aparecerá aquí.
       </p>
     );
   }
 
   return (
-    <ul className="divide-y divide-linea border-y border-linea">
+    <ul className="divide-y divide-linea border-t border-linea">
       {visible.map((f) => (
-        <li key={f.id} className="flex items-center justify-between gap-3 py-3">
-          <div className="min-w-0">
-            <p className="text-base text-tinta">{f.fact}</p>
-            <p className="mt-0.5 text-sm text-tinta-suave">
-              {SOURCE_LABELS[f.source]} · {fmtDate(f.created_at)}
-            </p>
-          </div>
-          <Button variant="text" className="shrink-0 text-sm" onClick={() => remove(f.id)} aria-label={`Borrar: ${f.fact}`}>
+        <li key={f.id} className="flex min-h-11 items-center justify-between gap-3 py-2.5">
+          <span className="flex items-center font-body text-cuerpo text-tinta min-w-0">
+            <i className="mr-2 inline-block size-2.5 shrink-0 rounded-full bg-memoria not-italic" aria-hidden="true" />
+            <span className="truncate">{f.fact}</span>
+          </span>
+          <button
+            type="button"
+            onClick={() => remove(f.id)}
+            aria-label={`Borrar: ${f.fact}`}
+            className="min-h-11 shrink-0 px-2 font-body text-control text-tinta-suave underline underline-offset-4 transition-colors hover:text-error focus-visible:ring-3 focus-visible:ring-foco rounded-sm"
+          >
             Borrar
-          </Button>
+          </button>
         </li>
       ))}
     </ul>
