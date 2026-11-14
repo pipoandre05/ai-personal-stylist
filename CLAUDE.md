@@ -59,7 +59,7 @@ Vitest. Código en `web/`; operar git desde la raíz.
 
 **Feature:** `superpowers:brainstorming` → maqueta HTML en `docs/superpowers/mockups/` aprobada por Felipe → `writing-plans` (ejecutor y revisor por tarea) → `subagent-driven-development` → `requesting-code-review` → `verification-before-completion` → PR → revisión visual de Felipe → merge. Bug → `systematic-debugging`.
 
-**Skills de diseño:** construir → `frontend-design` + `ui-ux-pro-max` (ambas) · cerrar → `impeccable`.
+**Skills de diseño** (en `.claude/skills/`; mapa en `docs/tecnico/skills-de-diseno.md`): construir → `frontend-design` + `ui-ux-pro-max` (ambas) · detalle e interacción → `emil-design-eng` · maquetas y demos de alta fidelidad → `stageshow` · cerrar → `impeccable`.
 **Skills de dominio:** esquema/RLS → `db-migrations` + `supabase:supabase-postgres-best-practices` · IA → `claude-api` + `agent-security` · tests → `testing-strategy`.
 
 **Git:** trunk-based. `feat/<slug>` ≤ 3 días → PR con checklist → squash. Nunca push directo a `main` (pre-push lo bloquea salvo docs-only). Ramas al día con merge, nunca rebase. **Migraciones las aplica Felipe** antes del merge.
