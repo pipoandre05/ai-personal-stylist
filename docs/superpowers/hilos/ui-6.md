@@ -33,3 +33,21 @@ Construcción de UI-6 (Respuestas sugeridas) completada sobre el commit `25b2cb3
 2. `web/tests/ui/suggested-replies.test.ts`:
    - Suite con 12 tests unitarios cubriendo detección de fotos, renderizado simple, renderizado múltiple, accesibilidad, estados deshabilitados y cero lima.
    - `npm run verify` pasando (295/295 tests) y `AI_MODE=mock npm run build` exitoso.
+
+### 2026-11-14 16:12 · Revisor · veredicto · vuelta 0
+
+Revisión de código completada sin hallazgos:
+1. Frontera: verificada con `bash agentes/scripts/verificar-frontera.sh equipo/ui-6-dinamica-hilo` (solo toca suggested-replies.tsx, su test en tests/ui y docs de superpowers).
+2. Respeto estricto a restricciones: archivos prohibidos (thread.tsx, thread-types.ts, conversation.tsx, use-conversation.ts, outfit-card.tsx, tool-status.tsx) 100% intactos.
+3. Seguridad y datos: componente de interacción puramente del cliente con callbacks limpios (onSend y onPickPhoto), sin exposición de credenciales, sin datos personales y sin llamadas directas a IA desde el cliente.
+4. Reglas del repo y UX_UI_SPEC §7.8:
+   - Modo simple: botones contorno medianos de 44 px (`Button variant="contorno" size="mediano"`), alineados a la derecha (`flex flex-wrap justify-end gap-2 px-6 pb-3`).
+   - Acciones de foto/selfie: `PHOTO_ACTION` y `SELFIE` integrados con ícono de cámara `IconCamera` size-5 accesible (`aria-hidden="true"`), disparando `onPickPhoto`.
+   - Modo múltiple: chips toggle (`Chip mode="toggle"`) con `aria-pressed`, área táctil accesible de 44 px (`after:-inset-1`), y botón "Listo" mediano inverso (`Button variant="inverso" size="mediano"`) deshabilitado si no hay selección (`disabled:opacity-45`), enviando opciones unidas por coma.
+   - Cero lima: ninguna sugerencia ni chip usa clases `accion` o `bg-accion` (regla de marca respetada).
+   - Accesibilidad: contenedor accesible con `role="group"` y `aria-label="Respuestas sugeridas"`, foco de 3 px azul (`focus-visible:ring-3 focus-visible:ring-foco`), targets táctiles >= 44 px. Transición de opacidad al enviar respetando `motion-reduce:transition-none`.
+5. Tokens y CSS: 100% tokens de globals.css y DESIGN.MD. tokens.test.ts en verde (0 clases inventadas).
+6. Tests y compilación: `npm run verify` en verde (lint limpio, typecheck sin errores, 295/295 tests vitest pasando, incluidos 12 tests en tests/ui/suggested-replies.test.ts) y `npm run build` exitoso.
+7. Hallazgos: 0 bloquea, 0 importante, 0 menor.
+
+VEREDICTO: Revisor aprobado sha=2bcf27732d47a9fbb8bff2617c8c750b3f40de96
