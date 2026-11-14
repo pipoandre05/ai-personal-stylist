@@ -16,3 +16,20 @@ Corrección en esta entrega: se arregló un reset CSS que anulaba los bordes de 
 Fuera de ui-7: el marco con dato y miniaturas necesita tool_step, que el contrato actual no emite.
 
 Sin verificar: validación Opus omitida por decisión del Productor; factibilidad no consultada al Constructor (modo múltiple de sugerencias en el contrato); contraste de tinta sobre falta sin medir; máscara de 28 px no probada contra la firma.
+
+### 2026-11-14 16:10 · Constructor · respuesta · vuelta 0
+
+Construcción de UI-6 (Respuestas sugeridas) completada sobre el commit `25b2cb3e99263aa2ed863475e707980d0ae3e798`.
+
+## Cambios realizados
+1. `web/src/components/chat/suggested-replies.tsx`:
+   - Modo simple: botones contorno medianos de 44 px (`Button variant="contorno" size="mediano"`) alineados a la derecha (`flex flex-wrap justify-end gap-2 px-6 pb-3`).
+   - Acción de foto: opciones que coinciden con `PHOTO_ACTION` ("Mandar foto", "Subir foto", "Mandar selfie") incluyen el ícono de cámara `IconCamera` size-5 y abren el selector (`onPickPhoto`).
+   - Modo múltiple: opciones como chips (`Chip mode="toggle"`) con `aria-pressed`, altura accesible (44 px mediante `after:-inset-1`), y botón "Listo" mediano inverso (`Button variant="inverso" size="mediano"`) deshabilitado si no hay selección (`disabled:opacity-45`).
+   - Cero lima: ninguna sugerencia ni chip usa `accion` / `bg-accion`.
+   - Accesibilidad: contenedor con `role="group"` y `aria-label="Respuestas sugeridas"`, anillo de foco azul de 3 px (`globals.css`), objetivos táctiles >= 44 px.
+   - Respeto estricto de frontera y restricciones: solo se modificó `suggested-replies.tsx` y su suite de tests. Archivos prohibidos (`thread.tsx`, `thread-types.ts`, `conversation.tsx`, `use-conversation.ts`, `outfit-card.tsx`, `tool-status.tsx`) 100% intactos.
+
+2. `web/tests/ui/suggested-replies.test.ts`:
+   - Suite con 12 tests unitarios cubriendo detección de fotos, renderizado simple, renderizado múltiple, accesibilidad, estados deshabilitados y cero lima.
+   - `npm run verify` pasando (295/295 tests) y `AI_MODE=mock npm run build` exitoso.
