@@ -116,10 +116,13 @@ describe("selección del agente simulado", () => {
 describe("asesor simulado: recorrido central", () => {
   const closetOk = [item("t", "top"), item("b", "bottom"), item("s", "shoes")];
 
-  it("'tengo un evento el fin de semana, ¿qué me pongo?' se reconoce como pedido de look formal", () => {
+  it("'tengo un evento el fin de semana, ¿qué me pongo?' entra al camino del evento (resumen y pregunta) y sigue siendo formal", () => {
     const text = "Tengo un evento el fin de semana, ¿qué me pongo?";
-    expect(planMockTurn({ text, hasImage: false, start: false, missing: [] })).toEqual({ kind: "look" });
+    // Antes era un pedido de look suelto; con el contrato v2 un evento tiene su propio recorrido (mock-flow.test.ts).
+    expect(planMockTurn({ text, hasImage: false, start: false, missing: [] })).toEqual({ kind: "event" });
     expect(isFormalRequest(text)).toBe(true);
+    // sin la palabra "evento" sigue siendo un look de día normal
+    expect(planMockTurn({ text: "¿Qué me pongo para la reunión?", hasImage: false, start: false, missing: [] })).toEqual({ kind: "look" });
   });
 
   it("anota preferencias dichas al pasar solo con el perfil completo", () => {
