@@ -154,12 +154,18 @@ printf 'esto no es json' | CLAUDE_PROJECT_DIR="$H" bash "$FRENO" >/dev/null 2>&1
 # el comando del settings.json propuesto: sin freno.sh bloquea; con freno que revienta, bloquea
 CMD=$(jq -r '.hooks.PreToolUse[0].hooks[0].command' "$SETTINGS")
 mkdir -p "$T/sin-freno"
-printf '%s' "$(bash_json ls "$T/sin-freno")" | CLAUDE_PROJECT_DIR="$T/sin-freno" bash -c "$CMD" >/dev/null 2>&1
+# (se corre desde la carpeta sin freno y fuera de todo repo: el comando tambien busca el freno en la raiz de git)
+( cd "$T/sin-freno" && printf '%s' "$(bash_json ls "$T/sin-freno")" | CLAUDE_PROJECT_DIR="$T/sin-freno" GIT_CEILING_DIRECTORIES="$T" bash -c "$CMD" >/dev/null 2>&1 )
 [ $? = 2 ] && pasa=$((pasa+1)) || mal "settings: sin freno.sh debe bloquear"
 mkdir -p "$T/freno-roto/.claude/hooks"; printf 'exit 1\n' > "$T/freno-roto/.claude/hooks/freno.sh"
 printf '%s' "$(bash_json ls "$T/freno-roto")" | CLAUDE_PROJECT_DIR="$T/freno-roto" bash -c "$CMD" >/dev/null 2>&1
 [ $? = 2 ] && pasa=$((pasa+1)) || mal "settings: freno que falla con 1 debe bloquear"
 mkdir -p "$T/freno-ok/.claude/hooks"; cp "$FRENO" "$T/freno-ok/.claude/hooks/freno.sh"
+# la variable apunta a otra carpeta (sesion movida de proyecto): debe encontrar el freno por la raiz de git
+mkdir -p "$T/repo-movido/.claude/hooks" "$T/repo-movido/web"; printf 'exit 0\n' > "$T/repo-movido/.claude/hooks/freno.sh"
+git -C "$T/repo-movido" init -q 2>/dev/null
+( cd "$T/repo-movido/web" && printf '%s' "$(bash_json ls "$T/repo-movido/web")" | CLAUDE_PROJECT_DIR="$T/no-existe" bash -c "$CMD" >/dev/null 2>&1 )
+[ $? = 0 ] && pasa=$((pasa+1)) || mal "settings: con la variable mal puesta debe hallar el freno por git"
 printf '%s' "$(bash_json ls "$T/freno-ok")" | CLAUDE_PROJECT_DIR="$T/freno-ok" bash -c "$CMD" >/dev/null 2>&1
 [ $? = 0 ] && pasa=$((pasa+1)) || mal "settings: freno sano deja pasar ls"
 jq -e . "$SETTINGS" >/dev/null && pasa=$((pasa+1)) || mal "settings.json no es JSON válido"

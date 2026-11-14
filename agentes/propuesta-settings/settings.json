@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "f=\"$CLAUDE_PROJECT_DIR/.claude/hooks/freno.sh\"; if [ ! -f \"$f\" ]; then echo 'FRENO: no encuentro .claude/hooks/freno.sh; bloqueo por seguridad (falla cerrado).' >&2; exit 2; fi; bash \"$f\"; c=$?; [ \"$c\" -eq 0 ] && exit 0; exit 2",
+            "command": "f=\"${CLAUDE_PROJECT_DIR:-}/.claude/hooks/freno.sh\"; if [ ! -f \"$f\" ]; then r=$(git rev-parse --show-toplevel 2>/dev/null); f=\"$r/.claude/hooks/freno.sh\"; fi; if [ ! -f \"$f\" ]; then echo 'FRENO: no encuentro .claude/hooks/freno.sh; bloqueo por seguridad (falla cerrado).' >&2; exit 2; fi; bash \"$f\"; c=$?; [ \"$c\" -eq 0 ] && exit 0; exit 2",
             "timeout": 150
           }
         ]
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "f=\"$CLAUDE_PROJECT_DIR/.claude/hooks/freno.sh\"; if [ ! -f \"$f\" ]; then echo 'FRENO: no encuentro .claude/hooks/freno.sh; bloqueo por seguridad (falla cerrado).' >&2; exit 2; fi; bash \"$f\"; c=$?; [ \"$c\" -eq 0 ] && exit 0; exit 2",
+            "command": "f=\"${CLAUDE_PROJECT_DIR:-}/.claude/hooks/freno.sh\"; if [ ! -f \"$f\" ]; then r=$(git rev-parse --show-toplevel 2>/dev/null); f=\"$r/.claude/hooks/freno.sh\"; fi; if [ ! -f \"$f\" ]; then echo 'FRENO: no encuentro .claude/hooks/freno.sh; bloqueo por seguridad (falla cerrado).' >&2; exit 2; fi; bash \"$f\"; c=$?; [ \"$c\" -eq 0 ] && exit 0; exit 2",
             "timeout": 30
           }
         ]

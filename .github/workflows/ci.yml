@@ -1,7 +1,7 @@
 name: ci
 on:
   pull_request:
-    paths: ['web/**', '.github/workflows/ci.yml']
+    paths: ['web/**', 'docs/**', 'agentes/**', '.claude/**', '.github/workflows/ci.yml']
   push:
     branches: [main]
     paths: ['web/**']
@@ -20,3 +20,23 @@ jobs:
         working-directory: web
       - run: npm run verify
         working-directory: web
+
+  # Tercer control de la frontera del equipo de bots (ademas del freno al editar y de
+  # condiciones-merge.sh antes del merge): un PR de una rama equipo/* no puede tocar rutas prohibidas.
+  frontera:
+    if: startsWith(github.head_ref, 'equipo/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - run: bash agentes/scripts/verificar-frontera.sh --base "origin/${{ github.base_ref }}" "origin/${{ github.head_ref }}"
+
+  # El freno y la frontera son controles: sus propias pruebas corren en cada PR.
+  controles:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: bash agentes/propuesta-settings/hooks/test-freno.sh
+      - run: bash agentes/scripts/test-verificar-frontera.sh
+      - run: bash agentes/scripts/test-condiciones-merge.sh
