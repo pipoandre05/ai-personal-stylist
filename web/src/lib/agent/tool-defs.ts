@@ -34,13 +34,18 @@ export const AGENT_TOOLS: Anthropic.Beta.BetaTool[] = [
   {
     name: "get_closet",
     description:
-      "Lista las prendas activas del clóset de la persona con su id, nombre, categoría, colores, formalidad, temporadas y ocasiones. Úsala antes de proponer un look. Puedes filtrar por categoría u ocasión.",
+      "Lista las prendas activas del clóset de la persona con su id, nombre, categoría, colores, formalidad, temporadas y ocasiones. Úsala antes de proponer un look. Puedes filtrar por categoría u ocasión. Si hay un evento, plan u ocasión, envía formality con el nivel que pide: el servidor compara el clóset con ese nivel y devuelve `viabilidad` (alcanza, falta_una_pieza o no_hay_base), qué prendas llegan y qué categoría no llega. Esa respuesta manda: no decidas por tu cuenta si el clóset alcanza.",
     strict: true,
     input_schema: {
       type: "object",
       properties: {
         category: { type: "string", enum: categoryEnum, description: "Filtra por categoría." },
         occasion: { type: "string", description: "Filtra por ocasión (por ejemplo: oficina, citas)." },
+        formality: {
+          type: "integer",
+          enum: [1, 2, 3, 4, 5],
+          description: "Nivel de formalidad que pide el marco: 1 deportivo, 2 casual relajado (asado, día a día), 3 casual cuidado u oficina, 4 formal (matrimonio de día o de noche, cena elegante), 5 gala o etiqueta estricta (esmoquin, traje largo): úsalo solo si la invitación pide etiqueta o gala.",
+        },
       },
       additionalProperties: false,
     },
@@ -206,7 +211,11 @@ export const AGENT_TOOLS: Anthropic.Beta.BetaTool[] = [
 
 // --- Validación de entradas (el modelo es una entrada no confiable) ---
 
-export const GetClosetInput = z.object({ category: z.enum(GARMENT_CATEGORIES).optional(), occasion: z.string().max(60).optional() });
+export const GetClosetInput = z.object({
+  category: z.enum(GARMENT_CATEGORIES).optional(),
+  occasion: z.string().max(60).optional(),
+  formality: z.number().int().min(1).max(5).optional(),
+});
 export const GetWeatherInput = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   place: z.string().trim().min(2).max(80).optional(),
