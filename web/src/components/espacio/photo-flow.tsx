@@ -10,8 +10,8 @@ import {
   type ReactNode,
 } from "react";
 import { IconCamera, IconClose, cn } from "@/components/ui";
-import { streamChat } from "@/lib/client/api";
-import { compressImage, uploadUserImage } from "@/lib/client/upload";
+import { setPendingPhoto } from "@/components/chat/pending-photo";
+import { compressImage } from "@/lib/client/upload";
 
 export type PhotoFlowKind = "selfie" | "garment";
 
@@ -42,9 +42,9 @@ function subscribeOnline(cb: () => void) {
  *
  * Abre directamente el selector nativo del sistema (sin atributo `capture`),
  * muestra la vista previa modal a pantalla completa (<dialog> accesible),
- * comprime la imagen en el cliente, sube la foto a Supabase storage y crea
- * una nueva sesión invocando streamChat sin conversation_id para luego
- * navegar a /asesor/<id>.
+ * comprime la imagen en el cliente y abre de inmediato una conversación nueva
+ * (/asesor) entregándole la foto en memoria: la subida y el turno del asesor se
+ * ven en el hilo, con el rastro de lo que va haciendo.
  */
 export function SpacePhotoButton({
   kind,
@@ -156,7 +156,11 @@ export function SpacePhotoButton({
     }
   };
 
-  const handleUploadAndSend = async () => {
+  /**
+   * "Usar esta foto": abre de inmediato una conversación nueva y le entrega la foto. La subida, el asesor pensando y su
+   * respuesta se ven en el hilo; aquí no se espera a que el asesor termine.
+   */
+  const handleUploadAndSend = () => {
     if (!selectedFile) return;
 
     if (!navigator.onLine) {
@@ -164,62 +168,13 @@ export function SpacePhotoButton({
       return;
     }
 
-    setStatus("uploading");
-    setErrorMessage(null);
-
-    const controller = new AbortController();
-    abortRef.current = controller;
-
-    try {
-      // 1. Subir a storage privado bajo user-media
-      const uploadKind = kind === "selfie" ? "selfies" : "garments";
-      const photoPath = await uploadUserImage(selectedFile, uploadKind);
-
-      // 2. Invocar streamChat sin conversation_id para crear sesión
-      const promptText = kind === "selfie" ? SELFIE_PROMPT : GARMENT_PROMPT;
-      let newConvId: string | null = null;
-
-      await streamChat(
-        {
-          text: promptText,
-          image_path: photoPath,
-        },
-        (event) => {
-          if (event.type === "conversation") {
-            newConvId = event.id;
-          }
-        },
-        controller.signal
-      );
-
-      // 3. Al completar el turno, navegar a la nueva sesión
-      if (newConvId) {
-        const dialog = dialogRef.current;
-        if (dialog?.open) dialog.close();
-        setDialogOpen(false);
-        cleanPreview();
-        router.push(`/asesor/${newConvId}`);
-        router.refresh();
-      } else {
-        throw new Error("No se pudo obtener el identificador de la conversación.");
-      }
-    } catch (err) {
-      if (controller.signal.aborted) {
-        return;
-      }
-      if (!navigator.onLine) {
-        setStatus("offline");
-      } else {
-        setStatus("error");
-        setErrorMessage(
-          err instanceof Error
-            ? err.message
-            : "No pude subir tu foto. Tu foto sigue aquí: puedes intentarlo de nuevo o elegir otra."
-        );
-      }
-    } finally {
-      abortRef.current = null;
-    }
+    setPendingPhoto({ file: selectedFile, text: kind === "selfie" ? SELFIE_PROMPT : GARMENT_PROMPT });
+    const dialog = dialogRef.current;
+    if (dialog?.open) dialog.close();
+    setDialogOpen(false);
+    cleanPreview();
+    setSelectedFile(null);
+    router.push("/asesor");
   };
 
   const promptText = kind === "selfie" ? SELFIE_PROMPT : GARMENT_PROMPT;

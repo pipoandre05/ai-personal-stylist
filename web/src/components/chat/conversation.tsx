@@ -77,10 +77,10 @@ function ConversationView({
       onSend={(text, file) => c.send(text, file)}
       onStop={c.stop}
       onFocusField={c.onFocusField}
-      // En la pantalla de inicio, en pantallas anchas, el campo va suelto bajo el saludo: sin franja ni borde superior.
+      // En la pantalla de inicio, en escritorio, el campo va suelto bajo el saludo: sin franja, sin caja alrededor.
       className={
         showStartScreen
-          ? "escritorio:rounded-tarjeta escritorio:border escritorio:px-3 escritorio:pb-2.5"
+          ? "escritorio:border-0 escritorio:bg-transparent escritorio:px-0 escritorio:pt-0 escritorio:pb-0"
           : undefined
       }
     />
