@@ -162,3 +162,16 @@ Humo ejecutado en build de producción con AI_MODE=mock, PORT=3210 contra el ase
 - Flujo interactivo en vivo dentro de `/asesor` bajo sesión autenticada en el navegador embebido de la app, dado que el proxy redirige a `/entrar` en ausencia de credenciales de prueba de QA para localhost provistas en OpenMausBot. La validación se respalda en el build de producción con AI_MODE=mock, la suite integral de 298 tests automatizados y la inspección computada de estilos, accesibilidad y tokens.
 
 VEREDICTO: QA aprobado sha=24675287e79ad7f109614cf0061441ee40bd9307
+
+### 2026-11-14 16:29 · Revisor · veredicto · vuelta 0
+
+Revisión de rework (resiliencia) completada sin hallazgos:
+1. Diff examinado (`git diff 2bcf277..2467528`):
+   - `onSend` tipado como `(text: string) => void | Promise<void>`.
+   - `handleSendSimple` y `handleSendMultiple` envuelven la llamada a `onSend` en `try...catch` asíncrono y restauran `setIsDismissing(false)` ante errores o promesas rechazadas, evitando deshabilitar u ocultar sugerencias indebidamente.
+2. Frontera: estrictamente dentro de la frontera permitida (`web/src/components/chat/suggested-replies.tsx`).
+3. Seguridad, accesibilidad y tokens: se mantienen todas las garantías previas (cero lima, roles y labels accesibles, tokens válidos de globals.css).
+4. Verificación técnica: `npm run verify` en verde (lint, typecheck y 298/298 tests vitest pasando) y `npm run build` exitoso.
+5. Hallazgos: 0 bloquea, 0 importante, 0 menor.
+
+VEREDICTO: Revisor aprobado sha=24675287e79ad7f109614cf0061441ee40bd9307
