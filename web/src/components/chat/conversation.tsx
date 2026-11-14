@@ -60,6 +60,7 @@ export function Conversation({
     <main
       id="contenido"
       ref={mainRef}
+      data-inicio={showStartScreen ? "" : undefined}
       className="mx-auto flex min-h-dvh w-full max-w-app flex-col bg-fondo"
     >
       <AppHeader
