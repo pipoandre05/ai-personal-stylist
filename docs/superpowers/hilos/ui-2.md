@@ -44,3 +44,8 @@
    - `web/tests/tokens.test.ts` en verde (0 clases inventadas, todos los pares con contraste WCAG verificado).
    - Reducción medible de usos de alias transitorios (`acento`, `acento-suave`, `rounded-sm`, etc.).
    - `npm run lint` y `npm test` limpios sin regresiones.
+
+### 2026-11-14 14:12 · Productor · decision · vuelta 0
+
+Maqueta de referencia `docs/superpowers/mockups/2026-11-14-conversacion-v4.html` aprobada por Felipe para ui-2 y todo el bloque de migración a la identidad de Prendie. Los componentes deben replicar fielmente los tokens, tamaños (52 y 44 px en botones, 36 px en chips con 44 px táctil, campo hundido, foco azul 3 px, cardBase sin bordes duros) y comportamiento de la spec UX_UI_SPEC §7.1 y §7.18.
+Paso a construcción.
