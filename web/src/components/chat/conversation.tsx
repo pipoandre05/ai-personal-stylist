@@ -6,6 +6,7 @@ import { Composer } from "./composer";
 import { SuggestedReplies } from "./suggested-replies";
 import { Thread } from "./thread";
 import { useConversation } from "./use-conversation";
+import { EventEditor } from "./v2/event-editor";
 
 type ConversationProps = {
   conversationId: string | null;
@@ -39,7 +40,17 @@ export function Conversation({ conversationId, initialMessages, closetCount, dis
         onRetryPerson={c.retryPerson}
         onRetryAdvisor={c.retryAdvisor}
         onAsk={(text) => c.send(text)}
+        actionBusy={c.actionBusy}
+        handlers={{
+          onEditEvent: c.openEdit,
+          onSaveOutfit: c.saveOutfit,
+          onDiscardOutfit: c.discardOutfit,
+          onRefine: c.refine,
+          onSearchOfferAction: (a) => c.refine(a.intent, a.label),
+          onSelectOption: c.selectOption,
+        }}
       />
+      <EventEditor field={c.editField} summary={c.editSummary} busy={c.actionBusy} onClose={c.closeEdit} onSubmit={c.submitEdit} />
 
       {c.failedStart ? (
         <p className="px-5 pb-4 text-sm text-tinta-suave">
