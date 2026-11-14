@@ -1,7 +1,15 @@
 // Service worker mínimo de Prendie: hace la app instalable y cachea SOLO el shell estático.
 // Nunca cachea: /api/, páginas o respuestas con sesión, fotos (Supabase Storage / URLs firmadas).
-const CACHE = "estilo-shell-v1";
-const SHELL = ["/icon.svg", "/icon-192.png", "/icon-512.png", "/apple-touch-icon.png"];
+const CACHE = "prendie-shell-v1";
+const SHELL = [
+  "/icon.svg",
+  "/icon-192.png",
+  "/icon-512.png",
+  "/apple-touch-icon.png",
+  "/favicon.svg",
+  "/favicon.ico",
+  "/manifest.json",
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
