@@ -77,3 +77,23 @@ Inspeccionado en navegador a 390x844 y 360 px de ancho (puerto 3220, AI_MODE=moc
 - Semántica y accesibilidad: role="group" con aria-label="Respuestas sugeridas".
 
 Veredicto visual: Conforme sin observaciones. Cero hallazgos abiertos.
+
+### 2026-11-14 16:17 · QA · veredicto · vuelta 0
+
+Humo ejecutado en build de producción con AI_MODE=mock, PORT=3210 contra el asesor simulado en navegador móvil (390x844 y 360 px de ancho) y pruebas de renderizado computado e interacción de UI-6 (Respuestas sugeridas).
+
+## Humo
+- Modo simple (respuestas sugeridas de un toque): botones contorno medianos de 44 px (h-11, px-[18px], text-sm font-bold, border-[1.5px] border-linea-fuerte text-tinta bg-transparent hover:bg-hundido) alineados a la derecha (flex flex-wrap justify-end gap-2 px-6 pb-3) → OK
+- Detección de fotos (PHOTO_ACTION y SELFIE): opciones que coinciden ("Mandar foto", "Subir foto", "Mandar selfie") incluyen ícono de cámara IconCamera size-5 accesible y disparan onPickPhoto(selfie) → OK
+- Modo múltiple: opciones renderizadas como chips píldora (Chip mode="toggle", 36 px de alto visual con área táctil accesible de 44 px vía after:absolute after:-inset-1) con atributo aria-pressed="true" / "false" → OK
+- Selección de chips: estado seleccionado pasa a fondo inverso (bg-inverso text-sobre-inverso border-inverso) con ícono de check (size-4 text-sobre-inverso) → OK
+- Botón "Listo": botón inverso mediano de 44 px (h-11, bg-inverso text-sobre-inverso), deshabilitado sin selección previa (disabled:opacity-45, no interactuable) y activo al elegir una o más opciones concatenándolas por coma al enviar → OK
+- Regla de marca estricta: cero presencia de lima (cero uso de bg-accion o text-accion en sugerencias ni chips, reservando lima exclusivamente para la acción principal del asesor) → OK
+- Transición y salida: animación de salida mediante fade-out de opacidad (transition-opacity duration-150), respetando la preferencia motion-reduce:transition-none → OK
+- Responsive y mobile viewport (390x844 y 360 px): a 360 px de ancho el contenedor con flex-wrap y justify-end acomoda las opciones en dos filas limpiamente sin desbordar ni generar scroll horizontal (scrollWidth <= clientWidth) → OK
+- Accesibilidad: contenedor con role="group" y aria-label="Respuestas sugeridas", foco visible con anillo azul de 3 px (outline: 3px solid #2b4bff), objetivos táctiles interactivos >= 44 px → OK
+- Verificación técnica y suite: npm run verify en verde (lint limpio, typecheck sin errores, 298/298 vitest tests pasando, incluidos 12 tests en tests/ui/suggested-replies.test.ts); build de producción con AI_MODE=mock exitoso → OK
+- Frontera y aislamiento: únicamente modificados web/src/components/chat/suggested-replies.tsx y web/tests/ui/suggested-replies.test.ts; componentes de chat protegidos (thread.tsx, conversation.tsx, etc.) intactos → OK
+- Servidor de pruebas detenido tras finalizar la ejecución (puerto 3210 libre) → OK
+
+VEREDICTO: QA aprobado sha=2bcf27732d47a9fbb8bff2617c8c750b3f40de96
