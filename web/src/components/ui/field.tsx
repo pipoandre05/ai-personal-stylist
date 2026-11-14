@@ -29,19 +29,19 @@ export function Field({ label, hint, error, required, className, children }: Fie
 
   return (
     <div className={className}>
-      <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-tinta">
+      <label htmlFor={id} className="mb-1.5 block font-body text-control text-tinta">
         {label}
         {required ? <span aria-hidden="true" className="text-tinta-suave"> *</span> : null}
       </label>
       {children({ id, "aria-describedby": describedBy, "aria-invalid": error ? true : undefined })}
       {hint ? (
-        <p id={hintId} className="mt-1.5 text-sm text-tinta-suave">
+        <p id={hintId} className="mt-1.5 font-body text-meta text-tinta-suave">
           {hint}
         </p>
       ) : null}
       {error ? (
-        <p id={errorId} role="alert" className="mt-1.5 flex items-start gap-1.5 text-sm text-error">
-          <IconAlert className="mt-0.5 size-4 shrink-0" />
+        <p id={errorId} role="alert" className="mt-1.5 flex items-start gap-1.5 font-body text-meta text-error">
+          <IconAlert className="mt-0.5 size-4 shrink-0 text-error" />
           <span>{error}</span>
         </p>
       ) : null}
@@ -51,6 +51,6 @@ export function Field({ label, hint, error, required, className, children }: Fie
 
 export const inputClasses = (invalid?: boolean) =>
   cn(
-    "h-12 w-full rounded-sm border bg-superficie px-4 text-base text-tinta placeholder:text-tinta-suave focus-visible:border-acento",
-    invalid ? "border-error" : "border-linea-fuerte",
+    "min-h-12 w-full rounded-campo bg-hundido px-4 font-body text-base font-medium text-tinta placeholder:text-tinta-suave transition-[box-shadow,border-color] duration-150 ease-salida outline-none focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-foco disabled:cursor-not-allowed disabled:opacity-45",
+    invalid ? "border-[1.5px] border-error" : "border-0",
   );

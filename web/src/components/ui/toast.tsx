@@ -55,14 +55,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {children}
       <div
         aria-live="polite"
-        className="pointer-events-none fixed inset-x-0 bottom-20 z-40 mx-auto flex max-w-app flex-col items-center gap-2 px-5 pb-3"
+        className="pointer-events-none fixed inset-x-0 bottom-24 z-40 mx-auto flex max-w-app flex-col items-center justify-center gap-2 px-6"
       >
         {items.map((t) => (
           <div
             key={t.id}
-            className="pointer-events-auto flex min-h-12 w-full animate-subir items-center gap-3 rounded-md bg-tinta px-4 py-3 text-sm text-superficie shadow-flotante"
+            className="pointer-events-auto flex min-h-12 w-full animate-subir items-center gap-3 rounded-campo bg-inverso px-4 py-3 font-body text-cuerpo text-sobre-inverso shadow-flotante"
           >
-            {t.tone === "error" ? <IconAlert className="size-5 shrink-0" /> : null}
+            {t.tone === "error" ? <IconAlert className="size-5 shrink-0 text-sobre-inverso" /> : null}
             <p className="min-w-0 flex-1">{t.message}</p>
             {t.action ? (
               <button
@@ -71,7 +71,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                   t.action?.onAction();
                   dismiss(t.id);
                 }}
-                className="-my-2 -mr-2 min-h-11 shrink-0 px-2 font-semibold text-superficie underline underline-offset-4"
+                className="-my-2 -mr-2 min-h-11 shrink-0 px-2 font-body text-sm font-bold text-sobre-inverso underline underline-offset-4 transition-[transform,opacity] duration-150 ease-salida active:scale-[0.97]"
               >
                 {t.action.label}
               </button>
