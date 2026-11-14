@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Barrera de disciplina, no de seguridad (se esquiva con --no-verify).
+# Politica: push a main solo docs-only (*.md, docs/); todo lo demas via rama+PR.
+# Instalado por project-inception: git config core.hooksPath .githooks
+# Layout: repo en la raiz, codigo en web/. Si el codigo vive en la raiz, quitar el `cd web`.
+set -e
+root=$(git rev-parse --show-toplevel)
+branch=$(git rev-parse --abbrev-ref HEAD)
+if [ "$branch" = "main" ]; then
+  base=$(git rev-parse origin/main 2>/dev/null || git rev-parse HEAD~1)
+  if git diff --name-only "$base"..HEAD | grep -qvE '(\.md$|^docs/|^brand/)'; then
+    echo "✋ Push directo a main con cambios de codigo. Usa una rama y un PR."
+    echo "   Si es intencional: git push --no-verify"
+    exit 1
+  fi
+  exit 0
+fi
+cd "$root/web" && npm run verify

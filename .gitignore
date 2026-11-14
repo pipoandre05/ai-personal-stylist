@@ -1,0 +1,20 @@
+# Raíz del proyecto — copiar como .gitignore
+.DS_Store
+*.log
+__pycache__/
+
+# Claude Code: se versionan settings.json y hooks/; lo demás no
+.claude/*
+!.claude/settings.json
+!.claude/hooks/
+!.claude/launch.json
+.superpowers/
+.worktrees/
+
+# Graphify: todo derivado y regenerable (graphify update .)
+graphify-out/
+.playwright-mcp/
+
+# Secretos
+.env*
+!.env.local.example
