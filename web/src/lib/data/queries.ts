@@ -13,6 +13,9 @@ import type {
   StyleProfile,
   Weather,
 } from "@/lib/domain/types";
+import { displayTitle } from "@/lib/domain/conversation-title";
+import { isOnboardingComplete } from "@/lib/domain/profile-completeness";
+import type { ConversationSummary } from "@/lib/domain/types";
 import { createClient, getSessionUser } from "@/lib/supabase/server";
 import { getWeather } from "@/lib/weather";
 import { logError } from "@/lib/server/log";
@@ -153,11 +156,55 @@ export async function getLatestConversation(): Promise<{ id: string; messages: C
     .maybeSingle<{ id: string }>();
   if (convError) logError("queries.getLatestConversation.conversation", convError);
   if (!conv) return null;
+  return { id: conv.id, messages: await loadThread(db, conv.id) };
+}
 
+/** Una sesión de la persona con su hilo completo. null si no existe o no es suya (RLS y filtro por user_id). */
+export async function getConversation(id: string): Promise<{ id: string; title: string; messages: ChatMessageView[] } | null> {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) return null;
+  const user = await getSessionUser();
+  if (!user) return null;
+  const db = await createClient();
+  const { data: conv, error } = await db
+    .from("conversations")
+    .select("id, title")
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .maybeSingle<{ id: string; title: string }>();
+  if (error) logError("queries.getConversation", error);
+  if (!conv) return null;
+  return { id: conv.id, title: displayTitle(conv.title), messages: await loadThread(db, conv.id) };
+}
+
+/** Sesiones de la persona, de la más reciente a la más antigua (panel de sesiones). Máximo 50. */
+export async function listConversations(): Promise<ConversationSummary[]> {
+  const user = await getSessionUser();
+  if (!user) return [];
+  const db = await createClient();
+  const { data, error } = await db
+    .from("conversations")
+    .select("id, title, updated_at")
+    .eq("user_id", user.id)
+    .order("updated_at", { ascending: false })
+    .limit(50)
+    .returns<{ id: string; title: string; updated_at: string }[]>();
+  if (error) logError("queries.listConversations", error);
+  return (data ?? []).map((c) => ({ id: c.id, title: displayTitle(c.title), updated_at: c.updated_at }));
+}
+
+/** true si a la persona le falta su perfil inicial: en ese caso /asesor abre con el asesor hablando primero. */
+export async function needsOnboarding(): Promise<boolean> {
+  const [profile, style] = await Promise.all([getProfile(), getStyleProfile()]);
+  if (!profile) return false; // sin sesión no hay nada que iniciar
+  return !isOnboardingComplete(profile, style);
+}
+
+/** Hilo de una conversación ya verificada como propia: resuelve `parts` a sus DTO y firma las fotos. */
+async function loadThread(db: Awaited<ReturnType<typeof createClient>>, conversationId: string): Promise<ChatMessageView[]> {
   const { data: rows, error: rowsError } = await db
     .from("messages")
     .select("id, role, text, parts, created_at")
-    .eq("conversation_id", conv.id)
+    .eq("conversation_id", conversationId)
     .order("created_at", { ascending: false })
     .limit(CHAT_HISTORY_LIMIT)
     .returns<MessageRow[]>();
@@ -217,7 +264,7 @@ export async function getLatestConversation(): Promise<{ id: string; messages: C
     imageUrls,
     liveMemoryIds,
   });
-  return { id: conv.id, messages };
+  return messages;
 }
 
 /** Clima de hoy en la ciudad del perfil; null si falla (la UI lo omite). */

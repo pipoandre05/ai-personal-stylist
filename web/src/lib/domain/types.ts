@@ -523,3 +523,12 @@ export type PhotoKind = "garments" | "selfies" | "chat";
 export type ConsentKind = "terms" | "photo_processing" | "face_photo";
 /** Versión de los textos legales aceptados (R-03). */
 export const CONSENT_VERSION = "2026-11-14";
+
+/** Una sesión pasada en el panel de sesiones. */
+export type ConversationSummary = {
+  id: string;
+  /** Nunca vacío: si la conversación no tiene título, llega "Conversación". */
+  title: string;
+  /** timestamptz ISO. Mostrar con fmtDate(). */
+  updated_at: string;
+};
