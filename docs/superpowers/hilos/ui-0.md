@@ -81,3 +81,46 @@ Implementado web/src/app/not-found.tsx segun la maqueta y criterios aprobados:
 - Sin "Error 404", sin emoji, tuteo en primera persona del asesor.
 - Solo tokens vigentes de globals.css.
 - Verificado: npm run verify (lint, typecheck, vitest) en verde, npm run build OK, frontera verificada.
+
+### 2026-11-14 13:42 · Revisor · veredicto · vuelta 0
+
+Revisión de código completada sin hallazgos:
+1. Frontera: verificada con `bash agentes/scripts/verificar-frontera.sh equipo/ui-0-no-encontrado`. Solo toca `web/src/app/not-found.tsx` y docs de superpowers.
+2. Seguridad y datos: sin datos personales, sin llamadas de IA desde el cliente, sin contenido inseguro.
+3. Reglas invariantes de CLAUDE.md: voz en primera persona del asesor, tuteo, sin emoji, sin jerga técnica ("Error 404" eliminado), botón con verbo y objeto ("Volver al asesor"), vocabulario correcto ("look", "asesor").
+4. Correctitud contra maqueta y criterios: h1 único, filete aria-hidden decorativo, párrafo de apoyo exacto, CTA único ButtonLink fullWidth hacia /asesor (h-12 = 48 px), centrado vertical con Screen.
+5. Tokens: 100% tokens de globals.css (@theme: bg-acento, text-tinta-suave, font-display, bg-tinta, text-superficie, rounded-sm, bg-fondo, max-w-app). Cero hex o clases Tailwind huérfanas.
+6. Tests y compilación: `npm run verify` (lint, typecheck, vitest con 99 tests) en verde y `npm run build` exitoso.
+7. Hallazgos: 0 bloquea, 0 importante, 0 menor.
+
+VEREDICTO: Revisor aprobado sha=7323424cdca769fc0f367a5f9b8259a0f6fd567c
+
+### 2026-11-14 13:42 · Diseño · nota · vuelta 0
+
+Revisión visual sobre commit 7323424cdca769fc0f367a5f9b8259a0f6fd567c contra la maqueta docs/superpowers/mockups/2026-11-14-ui-0.html.
+Inspeccionado en navegador a 390x844 y 375x812 (dev server puerto 3220, ruta /no-existe.json):
+
+1. Jerarquía y estructura:
+- Único h1 en el DOM: "No encuentro esta página." con font-display ("Bodoni Moda", 36px/40px).
+- Filete editorial único antes del título: w-10 (40px) h-0.5 (2px), bg-acento (#7a2e2a), mb-5 (20px), con aria-hidden="true".
+- Eliminado "Error 404" e ilustraciones; composición editorial limpia y centrada verticalmente en Screen (min-h-dvh, px-5).
+
+2. Espaciado y dimensiones táctiles:
+- Margen inferior filete: 20px (mb-5).
+- Margen superior párrafo de apoyo: 12px (mt-3), max-w-sm (384px).
+- Margen superior contenedor CTA: 24px (mt-6).
+- Alto de objetivo táctil CTA: 48px (h-12 >= 44px estándar WCAG).
+- Ancho completo (fullWidth): 350px útiles a 390px de pantalla y 335px útiles a 375px de pantalla. Sin desborde ni scroll horizontal (scrollWidth <= 390px / 375px).
+
+3. Tokens y contraste:
+- Fondo: var(--fondo) #f6f2ec.
+- Tinta: var(--tinta) #1f1b17 (contraste > 14:1 contra fondo).
+- Tinta suave: var(--tinta-suave) #5c534a (contraste ~7.1:1 contra fondo, cumple AA y AAA para texto normal).
+- CTA: bg-tinta (#1f1b17) con texto var(--superficie) #fffdf9 (contraste > 16:1), rounded-sm (4px).
+- Foco visible verificado: outline 2px sólido var(--acento) #7a2e2a con outline-offset de 2px.
+
+4. Copy y voz:
+- Tuteo estricto, sin emoji, primera persona del asesor ("No encuentro esta página", "Volvamos a la conversación y seguimos con tu look").
+- Verbo y objeto en CTA: "Volver al asesor" enlazando a /asesor.
+
+Veredicto visual: Conforme sin observaciones. Cero hallazgos abiertos.
