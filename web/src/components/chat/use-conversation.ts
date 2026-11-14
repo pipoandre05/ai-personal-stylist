@@ -202,10 +202,16 @@ export function useConversation({ conversationId, initialMessages }: UseConversa
   }, []);
 
   useEffect(() => {
+    let lastY = window.scrollY;
     const onScroll = () => {
+      const y = window.scrollY;
+      const movedUp = y < lastY - 2;
+      lastY = y;
       if (Date.now() < lockUntil.current) return;
       const d = distanceFromBottom();
-      stick.current = d < NEAR_BOTTOM_PX;
+      // Solo cuenta como "subió a leer" si la persona fue hacia arriba: una tarjeta alta que crece de golpe no mueve scrollY.
+      if (d < NEAR_BOTTOM_PX) stick.current = true;
+      else if (movedUp) stick.current = false;
       setShowJump(d > JUMP_AFTER_PX);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -217,6 +223,8 @@ export function useConversation({ conversationId, initialMessages }: UseConversa
     if (!el) return;
     const ro = new ResizeObserver(() => {
       if (!stick.current) return;
+      // Una tarjeta alta crece de golpe: el scroll que provocamos nosotros no cuenta como "la persona subió a leer".
+      lockUntil.current = Date.now() + 250;
       scrollToBottom(smoothNext.current);
       smoothNext.current = false;
     });
