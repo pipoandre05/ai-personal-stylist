@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>D-17 a D-22 · Pulido de interfaz</title>
+<style>
+:root{--fondo:#F2F2EE;--superficie:#FFF;--hundido:#E8E9E4;--linea:#D6D8D2;--tinta:#121412;--suave:#5E625D;--exito:#0B7285;--falta:#FF8A57;--foco:#2B4BFF}
+*{box-sizing:border-box;margin:0}
+body{font:400 14px/1.45 Manrope,system-ui,sans-serif;background:#cfd1cb;color:var(--tinta);padding:24px;display:flex;flex-direction:column;gap:40px;align-items:flex-start}
+h1,h2,h3{font-family:"Bricolage Grotesque",system-ui,sans-serif}
+h2{font-size:18px;margin-bottom:4px}
+.nota{max-width:760px;font-size:13px;color:#33362f}
+.nota b{color:var(--tinta)}
+.fila{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start}
+.cap{font:800 11px/1 Manrope;letter-spacing:.12em;text-transform:uppercase;color:var(--suave);margin-bottom:8px;display:block}
+.marco{background:var(--fondo);border-radius:8px;overflow:hidden;position:relative}
+.m390{width:390px}
+.hilo{padding:16px 24px}
+.msg{font:600 16px/24px Manrope;margin-bottom:12px}
+.firma{font:800 11px/1 Manrope;letter-spacing:.12em;text-transform:uppercase;color:var(--suave);display:block;margin-bottom:6px}
+.rastro{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:var(--suave);margin-bottom:12px}
+.rastro .p{display:flex;gap:8px;align-items:center;min-height:20px}
+.rastro .p i{width:14px;height:14px;border-radius:50%;background:var(--exito);flex:none}
+.rastro .dup{text-decoration:line-through;text-decoration-color:#C2341F}
+.mal{outline:2px dashed #C2341F;outline-offset:3px;border-radius:8px}
+.bien{outline:2px dashed var(--exito);outline-offset:3px;border-radius:8px}
+.card{background:var(--superficie);border-radius:28px;padding:18px}
+.linea-b{display:flex;gap:8px;align-items:center;font-weight:700;color:var(--suave);font-size:13px;margin-bottom:12px}
+.opc{width:240px}
+.mesa{aspect-ratio:1;border-radius:24px;background:var(--hundido);display:grid;place-items:center;overflow:hidden;position:relative}
+.mesa .flota{width:62%;height:72%;border-radius:12px;background:#fff;box-shadow:0 2px 8px rgba(18,20,18,.18);display:grid;place-items:center}
+.mesa.cubre{background:#fff}
+.mesa .foto{position:absolute;inset:0;display:grid;place-items:center}
+.silu{width:46%;color:#9b9e98}
+.mesa.cubre::after{content:"";position:absolute;inset:0;border-radius:24px;box-shadow:inset 0 0 0 1px var(--linea)}
+.tienda{font:800 11px/1 Manrope;letter-spacing:.12em;text-transform:uppercase;color:var(--suave);margin-top:8px;display:block}
+.nom{font:700 16px/1.3 "Bricolage Grotesque";display:block;margin-top:2px}
+.prec{font-size:13px;color:var(--suave)}
+.mesa3{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;aspect-ratio:3/2;background:var(--hundido);border-radius:24px;padding:12px}
+.pz{background:var(--superficie);opacity:.7;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:4px;text-align:center;color:var(--suave);font-size:12px;line-height:1.2;min-width:0}
+.pz.foto{background:transparent;opacity:1}
+.pz svg{width:32px;height:32px}
+.pz span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
+.pz span.mal2{display:block;overflow:hidden;white-space:nowrap;text-overflow:clip;max-width:100%}
+.leyenda{font-size:13px;color:var(--suave);margin-top:8px;display:flex;flex-direction:column;gap:2px}
+.hdr{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 8px 0 4px;background:var(--fondo);border-bottom:1px solid var(--linea)}
+.ib{width:44px;height:44px;display:grid;place-items:center;border-radius:12px}
+.wm{font:800 20px "Bricolage Grotesque"}
+.esp{font:700 14px Manrope;border:1.5px solid var(--tinta);border-radius:999px;min-height:44px;padding:0 14px;display:inline-grid;place-items:center}
+.panel{position:absolute;left:0;top:0;bottom:0;width:300px;background:var(--superficie);padding:12px 16px;box-shadow:8px 0 24px rgba(18,20,18,.12)}
+.velo{position:absolute;inset:0;background:rgba(18,20,18,.4)}
+.sc{display:block;font:700 16px/1.3 "Bricolage Grotesque"}
+.item{min-height:52px;display:flex;flex-direction:column;justify-content:center;border-bottom:1px solid var(--linea)}
+.item small{color:var(--suave);font-size:12px}
+.aria{font:12px/1.4 ui-monospace,Menlo,monospace;background:#fff;border:1px solid var(--linea);border-radius:8px;padding:6px 8px;margin-top:8px;max-width:390px}
+.sec{font:800 11px/1 Manrope;letter-spacing:.12em;text-transform:uppercase;color:var(--suave);margin:16px 0 8px;display:block}
+.fila-esp{padding:14px 0;border-bottom:1px solid var(--linea)}
+.fila-esp small{display:block;color:var(--suave);font-size:13px;margin-top:2px}
+.pill{display:inline-block;background:var(--hundido);border-radius:999px;padding:4px 10px;font-size:13px;font-weight:600;margin:0 4px 4px 0}
+.tab{display:flex;align-items:center;gap:8px;background:#e1e2dc;border-radius:8px 8px 0 0;padding:8px 14px;font:13px system-ui;width:max-content;margin-bottom:0}
+.nf{width:844px;height:390px;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:24px;padding:24px 40px}
+.nf.mal{outline:none}
+.nf h1{font-size:34px;line-height:1.1}
+.nf p{margin-top:8px;color:var(--suave);max-width:24rem}
+.cta{display:inline-grid;place-items:center;height:52px;padding:0 24px;border-radius:999px;background:var(--tinta);color:#fff;font:700 16px Manrope;margin-top:20px}
+.masc{display:grid;place-items:center}
+.masc svg{height:150px;width:auto}
+.tabla{border-collapse:collapse;font-size:13px;background:#fff;border-radius:8px;overflow:hidden}
+.tabla td,.tabla th{border:1px solid var(--linea);padding:6px 10px;text-align:left;vertical-align:top}
+</style></head><body>
+<div class="nota"><h1 style="font-size:24px">D-17 a D-22 · Pulido de interfaz</h1>
+Borrador de Diseño. Fuente: <code>docs/tecnico/revision-prendie-2026-11-14.md</code>. Cada defecto muestra «Hoy» (borde rojo) y «Propuesta» (borde verde). Solo tokens de <code>globals.css</code>; sin tarjetas nuevas. Las siluetas son marcadores simples, no arte final. Sin validación Opus ni consulta al Constructor (borrador previo a la rama).</div>
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Prendie · mascota "la etiqueta que te arma el look" (asset de diseño). Dibujo aprobado por Felipe, 2026-11-14.
+  Original: docs/superpowers/mockups/2026-11-14-mascota-etiqueta.html. Solo paleta de tokens: lima #C9F24D, tinta #121412,
+  blanco #FFFFFF, gris #E8E9E4. Sprite de símbolos: no dibuja nada por sí solo; se usa con use.
+
+  USO
+    inline en el HTML:  pegar este svg (oculto, ancho y alto 0) y escribir  <svg style="display:none" width="114" height="160"><use href="#m-saludo" width="100%" height="100%"/></svg>
+    archivo externo:    <svg style="display:none" width="114" height="160"><use href="mascota.svg#m-saludo" width="100%" height="100%"/></svg>   (por http, no file://)
+    No poner viewBox en el svg que contiene el use: el viewBox ya viene en cada symbol.
+
+  SÍMBOLOS
+    m-saludo    cuerpo entero, pose canon: saluda con la mano derecha, ceja derecha arriba, media sonrisa. viewBox 0 -16 240 336.
+    m-pensando  cuerpo entero: mano en el mentón, mirada arriba. viewBox 0 -16 240 336.
+    m-ceja      cuerpo entero: una ceja muy levantada, mano en la cadera y otra abierta. viewBox 0 -16 240 336.
+    m-tada      cuerpo entero: brazos abiertos presentando, boca abierta. viewBox 0 -16 240 336.
+    m-ups       cuerpo entero: apenado, se rasca la cabeza, gota de sudor, boca ondulada. viewBox 0 -16 240 336.
+    h-firma     solo la cabeza-etiqueta, versión completa (con trama), expresión firma. viewBox 44 -16 152 242.
+    h-tada      cabeza completa, expresión Ta-dá (boca abierta). viewBox 44 -16 152 242.
+    h-firma-s   cabeza versión chica (sin trama, ojos grandes, pupila simple), expresión firma. Para 40 px o menos. viewBox 44 -16 152 242.
+    h-tada-s    cabeza versión chica, expresión Ta-dá. Para 40 px o menos. viewBox 44 -16 152 242.
+    h-etiqueta  solo la etiqueta del logo con su agujero, sin cara ni cordón (paso 1 de la construcción). viewBox 44 -16 152 242.
+    h-cordon    etiqueta con agujero y cordón, sin cara (paso intermedio). viewBox 44 -16 152 242.
+    Piezas internas (no usar sueltas): cuerpo, cuerpo-s, cordon, cordon-c, cordon-s, p-etq, ojos, ojo-b, pupila, pupila-s, guante, guante-p,
+    zapatilla, base-pies, mejillas, patrones trama y trama-f, filtros halo y halo-s.
+
+  VARIABLES CSS (todas opcionales; sin definirlas el dibujo es el canónico de Día). Se escriben con dos guiones delante;
+  están listadas con ese nombre exacto en el elemento desc de este archivo, porque un comentario XML no admite dos guiones seguidos.
+    w-o     6px     grosor del contorno principal (cuerpo). Cabeza chica: 13px.
+    w-i     3px     grosor de detalles internos (mitad del contorno). Cabeza chica: 7px.
+    w-b     7px     grosor de cejas y cordón. Cabeza chica: 10px.
+    w-e     3.6px   contorno de los ojos. Cabeza chica: 7px.
+    w-m     4.6px   grosor de la boca. Cabeza chica: 8px.
+    trama   inline  display de la trama de puntos; none la oculta.
+    sombra  inline  display de la sombra elíptica bajo los pies; none la oculta (Noche).
+    halo    none    filtro del halo hueso de las poses de cuerpo entero y cabezas completas. Noche: url(#halo) (3 unidades).
+    halo-s  none    filtro del halo de las cabezas chicas. Noche: url(#halo-s) (6 unidades).
+  Cabeza chica: usar h-firma-s / h-tada-s y poner en el svg que la contiene las cinco variables w-* con los valores de "Cabeza chica" de arriba
+  (ejemplo exacto en el desc de este archivo).
+
+  LÍMITE EN use EXTERNO: el halo de Noche necesita que el filtro se resuelva; ver el desc de este archivo.
+-->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="0" height="0" aria-hidden="true" focusable="false">
+<title>Prendie · mascota</title>
+<desc>Variables CSS: --w-o (6px), --w-i (3px), --w-b (7px), --w-e (3.6px), --w-m (4.6px), --trama (inline), --sombra (inline), --halo (none; Noche: url(#halo)), --halo-s (none; Noche: url(#halo-s)). Cabeza chica, atributo style del svg contenedor: --w-o:13px;--w-i:7px;--w-e:7px;--w-b:10px;--w-m:8px. Noche inline: --halo:url(#halo);--halo-s:url(#halo-s);--sombra:none.</desc>
+<defs>
+  <!-- Halo hueso para Noche: contorno exterior de 3 unidades (6 en la cabeza chica). Se activa con -halo / -halo-s. -->
+  <filter id="halo" x="-14%" y="-10%" width="128%" height="120%" color-interpolation-filters="sRGB">
+    <feMorphology in="SourceAlpha" operator="dilate" radius="3" result="d"/>
+    <feFlood flood-color="#F4F5F0"/><feComposite in2="d" operator="in" result="h"/>
+    <feMerge><feMergeNode in="h"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <filter id="halo-s" x="-20%" y="-12%" width="140%" height="124%" color-interpolation-filters="sRGB">
+    <feMorphology in="SourceAlpha" operator="dilate" radius="6" result="d"/>
+    <feFlood flood-color="#F4F5F0"/><feComposite in2="d" operator="in" result="h"/>
+    <feMerge><feMergeNode in="h"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <!-- Trama de puntos de tinta: un solo nivel, en diagonal -->
+  <pattern id="trama" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(28)">
+    <circle cx="1.5" cy="1.5" r="1.05" fill="#121412"/><circle cx="4.5" cy="4.5" r="1.05" fill="#121412"/>
+  </pattern>
+  <pattern id="trama-f" width="4.4" height="4.4" patternUnits="userSpaceOnUse" patternTransform="rotate(28)">
+    <circle cx="1.1" cy="1.1" r="0.8" fill="#121412"/><circle cx="3.3" cy="3.3" r="0.8" fill="#121412"/>
+  </pattern>
+
+  <!-- Forma de la etiqueta del logotipo (M4 8 L11 1 L18 8 V24 Q18 27 15 27 H7 Q4 27 4 24 Z) en escala x8.4, y7.6 -->
+  <path id="p-etq" d="M61.2 67.2 L120 14 L178.8 67.2 V188.8 Q178.8 211.6 153.6 211.6 H86.4 Q61.2 211.6 61.2 188.8 Z"/>
+  <clipPath id="cl-etq"><use href="#p-etq"/></clipPath>
+  <mask id="mk-luz" maskUnits="userSpaceOnUse" x="40" y="0" width="160" height="230">
+    <rect x="40" y="0" width="160" height="230" fill="#fff"/>
+    <use href="#p-etq" transform="translate(-17 -13)" fill="#000"/>
+  </mask>
+
+  <!-- Cuerpo-etiqueta: lima, trama a la derecha/abajo, contorno, agujero y cordón -->
+  <g id="cuerpo">
+    <use href="#p-etq" fill="#C9F24D"/>
+    <g clip-path="url(#cl-etq)" style="display:var(--trama,inline)"><rect x="40" y="0" width="160" height="230" fill="url(#trama)" mask="url(#mk-luz)"/></g>
+    <use href="#p-etq" style="fill:none;stroke:#121412;stroke-width:var(--w-o,6px);stroke-linejoin:round;stroke-linecap:round"/>
+    <circle cx="120" cy="76" r="15.5" fill="#121412"/>
+  </g>
+  <!-- Cordón: sale del agujero, cruza la punta y se curva como jopo -->
+  <path id="cordon" d="M120 76 C 118 52, 112 40, 118 26 C 124 12, 140 6, 148 -2" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/>
+  <!-- Versión cordón corto para la cabeza chica -->
+  <path id="cordon-c" d="M120 76 C 118 54, 114 42, 120 28 C 124 18, 134 12, 142 8" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/>
+
+  <!-- Piezas de cara -->
+  <ellipse id="ojo-b" cx="0" cy="0" rx="14" ry="19"/>
+  <clipPath id="cl-pupila"><ellipse cx="0" cy="0" rx="7.6" ry="10.8"/></clipPath>
+  <g id="pupila">
+    <ellipse cx="0" cy="0" rx="7.6" ry="10.8" fill="#121412"/>
+    <path d="M0 -1 L10 -14 L11 3 Z" fill="#FFFFFF" clip-path="url(#cl-pupila)"/>
+  </g>
+  <g id="pupila-s"><!-- pupila simplificada para la cabeza chica: sin cuña grande -->
+    <ellipse cx="0" cy="0" rx="7.4" ry="10.6" fill="#121412"/>
+    <circle cx="2.6" cy="-4.4" r="2.8" fill="#FFFFFF"/>
+  </g>
+
+  <!-- Guante: dedos hacia arriba, palma en el origen. 3 dedos + pulgar a la izquierda. -->
+  <g id="g-forma">
+    <ellipse cx="0" cy="0" rx="11" ry="10"/>
+    <rect x="-10.6" y="-19" width="6.6" height="17" rx="3.3"/>
+    <rect x="-3.3" y="-22" width="6.6" height="20" rx="3.3"/>
+    <rect x="4" y="-19" width="6.6" height="17" rx="3.3"/>
+    <rect x="-17" y="-8" width="6.4" height="14" rx="3.2" transform="rotate(-34 -14 -1)"/>
+  </g>
+  <clipPath id="cl-palma"><ellipse cx="0" cy="0" rx="11" ry="10"/></clipPath>
+  <g id="guante">
+    <use href="#g-forma" style="fill:#121412;stroke:#121412;stroke-width:10px;stroke-linejoin:round"/>
+    <use href="#g-forma" style="fill:#FFFFFF;stroke:none"/>
+    <ellipse cx="4" cy="6" rx="9" ry="6" fill="#E8E9E4" clip-path="url(#cl-palma)"/>
+    <path d="M-3.4 -21 V-13 M3.4 -19 V-12" style="fill:none;stroke:#121412;stroke-width:2.6px;stroke-linecap:round"/>
+    <path d="M-3 -3 V2 M1 -3 V3 M5 -3 V2" transform="translate(0 2)" style="fill:none;stroke:#121412;stroke-width:2.6px;stroke-linecap:round"/>
+  </g>
+  <g id="guante-p"><!-- palma al frente: sin líneas en el dorso -->
+    <use href="#g-forma" style="fill:#121412;stroke:#121412;stroke-width:10px;stroke-linejoin:round"/>
+    <use href="#g-forma" style="fill:#FFFFFF;stroke:none"/>
+    <ellipse cx="4" cy="6" rx="9" ry="6" fill="#E8E9E4" clip-path="url(#cl-palma)"/>
+    <path d="M-3.4 -21 V-13 M3.4 -19 V-12" style="fill:none;stroke:#121412;stroke-width:2.6px;stroke-linecap:round"/>
+  </g>
+
+  <!-- Zapatilla sobredimensionada, punta a la derecha. Origen = tobillo. -->
+  <clipPath id="cl-zap"><path d="M-18 18 C-22 6 -16 -9 -4 -9 L8 -9 C13 -9 16 0 26 2 C42 2 50 8 50 18 Z"/></clipPath>
+  <g id="zapatilla">
+    <path d="M-18 18 C-22 6 -16 -9 -4 -9 L8 -9 C13 -9 16 0 26 2 C42 2 50 8 50 18 Z" style="fill:#FFFFFF;stroke:#121412;stroke-width:5px;stroke-linejoin:round"/>
+    <path d="M-18 6 Q 8 10 30 6 L52 6 L52 20 L-20 20 Z" fill="#E8E9E4" clip-path="url(#cl-zap)" opacity="0"/>
+    <path d="M-17 7 Q 6 9 28 8" style="fill:none;stroke:#121412;stroke-width:var(--w-i,3px);stroke-linejoin:round;stroke-linecap:round;--w-i:3px"/>
+    <path d="M7 -3 L14 3 M13 -5 L20 1 M19 -7 L26 -1" style="fill:none;stroke:#121412;stroke-width:var(--w-i,3px);stroke-linejoin:round;stroke-linecap:round;--w-i:3px"/>
+    <path d="M33 4 Q38 10 36 17" style="fill:none;stroke:#121412;stroke-width:var(--w-i,3px);stroke-linejoin:round;stroke-linecap:round;--w-i:2.6px"/>
+    <path d="M-22 16 H52 Q57 16 57 22 Q57 29 51 29 H-17 Q-24 29 -24 22 Q-24 16 -22 16 Z" fill="#FFFFFF" stroke="#121412" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M-17 25.5 H51" stroke="#E8E9E4" stroke-width="3.6" stroke-linecap="round" fill="none"/>
+  </g>
+
+  <!-- Base común: sombra, piernas y zapatillas (idéntica en todas las poses) -->
+  <g id="base-pies">
+    <ellipse cx="120" cy="306" rx="86" ry="8" fill="url(#trama)" style="display:var(--sombra,inline)"/>
+    <path d="M106 206 C106 238, 100 258, 98 278" style="fill:none;stroke:#121412;stroke-width:17px;stroke-linecap:round;stroke-linejoin:round"/><path d="M106 206 C106 238, 100 258, 98 278" style="fill:none;stroke:#C9F24D;stroke-width:7px;stroke-linecap:round;stroke-linejoin:round"/>
+    <path d="M134 206 C134 238, 140 258, 142 278" style="fill:none;stroke:#121412;stroke-width:17px;stroke-linecap:round;stroke-linejoin:round"/><path d="M134 206 C134 238, 140 258, 142 278" style="fill:none;stroke:#C9F24D;stroke-width:7px;stroke-linecap:round;stroke-linejoin:round"/>
+    <use href="#zapatilla" transform="translate(97 274) scale(-1 1)"/>
+    <use href="#zapatilla" transform="translate(143 274)"/>
+  </g>
+
+  <!-- Mejillas en trama -->
+  <g id="mejillas" style="display:var(--trama,inline)">
+    <ellipse cx="82" cy="160" rx="9" ry="6" fill="url(#trama)"/>
+    <ellipse cx="160" cy="160" rx="9" ry="6" fill="url(#trama)"/>
+  </g>
+
+  <!-- ===================== POSES ===================== -->
+  <!-- Cara base compartida: ojos blancos pie-cut en (100,138) y (142,138) -->
+  <g id="ojos"><use href="#ojo-b" x="100" y="138" style="fill:#FFFFFF;stroke:#121412;stroke-width:var(--w-e,3.6px)"/><use href="#ojo-b" x="142" y="138" style="fill:#FFFFFF;stroke:#121412;stroke-width:var(--w-e,3.6px)"/></g>
+
+  <!-- 1. SALUDO (canon): ceja derecha arriba, media sonrisa, mano derecha saludando -->
+  <symbol id="m-saludo" viewBox="0 -16 240 336">
+    <g style="filter:var(--halo,none)">
+    <use href="#base-pies"/>
+    <path d="M70 142 C46 152, 38 178, 44 200" style="fill:none;stroke:#121412;stroke-width:17px;stroke-linecap:round;stroke-linejoin:round"/><path d="M70 142 C46 152, 38 178, 44 200" style="fill:none;stroke:#C9F24D;stroke-width:7px;stroke-linecap:round;stroke-linejoin:round"/>
+    <path d="M170 140 C200 142, 212 120, 210 94" style="fill:none;stroke:#121412;stroke-width:17px;stroke-linecap:round;stroke-linejoin:round"/><path d="M170 140 C200 142, 212 120, 210 94" style="fill:none;stroke:#C9F24D;stroke-width:7px;stroke-linecap:round;stroke-linejoin:round"/>
+    <use href="#cuerpo"/><use href="#cordon"/>
+    <use href="#ojos"/><use href="#pupila" x="103" y="140"/><use href="#pupila" x="145" y="140"/>
+    <path d="M85 114 Q99 108 114 113" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/><path d="M130 100 Q143 88 158 100" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/>
+    <path d="M103 172 Q124 190 148 168" style="fill:none;stroke:#121412;stroke-width:var(--w-m,4.6px);stroke-linecap:round;stroke-linejoin:round"/><path d="M148 168 L153 164" style="fill:none;stroke:#121412;stroke-width:var(--w-i,3px);stroke-linejoin:round;stroke-linecap:round"/>
+    <use href="#guante" transform="translate(44 210) rotate(176)"/>
+    <use href="#guante-p" transform="translate(212 80) rotate(10)"/>
+    <path d="M233 66 Q239 76 234 88 M226 56 Q235 56 238 64" style="fill:none;stroke:#121412;stroke-width:var(--w-i,3px);stroke-linejoin:round;stroke-linecap:round"/></g>
+  </symbol>
+
+  <!-- 2. PENSANDO: mano en el mentón, mirada arriba, ceja derecha arriba -->
+  <symbol id="m-pensando" viewBox="0 -16 240 336">
+    <g style="filter:var(--halo,none)">
+    <use href="#base-pies"/>
+    <use href="#cuerpo"/><use href="#cordon"/>
+    <use href="#ojos"/><use href="#pupila" x="98" y="130"/><use href="#pupila" x="140" y="130"/>
+    <path d="M85 112 Q99 110 114 116" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/><path d="M130 100 Q143 86 158 98" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/>
+    <path d="M108 176 Q122 170 134 176" style="fill:none;stroke:#121412;stroke-width:var(--w-m,4.6px);stroke-linecap:round;stroke-linejoin:round"/><path d="M134 176 L138 172" style="fill:none;stroke:#121412;stroke-width:var(--w-i,3px);stroke-linejoin:round;stroke-linecap:round"/>
+    <path d="M68 150 C54 196, 100 220, 176 208" style="fill:none;stroke:#121412;stroke-width:17px;stroke-linecap:round;stroke-linejoin:round"/><path d="M68 150 C54 196, 100 220, 176 208" style="fill:none;stroke:#C9F24D;stroke-width:7px;stroke-linecap:round;stroke-linejoin:round"/>
+    <use href="#guante" transform="translate(180 210) rotate(100)"/>
+    <path d="M172 148 C206 160, 198 202, 164 198" style="fill:none;stroke:#121412;stroke-width:17px;stroke-linecap:round;stroke-linejoin:round"/><path d="M172 148 C206 160, 198 202, 164 198" style="fill:none;stroke:#C9F24D;stroke-width:7px;stroke-linecap:round;stroke-linejoin:round"/>
+    <use href="#guante-p" transform="translate(156 190) rotate(-24)"/></g>
+  </symbol>
+
+  <!-- 3. CEJA LEVANTADA: una mano en la cadera, la otra abierta con la palma arriba -->
+  <symbol id="m-ceja" viewBox="0 -16 240 336">
+    <g style="filter:var(--halo,none)">
+    <use href="#base-pies"/>
+    <path d="M172 146 C206 152, 216 172, 206 192" style="fill:none;stroke:#121412;stroke-width:17px;stroke-linecap:round;stroke-linejoin:round"/><path d="M172 146 C206 152, 216 172, 206 192" style="fill:none;stroke:#C9F24D;stroke-width:7px;stroke-linecap:round;stroke-linejoin:round"/>
+    <use href="#cuerpo"/><use href="#cordon"/>
+    <use href="#ojos"/><use href="#pupila" x="105" y="138"/><use href="#pupila" x="147" y="138"/>
+    <path d="M85 116 Q99 114 114 120" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/><path d="M128 98 Q144 78 162 94" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/>
+    <path d="M108 176 Q124 180 150 166" style="fill:none;stroke:#121412;stroke-width:var(--w-m,4.6px);stroke-linecap:round;stroke-linejoin:round"/><path d="M150 166 L155 161" style="fill:none;stroke:#121412;stroke-width:var(--w-i,3px);stroke-linejoin:round;stroke-linecap:round"/>
+    <path d="M68 144 C34 150, 28 188, 62 196" style="fill:none;stroke:#121412;stroke-width:17px;stroke-linecap:round;stroke-linejoin:round"/><path d="M68 144 C34 150, 28 188, 62 196" style="fill:none;stroke:#C9F24D;stroke-width:7px;stroke-linecap:round;stroke-linejoin:round"/>
+    <use href="#guante" transform="translate(74 198) rotate(78)"/>
+    <use href="#guante-p" transform="translate(206 176) rotate(-12)"/></g>
+  </symbol>
+
+  <!-- 4. TA-DA: brazos abiertos presentando, boca abierta -->
+  <symbol id="m-tada" viewBox="0 -16 240 336">
+    <g style="filter:var(--halo,none)">
+    <use href="#base-pies"/>
+    <path d="M68 148 C38 146, 22 124, 30 98" style="fill:none;stroke:#121412;stroke-width:17px;stroke-linecap:round;stroke-linejoin:round"/><path d="M68 148 C38 146, 22 124, 30 98" style="fill:none;stroke:#C9F24D;stroke-width:7px;stroke-linecap:round;stroke-linejoin:round"/>
+    <path d="M172 148 C202 146, 218 124, 210 98" style="fill:none;stroke:#121412;stroke-width:17px;stroke-linecap:round;stroke-linejoin:round"/><path d="M172 148 C202 146, 218 124, 210 98" style="fill:none;stroke:#C9F24D;stroke-width:7px;stroke-linecap:round;stroke-linejoin:round"/>
+    <use href="#cuerpo"/><use href="#cordon"/>
+    <use href="#ojos"/><use href="#pupila" x="101" y="136"/><use href="#pupila" x="143" y="136"/>
+    <path d="M84 108 Q99 96 114 106" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/><path d="M128 106 Q143 94 158 108" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/>
+    <path d="M100 166 Q124 202 150 166 Z" style="fill:#FFFFFF;stroke:#121412;stroke-width:var(--w-m,4.6px);stroke-linecap:round;stroke-linejoin:round"/>
+    <path d="M110 184 Q124 176 138 184 Q124 196 110 184 Z" fill="#E8E9E4" stroke="none"/>
+    <use href="#guante-p" transform="translate(30 84) rotate(-16)"/>
+    <use href="#guante-p" transform="translate(210 84) rotate(16) scale(-1 1)"/>
+    <path d="M14 56 L9 49 M30 50 L30 41 M46 56 L51 49 M194 56 L189 49 M210 50 L210 41 M226 56 L231 49" style="fill:none;stroke:#121412;stroke-width:var(--w-i,3px);stroke-linejoin:round;stroke-linecap:round"/></g>
+  </symbol>
+
+  <!-- 5. UPS, SE CORTO: se rasca la cabeza, ceja preocupada, boca ondulada, gota -->
+  <symbol id="m-ups" viewBox="0 -16 240 336">
+    <g style="filter:var(--halo,none)">
+    <use href="#base-pies"/>
+    <path d="M68 150 C50 176, 52 200, 62 216" style="fill:none;stroke:#121412;stroke-width:17px;stroke-linecap:round;stroke-linejoin:round"/><path d="M68 150 C50 176, 52 200, 62 216" style="fill:none;stroke:#C9F24D;stroke-width:7px;stroke-linecap:round;stroke-linejoin:round"/>
+    <use href="#guante" transform="translate(63 228) rotate(176)"/>
+    <use href="#cuerpo"/><use href="#cordon"/>
+    <use href="#mejillas"/>
+    <use href="#ojos"/><use href="#pupila" x="96" y="141"/><use href="#pupila" x="138" y="141"/>
+    <path d="M85 118 Q99 112 114 104" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/><path d="M130 104 Q145 112 158 118" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/>
+    <path d="M104 178 q5 -7 10 0 t10 0 t10 0 t10 0" style="fill:none;stroke:#121412;stroke-width:var(--w-m,4.6px);stroke-linecap:round;stroke-linejoin:round"/>
+    <path d="M172 144 C216 132, 216 88, 188 74" style="fill:none;stroke:#121412;stroke-width:17px;stroke-linecap:round;stroke-linejoin:round"/><path d="M172 144 C216 132, 216 88, 188 74" style="fill:none;stroke:#C9F24D;stroke-width:7px;stroke-linecap:round;stroke-linejoin:round"/>
+    <use href="#guante" transform="translate(178 66) rotate(-52)"/>
+    <path d="M70 84 C70 84 61 96 61 103 A9 9 0 0 0 79 103 C79 96 70 84 70 84 Z" fill="#FFFFFF" stroke="#121412" stroke-width="3.4" stroke-linejoin="round"/></g>
+  </symbol>
+  <!-- ===================== CABEZAS (solo la etiqueta con cara, sin extremidades) ===================== -->
+  <symbol id="h-etiqueta" viewBox="44 -16 152 242"><g style="filter:var(--halo,none)"><use href="#p-etq" fill="#C9F24D"/><use href="#p-etq" style="fill:none;stroke:#121412;stroke-width:var(--w-o,6px);stroke-linejoin:round;stroke-linecap:round"/><circle cx="120" cy="76" r="15.5" fill="#121412"/></g></symbol>
+  <symbol id="h-cordon" viewBox="44 -16 152 242"><g style="filter:var(--halo,none)"><use href="#cuerpo"/><use href="#cordon-c"/></g></symbol>
+  <!-- Completa: firma (ceja arriba + media sonrisa) -->
+  <symbol id="h-firma" viewBox="44 -16 152 242">
+    <g style="filter:var(--halo,none)"><use href="#cuerpo"/><use href="#cordon-c"/>
+    <use href="#ojos"/><use href="#pupila" x="103" y="140"/><use href="#pupila" x="145" y="140"/>
+    <path d="M85 114 Q99 108 114 113" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/><path d="M130 100 Q143 88 158 100" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/>
+    <path d="M103 172 Q124 190 148 168" style="fill:none;stroke:#121412;stroke-width:var(--w-m,4.6px);stroke-linecap:round;stroke-linejoin:round"/><path d="M148 168 L153 164" style="fill:none;stroke:#121412;stroke-width:var(--w-i,3px);stroke-linejoin:round;stroke-linecap:round"/></g>
+  </symbol>
+  <symbol id="h-tada" viewBox="44 -16 152 242">
+    <g style="filter:var(--halo,none)"><use href="#cuerpo"/><use href="#cordon-c"/>
+    <use href="#ojos"/><use href="#pupila" x="101" y="136"/><use href="#pupila" x="143" y="136"/>
+    <path d="M84 108 Q99 96 114 106" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/><path d="M128 106 Q143 94 158 108" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/>
+    <path d="M100 166 Q124 202 150 166 Z" style="fill:#FFFFFF;stroke:#121412;stroke-width:var(--w-m,4.6px);stroke-linecap:round;stroke-linejoin:round"/>
+    <path d="M110 184 Q124 176 138 184 Q124 196 110 184 Z" fill="#E8E9E4" stroke="none"/></g>
+  </symbol>
+  <!-- Chica: sin trama, contornos gruesos (vars en el svg), ojos y cejas más grandes, pupila simple -->
+  <g id="cuerpo-s">
+    <use href="#p-etq" fill="#C9F24D"/>
+    <use href="#p-etq" style="fill:none;stroke:#121412;stroke-width:var(--w-o,6px);stroke-linejoin:round;stroke-linecap:round"/>
+    <circle cx="120" cy="78" r="17" fill="#121412"/>
+  </g>
+  <path id="cordon-s" d="M120 78 C 118 56, 114 44, 120 30 C 124 20, 134 14, 142 10" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/>
+  <symbol id="h-firma-s" viewBox="44 -16 152 242">
+    <g style="filter:var(--halo-s,none)"><use href="#cuerpo-s"/><use href="#cordon-s"/>
+    <ellipse cx="98" cy="142" rx="16" ry="21" style="fill:#FFFFFF;stroke:#121412;stroke-width:var(--w-e,3.6px)"/><ellipse cx="144" cy="142" rx="16" ry="21" style="fill:#FFFFFF;stroke:#121412;stroke-width:var(--w-e,3.6px)"/>
+    <use href="#pupila-s" x="101" y="145"/><use href="#pupila-s" x="147" y="145"/>
+    <path d="M80 112 Q96 106 114 111" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/><path d="M128 96 Q144 82 162 96" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/>
+    <path d="M100 182 Q124 202 152 176" style="fill:none;stroke:#121412;stroke-width:var(--w-m,4.6px);stroke-linecap:round;stroke-linejoin:round"/></g>
+  </symbol>
+  <symbol id="h-tada-s" viewBox="44 -16 152 242">
+    <g style="filter:var(--halo-s,none)"><use href="#cuerpo-s"/><use href="#cordon-s"/>
+    <ellipse cx="98" cy="140" rx="16" ry="21" style="fill:#FFFFFF;stroke:#121412;stroke-width:var(--w-e,3.6px)"/><ellipse cx="144" cy="140" rx="16" ry="21" style="fill:#FFFFFF;stroke:#121412;stroke-width:var(--w-e,3.6px)"/>
+    <use href="#pupila-s" x="100" y="141"/><use href="#pupila-s" x="146" y="141"/>
+    <path d="M80 106 Q96 92 114 104" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/><path d="M128 104 Q144 92 162 106" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/>
+    <path d="M98 172 Q124 212 154 172 Z" style="fill:#FFFFFF;stroke:#121412;stroke-width:var(--w-m,4.6px);stroke-linecap:round;stroke-linejoin:round"/></g>
+  </symbol>
+</defs>
+</svg>
+<!-- D-17 -->
+<section><h2>D-17 · Rastro sin pasos repetidos</h2>
+<div class="nota">Cada paso aparece una vez, en la forma de pasado más específica («Armé dos looks» reemplaza a «Armé el look · Armé el look»). La línea «Busqué en 7 tiendas · 40 resultados · elegí 3» vive solo en el rastro; la tarjeta de opciones arranca directo con las opciones (se quita de <code>shopping-options.tsx:98</code>).</div><br>
+<div class="fila">
+<div><span class="cap">Hoy</span><div class="marco m390"><div class="hilo">
+<div class="rastro mal"><div class="p"><i></i>Revisé tu clóset</div><div class="p dup"><i></i>Armé el look</div><div class="p dup"><i></i>Armé el look</div></div>
+<div class="msg">Armé dos looks para hoy.</div>
+<div class="rastro mal"><div class="p"><i></i>Busqué en 7 tiendas · 40 resultados · elegí 3</div></div>
+<div class="card"><div class="linea-b mal"><i style="width:14px;height:14px;border-radius:50%;background:var(--exito)"></i>Busqué en 7 tiendas · 40 resultados · elegí 3</div><span class="nom">Zapatillas blancas</span></div>
+</div></div></div>
+<div><span class="cap">Propuesta</span><div class="marco m390"><div class="hilo">
+<div class="rastro bien"><div class="p"><i></i>Revisé tu clóset</div><div class="p"><i></i>Armé dos looks</div></div>
+<div class="msg">Armé dos looks para hoy.</div>
+<div class="rastro bien"><div class="p"><i></i>Busqué en 7 tiendas · 40 resultados · elegí 3</div></div>
+<div class="card"><span class="tienda" style="margin-top:0">Opciones para comprar</span><span class="nom">Zapatillas blancas</span></div>
+</div></div>
+<div class="aria">Regla: pasos consecutivos con el mismo texto se fusionan; si son del mismo tipo con distinto resultado, se cuenta («dos looks»). La línea de búsqueda la pinta el rastro, no la tarjeta.</div></div>
+</div></section>
+
+<!-- D-18 -->
+<section><h2>D-18 · Foto de tienda cubre la mesa</h2>
+<div class="nota">Las fotos de tienda con fondo blanco dejan de flotar como un rectángulo con sombra. Propuesta: la mesa de la opción de compra pasa a <b>superficie (#FFF)</b> y la foto la cubre entera (<code>object-cover</code>), con un filete de 1 px en <b>linea</b> para que la mesa no se pierda sobre la tarjeta blanca. Sin sombra. Las prendas del clóset siguen recortadas sobre <b>hundido</b>: dos tratamientos con regla clara (recortada = sobre mesa gris; foto de tienda = cubre la mesa). Foto sin fondo blanco (con escenario): también cubre; el recorte lo decide <code>object-cover</code>, no la mesa.</div><br>
+<div class="fila">
+<div><span class="cap">Hoy</span><div class="marco m390" style="padding:18px"><div class="card opc" style="padding:0;width:240px;background:transparent"><div class="mesa mal"><div class="flota"><svg class="silu" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 34c0-6 6-8 12-10l6-8 6 4 8 8v10H8z"/></svg></div></div><span class="tienda">Tienda demo</span><span class="nom">Zapatillas blancas</span><span class="prec">$39.990</span></div></div></div>
+<div><span class="cap">Propuesta</span><div class="marco m390" style="padding:18px"><div class="card opc" style="padding:0;width:240px;background:transparent"><div class="mesa cubre bien"><div class="foto"><svg class="silu" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 34c0-6 6-8 12-10l6-8 6 4 8 8v10H8z"/></svg></div></div><span class="tienda">Tienda demo</span><span class="nom">Zapatillas blancas</span><span class="prec">$39.990</span></div></div></div>
+</div></section>
+
+<!-- D-19 -->
+<section><h2>D-19 · Prenda sin foto: nombre con «…»</h2>
+<div class="nota">El corte «Cinturón de cuero..» viene de un truncado manual. Propuesta: usar solo <code>line-clamp-2</code> de CSS (ya está en <code>piece.tsx</code>), que pone «…» (un carácter) y nunca dos puntos; quitar cualquier <code>slice</code> con «..» en el nombre. Si el nombre cabe en dos líneas se ve entero.</div><br>
+<div class="fila">
+<div><span class="cap">Hoy</span><div class="marco m390" style="padding:18px"><div class="mesa3"><div class="pz foto">Camisa</div><div class="pz foto">Jeans</div><div class="pz foto">Zapatillas</div><div class="pz mal"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="12" width="26" height="8" rx="3"/></svg><span class="mal2">Cinturón de cuero..</span></div></div><div class="leyenda"><span>4 · Cinturón de cuero negro</span></div></div></div>
+<div><span class="cap">Propuesta</span><div class="marco m390" style="padding:18px"><div class="mesa3"><div class="pz foto">Camisa</div><div class="pz foto">Jeans</div><div class="pz foto">Zapatillas</div><div class="pz bien"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="12" width="26" height="8" rx="3"/></svg><span>Cinturón de cuero negro</span></div></div><div class="leyenda"><span>4 · Cinturón de cuero negro</span></div></div>
+<div class="aria">Con nombre muy largo («Cinturón de cuero trenzado negro con hebilla dorada»): se corta a dos líneas con «…». La leyenda inferior siempre trae el nombre completo.</div></div>
+</div></section>
+
+<!-- D-20 -->
+<section><h2>D-20 · Copys de «Lo que sé de ti» sin negar lo que sí sabes</h2>
+<div class="nota">Hoy la pantalla dice «Todavía no te conozco» y «Aún no recuerdo nada de ti» junto a «Tu estilo: Casual, Urbano, Deportivo». Se contradice. Propuesta: el vacío habla solo de <b>recuerdos de la conversación</b>, no de la persona. Mismo texto en la hoja «Tu espacio» y en <code>/yo</code>.</div><br>
+<div class="fila">
+<div><span class="cap">Hoy</span><div class="marco m390" style="padding:16px 24px"><span class="sec" style="margin-top:0">Lo que sé de ti</span><div class="fila-esp"><b>Tu estilo</b><small>Casual, Urbano, Deportivo</small></div><div class="fila-esp mal"><b>Todavía no te conozco</b><small>Aún no recuerdo nada de ti.</small></div></div></div>
+<div><span class="cap">Propuesta</span><div class="marco m390" style="padding:16px 24px"><span class="sec" style="margin-top:0">Lo que sé de ti</span><div class="fila-esp"><b>Tu estilo</b><small>Casual, Urbano, Deportivo</small></div><div class="fila-esp bien"><b>Recuerdos de la conversación</b><small>Aún no guardo recuerdos de la conversación. Cuando me cuentes algo que valga la pena recordar, aparece aquí.</small></div></div></div>
+</div></section>
+
+<!-- D-21 -->
+<section><h2>D-21 · Mismo nombre en el botón y en el panel</h2>
+<div class="nota">El botón de menú se anuncia «Sesiones» y el panel se titula «Conversaciones». Propuesta: <b>«Conversaciones»</b> en los dos. El botón sigue siendo de ícono (44 px), así que el cambio es el <code>aria-label</code> (<code>app-header.tsx:62</code>) y el <code>aria-labelledby</code> del diálogo apuntando al mismo título. Nada cambia a la vista salvo que el título visible del panel coincide con lo que anuncia el lector.</div><br>
+<div class="fila">
+<div><span class="cap">Propuesta · panel abierto</span><div class="marco m390" style="height:420px"><div class="hdr"><span class="ib"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#121412" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></span><span class="wm">Prendie</span><span class="esp">Tu espacio</span></div>
+<div class="velo" style="top:56px"></div>
+<div class="panel" style="top:0"><div style="display:flex;justify-content:space-between;align-items:center;height:44px"><h3 class="sc" id="t-conv" style="font-size:18px">Conversaciones</h3><span class="ib"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#121412" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span></div>
+<div style="margin:8px 0 8px;height:52px;border-radius:999px;background:var(--tinta);color:#fff;display:grid;place-items:center;font:700 16px Manrope">Nueva conversación</div>
+<div class="item"><span class="sc" style="font-size:14px">¿Qué me pongo hoy?</span><small>14 nov 2026</small></div><div class="item"><span class="sc" style="font-size:14px">Look para el matrimonio</span><small>9 nov 2026</small></div></div></div>
+<div class="aria">botón: aria-label="Conversaciones" aria-haspopup="dialog"<br>diálogo: aria-labelledby="t-conv" → «Conversaciones»</div></div>
+</div></section>
+
+<!-- D-22 -->
+<section><h2>D-22 · Página no encontrada en apaisado y título de pestaña</h2>
+<div class="nota">En 844×390 la mascota (168 px) queda pegada arriba y la página desborda 4 px. Propuesta: en pantallas bajas (alto ≤ 480 px) dos columnas, mascota a 150 px en una caja centrada en vertical con margen superior mínimo de 24 px; el texto a la derecha. Se usa <code>min-h-dvh</code> y <code>box-border</code> para que no sobren 4 px. Copy y botón (52 px, inverso) no cambian. Título de la pestaña: <b>«No encontrada — Prendie»</b> (<code>metadata.title</code> en <code>not-found.tsx</code>).</div><br>
+<span class="cap">Pestaña</span><div class="tab"><span style="width:14px;height:14px;border-radius:4px;background:var(--tinta)"></span>No encontrada — Prendie</div><br>
+<div class="fila"><div><span class="cap">Propuesta · 844×390 · sin barras de desplazamiento</span>
+<div class="marco nf bien"><div class="masc"><svg viewBox="0 -16 240 336"><use href="#m-ups"/></svg></div><div><h1>No encuentro esta página.</h1><p>Puede que el enlace esté mal escrito o que ya no exista. Volvamos a la conversación y seguimos con tu look.</p><span class="cta">Volver al asesor</span></div></div></div></div>
+</section>
+
+<section><h2>Notas para el Constructor</h2>
+<table class="tabla"><tr><th>ID</th><th>Archivo</th><th>Cambio</th></tr>
+<tr><td>D-17</td><td><code>thread-items-v2.ts</code>, <code>shopping-options.tsx:98</code></td><td>Fusionar pasos repetidos y contar («dos looks»); quitar la línea de búsqueda de la tarjeta.</td></tr>
+<tr><td>D-18</td><td><code>shopping-options.tsx:139-145</code></td><td>Mesa de foto de tienda en <code>bg-superficie</code> con <code>ring-1 ring-linea</code>, foto <code>object-cover</code>, sin <code>drop-shadow</code>. Prendas del clóset sin cambio. A confirmar con Felipe si las fotos con escenario deben ir recortadas.</td></tr>
+<tr><td>D-19</td><td><code>piece.tsx</code></td><td>Solo <code>line-clamp-2</code>; revisar que nada recorte el nombre con «..».</td></tr>
+<tr><td>D-20</td><td><code>space-sheet.tsx</code>, <code>memory-list.tsx</code></td><td>Texto vacío único: «Aún no guardo recuerdos de la conversación».</td></tr>
+<tr><td>D-21</td><td><code>app-header.tsx:62</code></td><td><code>aria-label="Conversaciones"</code>.</td></tr>
+<tr><td>D-22</td><td><code>not-found.tsx</code></td><td>Título de pestaña; en alto ≤ 480 px dos columnas, mascota ≤ 150 px, <code>min-h-dvh</code>.</td></tr></table>
+<p class="nota" style="margin-top:12px"><b>Sin verificar:</b> el texto exacto del paso fusionado en D-17 (depende de cómo emite el contrato los pasos), que el recorte de D-19 venga de CSS y no de código, y los 4 px de desborde de D-22 (no medí en la app real).</p></section>
+</body></html>
