@@ -1,6 +1,7 @@
 "use client";
 
 import { btnText } from "./styles";
+import { MascotHead } from "@/components/ui";
 import { AdvisorMessage } from "./advisor-message";
 import { GarmentCard } from "./garment-card";
 import { MemoryNote } from "./memory-note";
@@ -170,6 +171,7 @@ function AdvisorTurn({
   actionBusy?: boolean;
 }) {
   const animate = item.fresh;
+  const working = Boolean(item.streaming) || showStatus;
   const v2 = isV2Turn(item);
   const v2Items = v2
     ? buildTurnItems(
@@ -186,7 +188,13 @@ function AdvisorTurn({
     : [];
   return (
     <div className={cn("flex flex-col gap-3.5", animate && "animate-aparecer")}>
-      <AdvisorMessage text={item.text} streaming={item.streaming && !showStatus} />
+      {/* Firma del turno: la cabeza de la mascota y el nombre. Va aquí y no en el texto, porque un turno puede partir
+          sin texto (solo pasos de trabajo). Se balancea mientras el asesor trabaja y hace "ta-dá" cuando llega un look. */}
+      <div className="flex items-center gap-2">
+        <MascotHead mood={!working && item.outfits.length > 0 ? "tada" : "firma"} swinging={working} />
+        <span className="text-sobretitulo uppercase text-tinta-suave">Prendie</span>
+      </div>
+      <AdvisorMessage text={item.text} streaming={item.streaming && !showStatus} hideSignature />
       {item.garments.map((g) => (
         <GarmentCard key={g.id} garment={g} animate={animate} />
       ))}

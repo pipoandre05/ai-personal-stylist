@@ -17,10 +17,10 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Estilo — tu asesor de imagen",
+  title: "Prendie — tu asesor de imagen",
   description:
     "Te ayudo a verte como quieres verte, con lo que ya tienes y con lo que realmente vale la pena comprar.",
-  applicationName: "Estilo",
+  applicationName: "Prendie",
 };
 
 export const viewport: Viewport = {

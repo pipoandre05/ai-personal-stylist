@@ -4,8 +4,8 @@ import type { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: "/",
-    name: "Estilo",
-    short_name: "Estilo",
+    name: "Prendie",
+    short_name: "Prendie",
     description: "Te ayudo a verte como quieres verte, con lo que ya tienes y con lo que realmente vale la pena comprar.",
     lang: "es-CL",
     start_url: "/asesor",

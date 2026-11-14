@@ -20,7 +20,7 @@ export type AppHeaderProps = {
 
 /**
  * Encabezado de la conversación (UI-20):
- * - Izquierda: botón de menú de 44 px para el panel de sesiones + Wordmark "Estilo".
+ * - Izquierda: botón de menú de 44 px para el panel de sesiones + Wordmark "Prendie".
  * - Derecha: botón contorno "Tu espacio" para la hoja inferior.
  */
 export function AppHeader({
@@ -65,7 +65,7 @@ export function AppHeader({
             <IconMenu className="size-5" />
           </button>
           <span className="font-display text-titulo font-extrabold tracking-[-0.03em]">
-            Estilo
+            Prendie
           </span>
         </div>
 

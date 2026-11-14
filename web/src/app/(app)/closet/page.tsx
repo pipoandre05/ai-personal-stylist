@@ -8,7 +8,7 @@ import { listGarments } from "@/lib/data/queries";
 import { CATEGORY_LABELS_SHORT, GARMENT_CATEGORIES, type GarmentCategory } from "@/lib/domain/types";
 import ClosetSkeleton from "./skeleton";
 
-export const metadata: Metadata = { title: "Tu clóset — Estilo" };
+export const metadata: Metadata = { title: "Tu clóset — Prendie" };
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 

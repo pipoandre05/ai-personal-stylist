@@ -6,7 +6,7 @@ import { LookList } from "@/components/espacio/look-list";
 import { listOutfits } from "@/lib/data/queries";
 import LooksSkeleton from "./skeleton";
 
-export const metadata: Metadata = { title: "Tus looks — Estilo" };
+export const metadata: Metadata = { title: "Tus looks — Prendie" };
 
 async function LooksContent() {
   const saved = await listOutfits({ status: "saved" });

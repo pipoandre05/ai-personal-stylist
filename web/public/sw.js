@@ -1,4 +1,4 @@
-// Service worker mínimo de Estilo: hace la app instalable y cachea SOLO el shell estático.
+// Service worker mínimo de Prendie: hace la app instalable y cachea SOLO el shell estático.
 // Nunca cachea: /api/, páginas o respuestas con sesión, fotos (Supabase Storage / URLs firmadas).
 const CACHE = "estilo-shell-v1";
 const SHELL = ["/icon.svg", "/icon-192.png", "/icon-512.png", "/apple-touch-icon.png"];
