@@ -52,3 +52,19 @@ Cambios realizados:
 
 Commit: 82679f43ecf44e086c519af3875f2a9fadc9895f
 Verificación: cd web && npm run verify && AI_MODE=mock npm run build
+
+### 2026-11-14 15:44 · Revisor · veredicto · vuelta 0
+
+Revisión de código completada sin hallazgos:
+1. Frontera: verificada con `bash agentes/scripts/verificar-frontera.sh equipo/ui-3-base-hilo` (13 archivos modificados, todos dentro de components/ui/app-header.tsx, components/chat/**, tests/ui/** y docs/superpowers/**).
+2. Seguridad y datos: sin datos personales en marcado/meta tags, URLs de objeto para vistas previas liberadas con revokeObjectURL, llamadas a IA centralizadas exclusivamente en servidor, fotos y links tratados como datos.
+3. Reglas invariantes de CLAUDE.md: zona America/Santiago respetada en formateadores de fecha del hilo, AI_MODE=mock probado y funcionando, vocabulario y tono acordes (asesor en primera persona, tuteo, sin emoji, botones con verbo y objeto claros).
+4. Correctitud contra criterios y maquetas aprobadas:
+   - UI-3 Encabezado: h-14 sticky, márgenes pl-6 pr-4, wordmark font-display text-titulo font-extrabold, botón "Tu espacio" contorno mediano accesible con aria-haspopup="dialog" y aria-expanded. Sin lima.
+   - UI-4 Voces: Asesor sin burbuja en text-destacado (Manrope 600), firma "Estilo" en text-sobretitulo solo en el primer bloque del turno, formato **negrita** sin color ni cursiva, cursor streaming 2x16 respirando (animate-respirar) en el último párrafo, error accesible con borde izquierdo 3px border-error y Reintentar. Persona a la derecha self-end max-w-[82%] bg-hundido rounded-campo text-cuerpo, enviando con opacity-70 y error con FailedLine accesible.
+   - UI-5 Compositor: barra superficie con border-t border-linea px-4 pt-2.5 pb-seguro; botón foto contorno size-11; campo BLANCO con borde de tinta 1.5px (bg-superficie border-[1.5px] border-linea-fuerte rounded-campo px-4 py-2.5 text-base font-medium text-tinta placeholder:text-tinta-suave focus-visible:ring-3 focus-visible:ring-foco min-w-0 flex-1) según decisión explícita de Felipe (contraste 18.5:1); botón Enviar inverso size-11 y Detener cuadrado size-3 respondiendo; placeholders contextuales implementados y probados; adaptación responsive a 360 px sin desbordamiento.
+5. Tokens y CSS: 100% de clases existen en globals.css / DESIGN.MD, tokens.test.ts en verde (cero clases inventadas).
+6. Tests y compilación: `npm run verify` en verde (lint limpio, typecheck sin errores, 145/145 tests vitest pasando, incluyendo 9 pruebas en tests/ui/thread-base.test.ts) y `npm run build` exitoso.
+7. Hallazgos: 0 bloquea, 0 importante, 0 menor.
+
+VEREDICTO: Revisor aprobado sha=82679f43ecf44e086c519af3875f2a9fadc9895f
