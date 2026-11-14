@@ -14,7 +14,7 @@ export type SuggestedRepliesProps = {
   options: string[];
   multiple?: boolean;
   disabled?: boolean;
-  onSend: (text: string) => void;
+  onSend: (text: string) => void | Promise<void>;
   onPickPhoto?: (selfie: boolean) => void;
   className?: string;
 };
@@ -26,6 +26,7 @@ export type SuggestedRepliesProps = {
  * - Modo múltiple: chips seleccionables (toggle) con aria-pressed y botón de acción "Listo" inverso.
  * - Sin lima (la acción lima queda reservada para el CTA principal del asesor).
  * - Transición de opacidad al enviar (150 ms, motion-reduce:transition-none).
+ * - Resiliencia: si onSend falla o rechaza, restaura la visibilidad para no bloquear a la persona.
  */
 export function SuggestedReplies({
   options,
@@ -42,14 +43,18 @@ export function SuggestedReplies({
     return null;
   }
 
-  const handleSendSimple = (option: string, isPhoto: boolean, isSelfie: boolean) => {
+  const handleSendSimple = async (option: string, isPhoto: boolean, isSelfie: boolean) => {
     if (disabled) return;
     if (isPhoto && onPickPhoto) {
       onPickPhoto(isSelfie);
       return;
     }
     setIsDismissing(true);
-    onSend(option);
+    try {
+      await onSend(option);
+    } catch {
+      setIsDismissing(false);
+    }
   };
 
   const handleToggle = (option: string) => {
@@ -59,10 +64,14 @@ export function SuggestedReplies({
     );
   };
 
-  const handleSendMultiple = () => {
+  const handleSendMultiple = async () => {
     if (disabled || picked.length === 0) return;
     setIsDismissing(true);
-    onSend(picked.join(", "));
+    try {
+      await onSend(picked.join(", "));
+    } catch {
+      setIsDismissing(false);
+    }
   };
 
   return (

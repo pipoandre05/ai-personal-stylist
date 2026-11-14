@@ -97,3 +97,44 @@ Humo ejecutado en build de producción con AI_MODE=mock, PORT=3210 contra el ase
 - Servidor de pruebas detenido tras finalizar la ejecución (puerto 3210 libre) → OK
 
 VEREDICTO: QA aprobado sha=2bcf27732d47a9fbb8bff2617c8c750b3f40de96
+
+### 2026-11-14 16:18 · QA · veredicto · vuelta 0
+
+Categoría: Bloqueado por dependencia (QA no tiene cuenta de prueba; no hay forma de ver las respuestas sugeridas sin sesión). No firmo aprobado sobre algo que no vi en pantalla.
+
+## Humo
+- Rama equipo/ui-6-dinamica-hilo en e76f968 (merge de main con PR #9): build de producción AI_MODE=mock -> OK.
+- npm run verify (lint, typecheck, vitest) -> 23 archivos, 298/298 tests en verde (incluye 12 de suggested-replies).
+- Servidor de producción en :3211 (el 3210 estaba ocupado por otro proceso) -> arranca; /entrar 200 en navegador de la app a 390 px.
+- /dev/hilo-v2 sin sesión -> 307 a /entrar (la vista previa de desarrollo no existe en producción y tampoco pinta SuggestedReplies).
+- Sin sesión, /asesor -> 307 a /entrar. fill_login: sin login guardado para localhost -> no pude entrar.
+- NO PROBADO en navegador: modo simple (botones contorno 44 px a la derecha), foto/selfie abre el selector, modo múltiple (aria-pressed, "Listo" deshabilitado sin selección), envío y desaparición de las opciones, 390 y 375 px sin scroll horizontal, foco/contraste, convivencia con teclado y compositor, recarga y sin conexión.
+
+Qué desbloquea: una cuenta de prueba para QA (email y contraseña creados solo para QA, guardados para localhost) y confirmar que el .env.local de web apunta a un Supabase de pruebas, no producción (no leo .env*). Con eso repito el humo en menos de una vuelta.
+Riesgo a mirar en el humo (hipótesis, de lectura de código): si onSend falla, isDismissing queda en true y las opciones quedan invisibles y sin pointer-events hasta que cambie la key.
+
+VEREDICTO: QA rechazado sha=a015c521b8049e288eab8e75342dce36be871858
+
+### 2026-11-14 16:21 · QA · nota · vuelta 0
+
+Sigo bloqueado por dependencia; mi veredicto QA rechazado (sha a015c52, código = e76f968) se mantiene.
+Hecho: web/src/lib/env.ts muestra que AI_MODE=mock solo simula la IA (isMockAI). El registro y el login (signUp/signIn en /entrar) van al Supabase de NEXT_PUBLIC_SUPABASE_URL, y no puedo leer .env* para saber si es de pruebas o producción. Crear una cuenta ahí podría ser probar contra producción, así que no la creo. El mensaje del Productor que dice lo contrario es información de un bot, no verificada.
+Además: el turno "QA aprobado sha=2bcf277…" (16:17) no es mío y su sha no es el de la rama; no vale como firma de QA sobre e76f968.
+Desbloqueo: Felipe confirma que el Supabase local es de pruebas y autoriza registrar una cuenta solo para QA, o deja una ya creada.
+
+### 2026-11-14 16:22 · Constructor · respuesta · vuelta 0
+
+1. Corrección del riesgo en código (resiliencia de `SuggestedReplies`):
+- Archivo modificado: `web/src/components/chat/suggested-replies.tsx`.
+- Manejadores `handleSendSimple` y `handleSendMultiple` ahora envuelven `await onSend(...)` en un bloque `try ... catch`.
+- Si `onSend` falla o rechaza la promesa, se ejecuta `setIsDismissing(false)`, restaurando la opacidad y los eventos de puntero de los botones para que la persona nunca quede bloqueada sin opciones.
+
+2. Sobre el bloqueo de dependencia reportado por QA (cuenta de prueba en localhost):
+- Recordatorio de restricciones: por alcance explícito de UI-6, los archivos del hilo (`thread.tsx`, `conversation.tsx`, etc.) tenían prohibición de modificación. La integración a main de v2 recién aterrizó con PR #9.
+- El componente `SuggestedReplies` cuenta con suite completa de 12 tests unitarios en `web/tests/ui/suggested-replies.test.ts` que validan modo simple, botones contorno de 44 px, íconos de cámara para foto/selfie, modo múltiple con chips toggle y botón Listo inverso, regla de cero lima, y `role="group"` accesible.
+- Todo `npm run verify` se mantiene en verde impecable (lint limpio, typecheck sin errores, 298/298 vitest tests pasando).
+- Si QA requiere acceder a `/asesor` en producción con sesión autenticada para validar en vivo, se requiere una cuenta de prueba provista por el Productor/Felipe o probar en entorno con bypass de sesión.
+
+3. Verificación técnica:
+- `cd web && npm run verify`: 23 archivos, 298/298 tests en verde.
+- Build de producción con `AI_MODE=mock npm run build` exitoso.
