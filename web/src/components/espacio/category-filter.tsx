@@ -8,10 +8,10 @@ type CategoryFilterProps = {
   active: GarmentCategory | null;
 };
 
-const chip =
-  "inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-[transform,opacity] duration-150 ease-estilo active:scale-[0.97]";
+const chipBase =
+  "inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full border-[1.5px] px-4 font-body text-sm font-extrabold transition-[transform,opacity] duration-150 ease-estilo active:scale-[0.97] focus-visible:ring-3 focus-visible:ring-foco";
 
-/** Filtro por categoría vía `?categoria=`: enlaces reales, así el filtro se comparte y el botón Atrás lo respeta. */
+/** Filtro por categoría vía `?categoria=`: chips con scroll horizontal y tokens de Prendie. */
 export function CategoryFilter({ available, active }: CategoryFilterProps) {
   const items: Array<{ key: string; href: string; label: string; on: boolean }> = [
     { key: "todo", href: "/closet", label: "Todo", on: active === null },
@@ -24,8 +24,8 @@ export function CategoryFilter({ available, active }: CategoryFilterProps) {
   ];
 
   return (
-    <nav aria-label="Filtrar por categoría" className="-mx-5">
-      <ul className="flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <nav aria-label="Filtrar por categoría" className="-mx-6 my-4">
+      <ul className="flex gap-2 overflow-x-auto px-6 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {items.map((i) => (
           <li key={i.key} className="shrink-0">
             <Link
@@ -34,8 +34,10 @@ export function CategoryFilter({ available, active }: CategoryFilterProps) {
               scroll={false}
               aria-current={i.on ? "page" : undefined}
               className={cn(
-                chip,
-                i.on ? "border-acento bg-acento-suave text-acento" : "border-transparent bg-hundido text-tinta",
+                chipBase,
+                i.on
+                  ? "border-inverso bg-inverso text-sobre-inverso"
+                  : "border-linea bg-superficie text-tinta hover:bg-hundido",
               )}
             >
               {i.on ? <IconCheck className="size-4" /> : null}

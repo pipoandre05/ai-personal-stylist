@@ -1,6 +1,6 @@
 "use client";
 
-import { AppHeader } from "@/components/ui";
+import { AppHeader, type SpaceSummary } from "@/components/ui";
 import type { ChatMessageView } from "@/lib/domain/types";
 import { Composer } from "./composer";
 import { SuggestedReplies } from "./suggested-replies";
@@ -13,16 +13,23 @@ type ConversationProps = {
   initialMessages: ChatMessageView[];
   closetCount: number;
   displayName: string | null;
+  spaceSummary?: SpaceSummary;
 };
 
 /** Presentación del hilo: solo marcado y clases. La lógica vive en `useConversation`. */
-export function Conversation({ conversationId, initialMessages, closetCount, displayName }: ConversationProps) {
+export function Conversation({
+  conversationId,
+  initialMessages,
+  closetCount,
+  displayName,
+  spaceSummary,
+}: ConversationProps) {
   const [c, mainRef, composerRef] = useConversation({ conversationId, initialMessages });
   const { replies, busy, disabled } = c;
 
   return (
     <main id="contenido" ref={mainRef} className="mx-auto flex min-h-dvh w-full max-w-app flex-col bg-fondo">
-      <AppHeader closetCount={closetCount} />
+      <AppHeader summary={spaceSummary} closetCount={closetCount} />
       <h1 className="sr-only">Tu asesor de imagen</h1>
 
       {!c.online ? (

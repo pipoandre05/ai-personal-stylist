@@ -19,7 +19,7 @@ const CATEGORY_OPTIONS: ChipOption[] = GARMENT_CATEGORIES.map((c) => ({ value: c
 const SEASON_OPTIONS: ChipOption[] = SEASONS.map((s) => ({ value: s, label: capitalize(s) }));
 const FORMALITY_OPTIONS: ChipOption[] = [1, 2, 3, 4, 5].map((n) => ({ value: String(n), label: FORMALITY_LABELS[n] }));
 
-/** Acciones sobre una prenda: favorita, edición fina y archivar (con confirmación). */
+/** Acciones sobre una prenda (UI-18): favorita (contorno), edición y archivar (confirmación inline). */
 export function GarmentEditor({ garment }: { garment: GarmentView }) {
   const router = useRouter();
   const { toast } = useToast();
@@ -37,7 +37,6 @@ export function GarmentEditor({ garment }: { garment: GarmentView }) {
   const [occasions, setOccasions] = useState<string[]>(garment.occasions);
   const [nameError, setNameError] = useState<string | null>(null);
 
-  // Las ocasiones guardadas que no están en el catálogo (vienen de la conversación) no se pierden.
   const occasionOptions: ChipOption[] = [
     ...new Set<string>([...OCCASION_OPTIONS, ...garment.occasions]),
   ].map((o) => ({ value: o, label: capitalize(o) }));
@@ -92,26 +91,53 @@ export function GarmentEditor({ garment }: { garment: GarmentView }) {
   }
 
   return (
-    <div className="mt-8 space-y-8">
-      <Button
-        variant="secondary"
-        fullWidth
-        aria-pressed={favorite}
-        onClick={onFavorite}
-        icon={<IconHeart className={favorite ? "size-5 fill-current text-acento" : "size-5"} />}
-      >
-        {favorite ? "Es una de tus favoritas" : "Marcar como favorita"}
-      </Button>
+    <div className="mt-8 space-y-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <Button
+          variant="contorno"
+          aria-pressed={favorite}
+          onClick={onFavorite}
+          icon={<IconHeart className={favorite ? "size-5 fill-current text-tinta" : "size-5 text-tinta"} />}
+        >
+          {favorite ? "Favorita" : "Marcar como favorita"}
+        </Button>
+        <Button variant="contorno" onClick={() => setEditing((prev) => !prev)}>
+          {editing ? "Cerrar edición" : "Editar prenda"}
+        </Button>
+        {!confirmingArchive ? (
+          <Button
+            variant="text"
+            className="font-body text-sm font-bold text-tinta-suave underline underline-offset-4 hover:text-error"
+            onClick={() => setConfirmingArchive(true)}
+          >
+            Archivar prenda
+          </Button>
+        ) : null}
+      </div>
+
+      {confirmingArchive ? (
+        <div role="group" aria-label="Confirmar archivo" className="rounded-tarjeta bg-hundido p-4">
+          <p className="font-body text-cuerpo text-tinta">¿Archivar? Dejará de aparecer en tus looks.</p>
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <Button variant="destructive" onClick={onArchive} loading={pending} loadingLabel="Archivando…">
+              Archivar prenda
+            </Button>
+            <Button variant="text" onClick={() => setConfirmingArchive(false)} disabled={pending}>
+              Cancelar
+            </Button>
+          </div>
+        </div>
+      ) : null}
 
       {editing ? (
         <form
-          className="space-y-6 border-t border-linea pt-8"
+          className="space-y-6 border-t border-linea pt-6"
           onSubmit={(e) => {
             e.preventDefault();
             onSave();
           }}
         >
-          <h2 className="font-display text-2xl">Editar prenda</h2>
+          <h2 className="font-display text-titulo-s font-extrabold text-tinta">Editar prenda</h2>
 
           <Input
             label="Nombre"
@@ -124,7 +150,7 @@ export function GarmentEditor({ garment }: { garment: GarmentView }) {
           />
 
           <fieldset>
-            <legend className="mb-2 text-sm font-medium text-tinta">Categoría</legend>
+            <legend className="mb-2 font-body text-sm font-bold text-tinta">Categoría</legend>
             <ChipGroup label="Categoría" options={CATEGORY_OPTIONS} value={category} onChange={(v) => v && setCategory(v as GarmentCategory)} />
           </fieldset>
 
@@ -138,21 +164,21 @@ export function GarmentEditor({ garment }: { garment: GarmentView }) {
           />
 
           <fieldset>
-            <legend className="mb-2 text-sm font-medium text-tinta">Formalidad</legend>
+            <legend className="mb-2 font-body text-sm font-bold text-tinta">Formalidad</legend>
             <ChipGroup label="Formalidad" options={FORMALITY_OPTIONS} value={formality} onChange={(v) => v && setFormality(v)} />
           </fieldset>
 
           <fieldset>
-            <legend className="mb-2 text-sm font-medium text-tinta">Temporadas</legend>
+            <legend className="mb-2 font-body text-sm font-bold text-tinta">Temporadas</legend>
             <ChipGroup multiple label="Temporadas" options={SEASON_OPTIONS} value={seasons} onChange={setSeasons} />
           </fieldset>
 
           <fieldset>
-            <legend className="mb-2 text-sm font-medium text-tinta">Ocasiones</legend>
+            <legend className="mb-2 font-body text-sm font-bold text-tinta">Ocasiones</legend>
             <ChipGroup multiple label="Ocasiones" options={occasionOptions} value={occasions} onChange={setOccasions} />
           </fieldset>
 
-          <p className="text-sm text-tinta-suave">
+          <p className="font-body text-meta text-tinta-suave">
             Los colores los detecta el asesor desde la foto. Si no calzan, mándale una foto mejor por la conversación.
           </p>
 
@@ -165,31 +191,7 @@ export function GarmentEditor({ garment }: { garment: GarmentView }) {
             </Button>
           </div>
         </form>
-      ) : (
-        <Button variant="secondary" fullWidth onClick={() => setEditing(true)}>
-          Editar prenda
-        </Button>
-      )}
-
-      <div className="border-t border-linea pt-6">
-        {confirmingArchive ? (
-          <div role="group" aria-label="Confirmar archivo" className="rounded-md bg-hundido p-4">
-            <p className="text-base text-tinta">¿Archivar? Dejará de aparecer en tus looks.</p>
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <Button variant="destructive" onClick={onArchive} loading={pending} loadingLabel="Archivando…">
-                Archivar prenda
-              </Button>
-              <Button variant="text" onClick={() => setConfirmingArchive(false)} disabled={pending}>
-                Cancelar
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <Button variant="text" className="text-tinta-suave" onClick={() => setConfirmingArchive(true)}>
-            Archivar prenda
-          </Button>
-        )}
-      </div>
+      ) : null}
     </div>
   );
 }
