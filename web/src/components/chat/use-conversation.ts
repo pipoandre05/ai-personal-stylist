@@ -31,7 +31,11 @@ type Acc = { text: string; outfits: OutfitView[]; garments: GarmentView[]; palet
 const GENERIC = "Algo salió mal. Intenta de nuevo en un momento.";
 const CUT_OFF = "Se cortó mi respuesta. Tu mensaje quedó guardado.";
 const LIMIT_TEXT = /m[aá]ximo de mensajes/i;
-const LIMIT_PLACEHOLDER = "Por hoy llegamos al máximo de mensajes. Mañana seguimos.";
+import { computePlaceholder } from "./placeholder";
+export { computePlaceholder, LIMIT_PLACEHOLDER } from "./placeholder";
+export type { ComputePlaceholderInput } from "./placeholder";
+
+
 const NEAR_BOTTOM_PX = 120;
 const JUMP_AFTER_PX = 360;
 
@@ -396,7 +400,7 @@ export function useConversation({ conversationId, initialMessages }: UseConversa
   }, []);
 
   const disabled = limit || !online;
-  const placeholder = limit ? LIMIT_PLACEHOLDER : !online ? "Sin conexión" : undefined;
+  const placeholder = computePlaceholder({ limit, online, replies, busy, items });
   const failedStart = items.length === 1 && items[0].kind === "advisor" && items[0].error !== null;
 
   /** Con el teclado abierto el último mensaje debe seguir a la vista. */

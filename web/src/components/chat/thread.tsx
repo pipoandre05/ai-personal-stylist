@@ -32,7 +32,7 @@ function dayLabel(iso: string, todayKey: string): string {
 
 function DaySeparator({ label }: { label: string }) {
   return (
-    <div className="flex items-center gap-3 text-xs font-medium uppercase tracking-[0.14em] text-tinta-suave">
+    <div className="flex items-center gap-3 text-sobretitulo uppercase text-tinta-suave">
       <span aria-hidden="true" className="h-px flex-1 bg-linea" />
       {label}
       <span aria-hidden="true" className="h-px flex-1 bg-linea" />
@@ -126,7 +126,7 @@ function AdvisorTurn({
 }) {
   const animate = item.fresh;
   return (
-    <div className={cn("flex flex-col gap-4", animate && "animate-aparecer")}>
+    <div className={cn("flex flex-col gap-3.5", animate && "animate-aparecer")}>
       <AdvisorMessage text={item.text} streaming={item.streaming && !showStatus} />
       {item.garments.map((g) => (
         <GarmentCard key={g.id} garment={g} animate={animate} />
@@ -140,7 +140,7 @@ function AdvisorTurn({
       ))}
       {showStatus ? <ToolStatus tool={tool} /> : null}
       {item.error ? (
-        <div role="alert" className="border-l-2 border-error pl-3 text-base text-tinta">
+        <div role="alert" className="border-l-[3px] border-error pl-3 text-destacado text-tinta">
           <p>{item.error}</p>
           {LIMIT.test(item.error) ? null : (
             <button type="button" onClick={onRetry} className={btnText}>
