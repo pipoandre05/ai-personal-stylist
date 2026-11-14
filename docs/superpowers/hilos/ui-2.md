@@ -141,3 +141,21 @@ Verificado en navegador a 390x844 (dev server puerto 3220, AI_MODE=mock):
 - Trazo base 2px (strokeWidth={2}), extremos y uniones redondeadas (round).
 
 Veredicto visual: Conforme sin observaciones. Cero hallazgos abiertos.
+
+### 2026-11-14 14:29 · Revisor · veredicto · vuelta 0
+
+Revisión de código completada sin hallazgos:
+1. Frontera: verificada con `bash agentes/scripts/verificar-frontera.sh equipo/ui-2-primitivas` (10 archivos modificados en components/ui, components/chat/styles.ts, tests y docs, todos dentro de la frontera permitida).
+2. Seguridad y datos: componentes puramente presentacionales y de interacción accesible; sin datos sensibles, sin llamadas a IA desde cliente, sin exposición de secretos.
+3. Reglas del repo y accesibilidad:
+   - Botones: píldora completa (`rounded-full`, `border-[1.5px]`), tamaños estándar 52 px (`h-[52px]`) y mediano 44 px (`h-11`). Variantes lima `bg-accion text-sobre-color`, inverso `bg-inverso text-sobre-inverso`, contorno `border-linea-fuerte text-tinta` (y `border-sobre-inverso` sobre inverso), texto y destructivo. Ícono accesible `size-5 [&>svg]:size-5 [&>svg]:stroke-2`.
+   - Chips: visual 36 px (`h-9`), táctil accesible de 44 px con `after:absolute after:-inset-1`. Selección en `bg-inverso border-inverso text-sobre-inverso` (nunca lima).
+   - Field/Input: `min-h-12`, `rounded-campo`, `bg-hundido`, sin borde estático, foco azul 3 px (`ring-3 ring-foco`), etiqueta `text-control` y error accesible `text-meta text-error` con `role="alert"`.
+   - Toast y ErrorBlock: toast en `aria-live="polite"` con `bg-inverso text-sobre-inverso`; `ErrorBlock` con `role="alert"`, `border-error` y acción "Reintentar".
+   - Íconos: trazo uniforme 2 px (`strokeWidth={2}`), `strokeLinecap="round"`, `strokeLinejoin="round"`.
+   - `cardBase`: `rounded-tarjeta bg-superficie p-[18px]` sin bordes duros ni sombras. `eyebrowAccent` sin alias transitorio `acento`.
+4. Tokens y CSS: 100% de clases validadas contra `@theme` en `globals.css` y `DESIGN.MD`. Suite `tokens.test.ts` pasando con 0 clases inventadas.
+5. Verificación técnica: `npm run verify` en verde (lint, typecheck, vitest 136/136 tests pasando, incluyendo los 13 de `tests/ui/primitives.test.ts`) y `npm run build` exitoso.
+6. Hallazgos: 0 bloquea, 0 importante, 0 menor.
+
+VEREDICTO: Revisor aprobado sha=25676980ae9112daac6de58cf756890f4b4e1e90
