@@ -3,7 +3,7 @@ import { cn } from "./cn";
 import { IconCheck } from "./icons";
 
 const base =
-  "inline-flex min-h-11 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-[transform,opacity] duration-150 ease-estilo active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40";
+  "relative inline-flex h-9 items-center justify-center gap-1.5 rounded-full border-[1.5px] font-body text-control transition-[transform,opacity,background-color,border-color,color] duration-150 ease-salida active:scale-[0.97] after:absolute after:-inset-1 disabled:cursor-not-allowed disabled:opacity-45";
 
 export type ChipProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "role"> & {
   selected?: boolean;
@@ -24,15 +24,14 @@ export function Chip({ selected = false, mode = "toggle", className, children, t
       : mode === "toggle"
         ? { "aria-pressed": selected }
         : {};
-  const tone =
-    mode === "shortcut"
-      ? "border-linea-fuerte bg-superficie text-tinta"
-      : selected
-        ? "border-acento bg-acento-suave text-acento"
-        : "border-transparent bg-hundido text-tinta";
+
+  const tone = selected
+    ? "border-inverso bg-inverso text-sobre-inverso"
+    : "border-linea-fuerte bg-transparent text-tinta hover:bg-hundido/60";
+
   return (
-    <button type={type} className={cn(base, tone, mode === "shortcut" && "shrink-0", className)} {...aria} {...rest}>
-      {selected && mode !== "shortcut" ? <IconCheck className="size-4" /> : null}
+    <button type={type} className={cn(base, "px-4", tone, mode === "shortcut" && "shrink-0", className)} {...aria} {...rest}>
+      {selected && mode !== "shortcut" ? <IconCheck className="size-4 shrink-0 text-sobre-inverso" /> : null}
       {children}
     </button>
   );
@@ -41,7 +40,7 @@ export function Chip({ selected = false, mode = "toggle", className, children, t
 /** Chip de solo lectura (perfil). No es un botón. */
 export function ReadOnlyChip({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <span className={cn("inline-flex min-h-8 items-center rounded-full bg-hundido px-3 text-sm text-tinta-suave", className)}>
+    <span className={cn("inline-flex h-9 items-center rounded-full border-[1.5px] border-linea-fuerte bg-transparent px-4 font-body text-control text-tinta", className)}>
       {children}
     </span>
   );

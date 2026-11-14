@@ -1,6 +1,6 @@
 import type { SVGProps } from "react";
 
-// Íconos SVG inline: 24×24, trazo 1.5, currentColor (DESIGN.MD §3).
+// Íconos SVG inline: 24×24, trazo 2, currentColor (DESIGN.MD §3, Prendie identity).
 // Decorativos por defecto (aria-hidden); si el ícono es lo único que hay en un botón,
 // el botón debe llevar aria-label.
 
@@ -13,7 +13,7 @@ function Base({ children, className = "size-6", ...rest }: IconProps & { childre
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.5}
+      strokeWidth={2}
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"

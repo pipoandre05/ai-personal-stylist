@@ -3,31 +3,77 @@ import type { ButtonHTMLAttributes, ComponentProps, ReactNode } from "react";
 import { cn } from "./cn";
 import { Spinner } from "./spinner";
 
-export type ButtonVariant = "primary" | "secondary" | "text" | "destructive";
+export type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "text"
+  | "destructive"
+  | "principal"
+  | "inverso"
+  | "outline"
+  | "contorno";
+
+export type ButtonSize = "default" | "standard" | "mediano" | "sm";
 
 const base =
-  "inline-flex min-w-11 items-center justify-center gap-2 rounded-sm font-body font-semibold transition-[transform,opacity] duration-150 ease-estilo active:scale-[0.98] aria-disabled:cursor-not-allowed aria-disabled:opacity-40 disabled:cursor-not-allowed disabled:opacity-40";
+  "inline-flex items-center justify-center gap-2 rounded-full border-[1.5px] font-body leading-none transition-[transform,opacity] duration-150 ease-salida active:scale-[0.97] aria-disabled:cursor-not-allowed aria-disabled:opacity-45 disabled:cursor-not-allowed disabled:opacity-45";
 
-const variants: Record<ButtonVariant, string> = {
-  primary: "h-12 px-5 text-base bg-tinta text-superficie hover:opacity-90",
-  secondary: "h-12 px-5 text-base border border-tinta bg-transparent text-tinta hover:bg-hundido",
-  text: "h-11 px-2 text-base font-medium text-acento underline decoration-1 underline-offset-4",
-  destructive: "h-12 px-5 text-base bg-error text-superficie hover:opacity-90",
+const sizes: Record<ButtonSize, string> = {
+  default: "h-[52px] px-6 text-base font-extrabold",
+  standard: "h-[52px] px-6 text-base font-extrabold",
+  mediano: "h-11 px-[18px] text-sm font-bold",
+  sm: "h-11 px-[18px] text-sm font-bold",
+};
+
+export type ButtonStyleOptions = {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  onInverse?: boolean;
+  fullWidth?: boolean;
+  className?: string;
 };
 
 /** Clases del botón, para aplicarlas a otros elementos (enlaces, labels). */
 export function buttonStyles({
   variant = "primary",
+  size = "default",
+  onInverse = false,
   fullWidth = false,
   className,
-}: { variant?: ButtonVariant; fullWidth?: boolean; className?: string } = {}) {
-  return cn(base, variants[variant], fullWidth && "w-full", className);
+}: ButtonStyleOptions = {}) {
+  const isOutline = variant === "secondary" || variant === "outline" || variant === "contorno";
+  const isPrimary = variant === "primary" || variant === "principal";
+  const isInverso = variant === "inverso";
+  const isText = variant === "text";
+  const isDestructive = variant === "destructive";
+
+  let variantCls = "";
+  if (isPrimary) {
+    variantCls = "border-transparent bg-accion text-sobre-color hover:opacity-90";
+  } else if (isInverso) {
+    variantCls = "border-transparent bg-inverso text-sobre-inverso hover:opacity-90";
+  } else if (isOutline) {
+    variantCls = onInverse
+      ? "border-sobre-inverso text-sobre-inverso bg-transparent hover:bg-sobre-inverso/10"
+      : "border-linea-fuerte text-tinta bg-transparent hover:bg-hundido";
+  } else if (isText) {
+    variantCls = "border-transparent bg-transparent text-tinta underline underline-offset-4 hover:opacity-80";
+  } else if (isDestructive) {
+    variantCls = "border-transparent bg-error text-sobre-estado hover:opacity-90";
+  }
+
+  // Variante texto siempre usa altura compacta de 44 px (h-11 px-2 text-sm)
+  const sizeCls = isText ? "h-11 px-2 text-sm font-bold" : sizes[size] ?? sizes.default;
+
+  return cn(base, sizeCls, variantCls, fullWidth && "w-full", className);
 }
 
 type CommonProps = {
   variant?: ButtonVariant;
+  size?: ButtonSize;
+  onInverse?: boolean;
   fullWidth?: boolean;
-  /** Ícono opcional antes de la etiqueta. */
+  /** Ícono opcional antes de la etiqueta (trazo 2, tamaño 20 px / size-5). */
   icon?: ReactNode;
 };
 
@@ -41,6 +87,8 @@ export type ButtonProps = CommonProps &
 
 export function Button({
   variant = "primary",
+  size = "default",
+  onInverse = false,
   fullWidth,
   icon,
   loading = false,
@@ -51,15 +99,21 @@ export function Button({
   type = "button",
   ...rest
 }: ButtonProps) {
+  const renderIcon = icon ? (
+    <span className="inline-flex size-5 shrink-0 items-center justify-center [&>svg]:size-5 [&>svg]:stroke-2" aria-hidden="true">
+      {icon}
+    </span>
+  ) : null;
+
   return (
     <button
       type={type}
-      className={buttonStyles({ variant, fullWidth, className })}
+      className={buttonStyles({ variant, size, onInverse, fullWidth, className })}
       disabled={disabled || loading}
       aria-busy={loading || undefined}
       {...rest}
     >
-      {loading ? <Spinner /> : icon}
+      {loading ? <Spinner /> : renderIcon}
       {loading && loadingLabel ? loadingLabel : children}
     </button>
   );
@@ -70,15 +124,23 @@ export type ButtonLinkProps = CommonProps & ComponentProps<typeof Link>;
 /** Enlace con apariencia de botón (navegación, no acción). */
 export function ButtonLink({
   variant = "primary",
+  size = "default",
+  onInverse = false,
   fullWidth,
   icon,
   className,
   children,
   ...rest
 }: ButtonLinkProps) {
-  return (
-    <Link className={buttonStyles({ variant, fullWidth, className })} {...rest}>
+  const renderIcon = icon ? (
+    <span className="inline-flex size-5 shrink-0 items-center justify-center [&>svg]:size-5 [&>svg]:stroke-2" aria-hidden="true">
       {icon}
+    </span>
+  ) : null;
+
+  return (
+    <Link className={buttonStyles({ variant, size, onInverse, fullWidth, className })} {...rest}>
+      {renderIcon}
       {children}
     </Link>
   );
