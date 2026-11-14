@@ -12,9 +12,26 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
+import { selectShoppingOption } from "@/lib/actions/shopping";
+import { updateEventSummary } from "@/lib/actions/event";
+import { setOutfitStatus } from "@/lib/actions/outfits";
 import { streamChat } from "@/lib/client/api";
+import { applyEventToTurn, emptyTurnState, type TurnState } from "./v2/thread-items-v2";
+import { useToast } from "@/components/ui/toast";
 import { uploadUserImage } from "@/lib/client/upload";
-import type { AgentToolName, ChatEvent, ChatMessageView, ColorAnalysis, GarmentView, OutfitView, QuickReplies } from "@/lib/domain/types";
+import type {
+  AgentToolName,
+  ChatEvent,
+  ChatIntent,
+  ChatMessageView,
+  ColorAnalysis,
+  EventField,
+  GarmentView,
+  OutfitStatus,
+  OutfitView,
+  QuickReplies,
+  ShoppingOptionsBlock,
+} from "@/lib/domain/types";
 import type { ComposerHandle } from "./composer";
 import { dayKey } from "./thread";
 import { toItems, type AdvisorItem, type PersonItem, type ThreadItem } from "./thread-types";
@@ -24,9 +41,17 @@ export type UseConversationInput = {
   initialMessages: ChatMessageView[];
 };
 
-type Turn = { text: string; imagePath?: string; start?: boolean };
-type Attempt = { text: string; file: File | null; imagePath?: string };
-type Acc = { text: string; outfits: OutfitView[]; garments: GarmentView[]; palette: ColorAnalysis | null; memories: string[] };
+type Turn = { text: string; imagePath?: string; start?: boolean; intent?: ChatIntent; clientMessageId?: string };
+type Attempt = { text: string; file: File | null; imagePath?: string; intent?: ChatIntent; clientMessageId: string };
+type Acc = {
+  text: string;
+  outfits: OutfitView[];
+  garments: GarmentView[];
+  palette: ColorAnalysis | null;
+  memories: string[];
+  /** Contrato v2: pasos, evento, looks, oferta y opciones del turno en vivo. */
+  turn: TurnState;
+};
 
 const GENERIC = "Algo salió mal. Intenta de nuevo en un momento.";
 const CUT_OFF = "Se cortó mi respuesta. Tu mensaje quedó guardado.";
@@ -72,16 +97,44 @@ function mergeServer(prev: ThreadItem[], server: ChatMessageView[]): ThreadItem[
     const garments = item.garments.length ? item.garments : s.garments;
     const outfits = item.outfits.length ? item.outfits : s.outfits;
     const palette = item.palette ?? s.palette;
-    if (garments === item.garments && outfits === item.outfits && palette === item.palette) return item;
+    const tool_steps = item.tool_steps?.length || !s.tool_steps?.length ? item.tool_steps : s.tool_steps;
+    const event_summary = item.event_summary ?? s.event_summary ?? null;
+    const shopping_blocks = item.shopping_blocks?.length || !s.shopping_blocks?.length ? item.shopping_blocks : s.shopping_blocks;
+    const search_offer = item.search_offer ?? s.search_offer ?? null;
+    if (
+      garments === item.garments &&
+      outfits === item.outfits &&
+      palette === item.palette &&
+      tool_steps === item.tool_steps &&
+      event_summary === (item.event_summary ?? null) &&
+      shopping_blocks === item.shopping_blocks &&
+      search_offer === (item.search_offer ?? null)
+    )
+      return item;
     changed = true;
-    return { ...item, garments, outfits, palette };
+    return { ...item, garments, outfits, palette, tool_steps, event_summary, shopping_blocks, search_offer };
   });
   return changed ? next : prev;
 }
 
+const COUNT_WORDS = ["", "una", "dos", "tres", "cuatro", "cinco"];
+const countWord = (n: number) => COUNT_WORDS[n] ?? String(n);
+
+/** Resumen para lectores de pantalla de lo nuevo del turno (UX_UI_SPEC §9). */
 function announcementFor(acc: Acc): string {
   const bits = [acc.text.trim()];
-  for (const o of acc.outfits) bits.push(`Te propuse un look: ${o.title}.`);
+  const { turn } = acc;
+  if (turn.event_summary) bits.push("Entendí tu evento.");
+  const pairs = new Map<string, number>();
+  for (const o of acc.outfits) if (o.pair_id) pairs.set(o.pair_id, (pairs.get(o.pair_id) ?? 0) + 1);
+  for (const n of pairs.values()) if (n === 2) bits.push("Dos looks propuestos.");
+  for (const o of acc.outfits) if (!o.pair_id || pairs.get(o.pair_id) !== 2) bits.push(`Te propuse un look: ${o.title}.`);
+  if (turn.search_offer) bits.push("Puedo buscarte opciones de compra.");
+  for (const b of turn.shopping_blocks) {
+    const n = b.options.length;
+    const word = countWord(n);
+    bits.push(n > 0 ? `${word[0].toUpperCase()}${word.slice(1)} ${n === 1 ? "opción" : "opciones"} de compra.` : "No encontré opciones de compra.");
+  }
   for (const g of acc.garments) bits.push(`Reconocí: ${g.name}.`);
   if (acc.palette) bits.push(`Tu paleta: ${acc.palette.season}, confianza ${acc.palette.confidence}.`);
   for (const m of acc.memories) bits.push(`Anotado: ${m}.`);
@@ -90,6 +143,7 @@ function announcementFor(acc: Acc): string {
 
 export function useConversation({ conversationId, initialMessages }: UseConversationInput) {
   const router = useRouter();
+  const { toast } = useToast();
   const [items, setItems] = useState<ThreadItem[]>(() => toItems(initialMessages));
   const [replies, setReplies] = useState<QuickReplies | null>(() => {
     const last = initialMessages.at(-1);
@@ -101,6 +155,8 @@ export function useConversation({ conversationId, initialMessages }: UseConversa
   const [limit, setLimit] = useState(false);
   const [announcement, setAnnouncement] = useState({ n: 0, text: "" });
   const [showJump, setShowJump] = useState(false);
+  const [editField, setEditField] = useState<EventField | null>(null);
+  const [actionBusy, setActionBusy] = useState(false);
   // "Hoy" depende de la hora actual: solo existe en el cliente (el prerender no puede leer el reloj).
   const todayKey = useSyncExternalStore(subscribeNever, () => dayKey(new Date().toISOString()), () => "");
   const [seenProps, setSeenProps] = useState(initialMessages);
@@ -146,10 +202,16 @@ export function useConversation({ conversationId, initialMessages }: UseConversa
   }, []);
 
   useEffect(() => {
+    let lastY = window.scrollY;
     const onScroll = () => {
+      const y = window.scrollY;
+      const movedUp = y < lastY - 2;
+      lastY = y;
       if (Date.now() < lockUntil.current) return;
       const d = distanceFromBottom();
-      stick.current = d < NEAR_BOTTOM_PX;
+      // Solo cuenta como "subió a leer" si la persona fue hacia arriba: una tarjeta alta que crece de golpe no mueve scrollY.
+      if (d < NEAR_BOTTOM_PX) stick.current = true;
+      else if (movedUp) stick.current = false;
       setShowJump(d > JUMP_AFTER_PX);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -161,6 +223,8 @@ export function useConversation({ conversationId, initialMessages }: UseConversa
     if (!el) return;
     const ro = new ResizeObserver(() => {
       if (!stick.current) return;
+      // Una tarjeta alta crece de golpe: el scroll que provocamos nosotros no cuenta como "la persona subió a leer".
+      lockUntil.current = Date.now() + 250;
       scrollToBottom(smoothNext.current);
       smoothNext.current = false;
     });
@@ -191,14 +255,22 @@ export function useConversation({ conversationId, initialMessages }: UseConversa
     setTool(null);
     setReplies(null);
 
-    const acc: Acc = { text: "", outfits: [], garments: [], palette: null, memories: [] };
+    const acc: Acc = { text: "", outfits: [], garments: [], palette: null, memories: [], turn: emptyTurnState() };
     const fresh: AdvisorItem = {
       kind: "advisor",
       key,
       id: null,
       at: new Date().toISOString(),
       fresh: true,
-      ...acc,
+      text: "",
+      outfits: [],
+      garments: [],
+      palette: null,
+      memories: [],
+      tool_steps: [],
+      event_summary: null,
+      shopping_blocks: [],
+      search_offer: null,
       streaming: true,
       error: null,
     };
@@ -215,6 +287,10 @@ export function useConversation({ conversationId, initialMessages }: UseConversa
                 garments: [...acc.garments],
                 palette: acc.palette,
                 memories: [...acc.memories],
+                tool_steps: acc.turn.tool_steps,
+                event_summary: acc.turn.event_summary,
+                shopping_blocks: acc.turn.shopping_blocks,
+                search_offer: acc.turn.search_offer,
                 ...extra,
               }
             : i,
@@ -246,7 +322,15 @@ export function useConversation({ conversationId, initialMessages }: UseConversa
           setAwaiting(true);
           break;
         case "outfit":
-          acc.outfits = [...acc.outfits.filter((o) => o.id !== e.outfit.id), e.outfit];
+          acc.turn = applyEventToTurn(acc.turn, e);
+          acc.outfits = acc.turn.outfits;
+          update();
+          break;
+        case "tool_step":
+        case "event_summary":
+        case "search_offer":
+        case "shopping_options":
+          acc.turn = applyEventToTurn(acc.turn, e);
           update();
           break;
         case "garment":
@@ -277,7 +361,14 @@ export function useConversation({ conversationId, initialMessages }: UseConversa
 
     try {
       await streamChat(
-        { conversation_id: convRef.current ?? undefined, text: turn.text, image_path: turn.imagePath, start: turn.start },
+        {
+          conversation_id: convRef.current ?? undefined,
+          text: turn.text,
+          image_path: turn.imagePath,
+          start: turn.start,
+          intent: turn.intent,
+          client_message_id: turn.clientMessageId,
+        },
         onEvent,
         controller.signal,
       );
@@ -285,7 +376,10 @@ export function useConversation({ conversationId, initialMessages }: UseConversa
       thrown = err instanceof Error ? err.message : GENERIC;
     }
 
-    const hasContent = Boolean(acc.text.trim() || acc.outfits.length || acc.garments.length || acc.palette);
+    const t = acc.turn;
+    const hasContent = Boolean(
+      acc.text.trim() || acc.outfits.length || acc.garments.length || acc.palette || t.tool_steps.length || t.event_summary || t.search_offer || t.shopping_blocks.length,
+    );
     if (thrown && !gotEvent) {
       // La request ni siquiera empezó (red, 429, sesión): el mensaje de la persona queda marcado como no enviado.
       if (LIMIT_TEXT.test(thrown)) setLimit(true);
@@ -325,10 +419,10 @@ export function useConversation({ conversationId, initialMessages }: UseConversa
       return setBusyBoth(false);
     }
     patchPerson(personKey, { status: "sending", error: null });
-    await runTurn({ text: attempt.text, imagePath: attempt.imagePath }, personKey);
+    await runTurn({ text: attempt.text, imagePath: attempt.imagePath, intent: attempt.intent, clientMessageId: attempt.clientMessageId }, personKey);
   }
 
-  function send(text: string, file: File | null = null) {
+  function send(text: string, file: File | null = null, intent?: ChatIntent) {
     const clean = text.trim();
     if (busyRef.current || (!clean && !file)) return;
     setBusyBoth(true);
@@ -338,7 +432,8 @@ export function useConversation({ conversationId, initialMessages }: UseConversa
       imageUrl = URL.createObjectURL(file);
       blobUrls.current.push(imageUrl);
     }
-    attempts.current.set(key, { text: clean, file });
+    // Un uuid por mensaje de la persona: el reintento reenvía el mismo y el servidor no duplica.
+    attempts.current.set(key, { text: clean, file, intent, clientMessageId: crypto.randomUUID() });
     setItems((prev) => [
       ...prev,
       {
@@ -380,6 +475,81 @@ export function useConversation({ conversationId, initialMessages }: UseConversa
 
   const stop = () => abortRef.current?.abort();
 
+  // --- Acciones de las tarjetas v2 (la lógica y las reglas viven en el servidor) ---
+
+  /** Chip de refinamiento u oferta: el rótulo visible es el mensaje de la persona; el `intent` va tal cual vino. */
+  const refine = (intent: ChatIntent, label: string) => send(label, null, intent);
+
+  const mapOutfits = (fn: (o: OutfitView) => OutfitView) =>
+    setItems((prev) => prev.map((i) => (i.kind === "advisor" && i.outfits.length ? { ...i, outfits: i.outfits.map(fn) } : i)));
+
+  async function changeOutfitStatus(outfit: OutfitView, status: Exclude<OutfitStatus, "proposed">) {
+    const before = outfit.status;
+    setActionBusy(true);
+    mapOutfits((o) => (o.id === outfit.id ? { ...o, status } : o));
+    const res = await setOutfitStatus(outfit.id, status);
+    if (!res.ok) {
+      mapOutfits((o) => (o.id === outfit.id ? { ...o, status: before } : o));
+      toast({ message: res.error, tone: "error" });
+    }
+    setActionBusy(false);
+  }
+  const saveOutfit = (o: OutfitView) => void changeOutfitStatus(o, "saved");
+  const discardOutfit = (o: OutfitView) => void changeOutfitStatus(o, "discarded");
+
+  async function selectOption(block: ShoppingOptionsBlock, outfitId: string | null, optionId: string | null) {
+    if (!outfitId) return;
+    const before = block.selected_option_id;
+    const apply = (id: string | null) =>
+      setItems((prev) =>
+        prev.map((i) => {
+          if (i.kind !== "advisor") return i;
+          const hasBlock = i.shopping_blocks?.some((b) => b.id === block.id);
+          const hasOutfit = i.outfits.some((o) => o.id === outfitId);
+          if (!hasBlock && !hasOutfit) return i;
+          const option = block.options.find((o) => o.id === id) ?? null;
+          return {
+            ...i,
+            shopping_blocks: i.shopping_blocks?.map((b) => (b.id === block.id ? { ...b, selected_option_id: id } : b)),
+            outfits: i.outfits.map((o) => (o.id === outfitId ? { ...o, selected_option: option } : o)),
+          };
+        }),
+      );
+    setActionBusy(true);
+    apply(optionId);
+    const res = await selectShoppingOption(outfitId, optionId);
+    if (!res.ok) {
+      apply(before);
+      toast({ message: res.error, tone: "error" });
+    }
+    setActionBusy(false);
+  }
+
+  const openEdit = (field: EventField) => setEditField(field);
+  const closeEdit = () => setEditField(null);
+
+  async function submitEdit(value: string) {
+    if (!editField) return;
+    setActionBusy(true);
+    const res = await updateEventSummary({ [editField]: value } as Parameters<typeof updateEventSummary>[0], convRef.current ?? undefined);
+    setActionBusy(false);
+    if (!res.ok) {
+      toast({ message: res.error, tone: "error" });
+      return;
+    }
+    // El servidor corrige el último resumen de la conversación: es el del último turno que lo trae.
+    setItems((prev) => {
+      let at = -1;
+      prev.forEach((i, n) => {
+        if (i.kind === "advisor" && i.event_summary) at = n;
+      });
+      return at === -1 ? prev : prev.map((i, n) => (n === at && i.kind === "advisor" ? { ...i, event_summary: res.data } : i));
+    });
+    setEditField(null);
+  }
+
+  const editingSummary = [...items].reverse().find((i) => i.kind === "advisor" && i.event_summary);
+
   // Saludo inicial: sin historial el asesor abre la conversación. El ref protege del doble disparo de StrictMode.
   // No se cancela al desmontar (StrictMode desmonta y vuelve a montar): el servidor termina y persiste el turno igual.
   const greet = useEffectEvent(() => {
@@ -400,7 +570,12 @@ export function useConversation({ conversationId, initialMessages }: UseConversa
   }, []);
 
   const disabled = limit || !online;
-  const placeholder = computePlaceholder({ limit, online, replies, busy, items });
+  const basePlaceholder = computePlaceholder({ limit, online, replies, busy, items });
+  const tail = items.at(-1);
+  const placeholder =
+    tail?.kind === "advisor" && tail.shopping_blocks?.length && !busy && !limit && online && !(replies && replies.options.length)
+      ? "Pregunta por una opción…"
+      : basePlaceholder;
   const failedStart = items.length === 1 && items[0].kind === "advisor" && items[0].error !== null;
 
   /** Con el teclado abierto el último mensaje debe seguir a la vista. */
@@ -430,6 +605,16 @@ export function useConversation({ conversationId, initialMessages }: UseConversa
     send,
     retryPerson,
     retryAdvisor,
+    refine,
+    saveOutfit,
+    discardOutfit,
+    selectOption,
+    editField,
+    editSummary: editingSummary && editingSummary.kind === "advisor" ? editingSummary.event_summary ?? null : null,
+    openEdit,
+    closeEdit,
+    submitEdit,
+    actionBusy,
     stop,
     jumpToEnd,
     onFocusField,
