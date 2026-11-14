@@ -131,3 +131,12 @@ Cualquiera de estas, sin tocar código: `SHOPPING_SEARCH=none` (o `mock`), o dej
 - Mercado Libre no se incluye (no permite agentes externos, DT-09).
 - Las tiendas que bloquean bots (403) o prohíben la ruta por `robots.txt` (Doite, Tricot) **no se consultan por ningún medio alternativo**.
 - Antes de lanzar: A-01 (aprobación formal de DT-09) y una conversación con las tiendas elegidas; la lista definitiva de tiendas la entrega el dueño.
+
+## Pendiente: ampliar dónde se busca (decidido 2026-11-14, para después de la demo)
+
+Felipe pidió dejar para después el trabajo de buscar en más tiendas. Orden propuesto:
+
+1. **Más tiendas Shopify y VTEX chilenas.** Agregar una tienda es solo sumarla a `SHOP_STORES`; el lector revisa `robots.txt` en cada consulta. Probadas el 2026-11-14 con respuesta de catálogo en CLP: `wildlama.com`, `froens.cl`, `karyncoo.com`, `bestias.cl`, `savillerow.cl`, `www.bold.cl`, `lippioutdoor.com`, `www.hakahonu.cl`, `www.rkflife.com` (Rockford). `www.cardinale.cl` responde pero su `robots.txt` prohíbe la búsqueda. Falta armar la lista completa con Felipe (él conoce las marcas).
+2. **Tiendas grandes con plataforma propia** (Falabella, Paris, Hites): adaptador liviano por tienda que lea los datos estructurados de la página o su consulta interna, si `robots.txt` lo permite. Playwright se usa solo para investigar cada sitio, no en producción (lento, frágil, no corre bien en Vercel). No se evade detección de bots ni CAPTCHA.
+3. **Google Shopping como relleno** cuando no hay suficientes opciones: no tiene API oficial de búsqueda, requiere un intermediario de pago y cuenta de Felipe; zona gris de términos de uso.
+4. **Género:** el asesor debe escribir "mujer" u "hombre" en la búsqueda; hoy el lector no conoce a la persona.
