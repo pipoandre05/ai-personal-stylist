@@ -97,7 +97,7 @@ export const IconCamera = (p: IconProps) => (
   </Base>
 );
 
-/** "Tu espacio": cuatro cuadros. */
+/** \"Tu espacio\": cuatro cuadros. */
 export const IconSpace = (p: IconProps) => (
   <Base {...p}>
     <rect x="4" y="4" width="6.5" height="6.5" rx="1.2" />
@@ -116,5 +116,11 @@ export const IconChevron = (p: IconProps) => (
 export const IconShirt = (p: IconProps) => (
   <Base {...p}>
     <path d="M9 4l3 2 3-2 5 3-2 4-2-1v10H8V10l-2 1-2-4z" />
+  </Base>
+);
+
+export const IconMenu = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M4 6h16M4 12h16M4 18h16" />
   </Base>
 );

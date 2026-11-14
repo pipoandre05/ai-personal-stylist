@@ -18,6 +18,7 @@ export { Input, type InputProps } from "./input";
 export { TopBar } from "./top-bar";
 export { SpaceHeader, type SpaceHeaderProps } from "./space-header";
 export { SpaceSheet, type SpaceSummary } from "./space-sheet";
+export { SessionsSheet, type SessionsSheetProps } from "./sessions-sheet";
 export { AppHeader, type AppHeaderProps } from "./app-header";
 export { QuickReplies } from "./quick-replies";
 export { PhotoButton } from "./photo-button";

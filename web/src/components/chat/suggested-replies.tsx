@@ -5,23 +5,33 @@ import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
 import { cn } from "@/components/ui/cn";
 import { IconCamera } from "@/components/ui/icons";
+import type { ChatIntent } from "@/lib/domain/types";
 
 // El asesor ofrece "Mandar foto" / "Mandar selfie" como texto: esas opciones abren el selector en vez de enviar.
 export const PHOTO_ACTION = /^(mandar|enviar|subir|tomar|sacar)\b.*\b(foto|selfie)\b/i;
 export const SELFIE = /selfie/i;
 
+export type SuggestedOption =
+  | string
+  | {
+      id?: string;
+      label: string;
+      intent?: ChatIntent;
+    };
+
 export type SuggestedRepliesProps = {
-  options: string[];
+  options: (string | SuggestedOption)[];
   multiple?: boolean;
   disabled?: boolean;
-  onSend: (text: string) => void | Promise<void>;
+  onSend: (text: string, intent?: ChatIntent) => void | Promise<void>;
   onPickPhoto?: (selfie: boolean) => void;
   className?: string;
 };
 
 /**
- * UI-6: Respuestas sugeridas de un toque sobre el compositor.
+ * UI-6 / UI-20 (Pieza A): Zona única de respuestas sugeridas y ajustes sobre el compositor.
  * - Modo simple: botones contorno de 44 px alineados a la derecha que envían en un clic.
+ *   Dispara el texto o el intent asociado al refinamiento (looks o compras).
  *   "Mandar foto" / "Mandar selfie" incluye ícono de cámara y abre el selector de fotos.
  * - Modo múltiple: chips seleccionables (toggle) con aria-pressed y botón de acción "Listo" inverso.
  * - Sin lima (la acción lima queda reservada para el CTA principal del asesor).
@@ -43,7 +53,12 @@ export function SuggestedReplies({
     return null;
   }
 
-  const handleSendSimple = async (option: string, isPhoto: boolean, isSelfie: boolean) => {
+  const handleSendSimple = async (
+    label: string,
+    intent: ChatIntent | undefined,
+    isPhoto: boolean,
+    isSelfie: boolean,
+  ) => {
     if (disabled) return;
     if (isPhoto && onPickPhoto) {
       onPickPhoto(isSelfie);
@@ -51,16 +66,16 @@ export function SuggestedReplies({
     }
     setIsDismissing(true);
     try {
-      await onSend(option);
+      await onSend(label, intent);
     } catch {
       setIsDismissing(false);
     }
   };
 
-  const handleToggle = (option: string) => {
+  const handleToggle = (label: string) => {
     if (disabled) return;
     setPicked((prev) =>
-      prev.includes(option) ? prev.filter((item) => item !== option) : [...prev, option],
+      prev.includes(label) ? prev.filter((item) => item !== label) : [...prev, label],
     );
   };
 
@@ -86,17 +101,19 @@ export function SuggestedReplies({
     >
       {multiple ? (
         <>
-          {options.map((o) => {
-            const selected = picked.includes(o);
+          {options.map((opt) => {
+            const label = typeof opt === "string" ? opt : opt.label;
+            const key = typeof opt === "string" ? opt : opt.id || opt.label;
+            const selected = picked.includes(label);
             return (
               <Chip
-                key={o}
+                key={key}
                 mode="toggle"
                 selected={selected}
                 disabled={disabled}
-                onClick={() => handleToggle(o)}
+                onClick={() => handleToggle(label)}
               >
-                {o}
+                {label}
               </Chip>
             );
           })}
@@ -111,20 +128,23 @@ export function SuggestedReplies({
           </Button>
         </>
       ) : (
-        options.map((o) => {
-          const isPhoto = PHOTO_ACTION.test(o);
-          const isSelfie = SELFIE.test(o);
+        options.map((opt) => {
+          const label = typeof opt === "string" ? opt : opt.label;
+          const intent = typeof opt === "string" ? undefined : opt.intent;
+          const key = typeof opt === "string" ? opt : opt.id || opt.label;
+          const isPhoto = PHOTO_ACTION.test(label);
+          const isSelfie = SELFIE.test(label);
           return (
             <Button
-              key={o}
+              key={key}
               variant="contorno"
               size="mediano"
               type="button"
               disabled={disabled}
               icon={isPhoto ? <IconCamera className="size-5" /> : undefined}
-              onClick={() => handleSendSimple(o, isPhoto, isSelfie)}
+              onClick={() => handleSendSimple(label, intent, isPhoto, isSelfie)}
             >
-              {o}
+              {label}
             </Button>
           );
         })

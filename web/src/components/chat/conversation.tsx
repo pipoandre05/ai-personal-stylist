@@ -1,8 +1,9 @@
 "use client";
 
 import { AppHeader, type SpaceSummary } from "@/components/ui";
-import type { ChatMessageView } from "@/lib/domain/types";
+import type { ChatMessageView, ConversationSummary } from "@/lib/domain/types";
 import { Composer } from "./composer";
+import { StartScreen } from "./start-screen";
 import { SuggestedReplies } from "./suggested-replies";
 import { Thread } from "./thread";
 import { useConversation } from "./use-conversation";
@@ -14,22 +15,33 @@ type ConversationProps = {
   closetCount: number;
   displayName: string | null;
   spaceSummary?: SpaceSummary;
+  conversations?: ConversationSummary[];
+  autoStart?: boolean;
 };
 
-/** Presentación del hilo: solo marcado y clases. La lógica vive en `useConversation`. */
+/** Presentación del hilo y pantalla de inicio: solo marcado y clases. La lógica vive en `useConversation`. */
 export function Conversation({
   conversationId,
   initialMessages,
   closetCount,
   displayName,
   spaceSummary,
+  conversations = [],
+  autoStart = false,
 }: ConversationProps) {
-  const [c, mainRef, composerRef] = useConversation({ conversationId, initialMessages });
-  const { replies, busy, disabled } = c;
+  const [c, mainRef, composerRef] = useConversation({ conversationId, initialMessages, autoStart });
+  const { replies, activeRefinements, busy, disabled } = c;
+
+  const showStartScreen = c.items.length === 0;
 
   return (
     <main id="contenido" ref={mainRef} className="mx-auto flex min-h-dvh w-full max-w-app flex-col bg-fondo">
-      <AppHeader summary={spaceSummary} closetCount={closetCount} />
+      <AppHeader
+        summary={spaceSummary}
+        closetCount={closetCount}
+        conversations={conversations}
+        currentConversationId={conversationId}
+      />
       <h1 className="sr-only">Tu asesor de imagen</h1>
 
       {!c.online ? (
@@ -38,25 +50,34 @@ export function Conversation({
         </p>
       ) : null}
 
-      <Thread
-        items={c.items}
-        busy={busy}
-        tool={c.tool}
-        showStatus={c.awaiting}
-        todayKey={c.todayKey}
-        onRetryPerson={c.retryPerson}
-        onRetryAdvisor={c.retryAdvisor}
-        onAsk={(text) => c.send(text)}
-        actionBusy={c.actionBusy}
-        handlers={{
-          onEditEvent: c.openEdit,
-          onSaveOutfit: c.saveOutfit,
-          onDiscardOutfit: c.discardOutfit,
-          onRefine: c.refine,
-          onSearchOfferAction: (a) => c.refine(a.intent, a.label),
-          onSelectOption: c.selectOption,
-        }}
-      />
+      {showStartScreen ? (
+        <StartScreen
+          displayName={displayName}
+          onSelectSuggestion={(text) => c.send(text)}
+          disabled={busy || disabled}
+        />
+      ) : (
+        <Thread
+          items={c.items}
+          busy={busy}
+          tool={c.tool}
+          showStatus={c.awaiting}
+          todayKey={c.todayKey}
+          onRetryPerson={c.retryPerson}
+          onRetryAdvisor={c.retryAdvisor}
+          onAsk={(text) => c.send(text)}
+          actionBusy={c.actionBusy}
+          handlers={{
+            onEditEvent: c.openEdit,
+            onSaveOutfit: c.saveOutfit,
+            onDiscardOutfit: c.discardOutfit,
+            onRefine: c.refine,
+            onSearchOfferAction: (a) => c.refine(a.intent, a.label),
+            onSelectOption: c.selectOption,
+          }}
+        />
+      )}
+
       <EventEditor field={c.editField} summary={c.editSummary} busy={c.actionBusy} onClose={c.closeEdit} onSubmit={c.submitEdit} />
 
       {c.failedStart ? (
@@ -79,12 +100,20 @@ export function Conversation({
           </button>
         ) : null}
 
+        {/* Zona única de respuestas rápidas sobre el compositor (UI-20, Pieza A) */}
         {replies && !busy && !disabled ? (
           <SuggestedReplies
             key={`${replies.multiple}-${replies.options.join("|")}`}
             options={replies.options}
             multiple={replies.multiple}
             onSend={(text) => c.send(text)}
+            onPickPhoto={c.pickPhoto}
+          />
+        ) : activeRefinements.length > 0 && !busy && !disabled ? (
+          <SuggestedReplies
+            key={activeRefinements.map((r) => r.id).join("|")}
+            options={activeRefinements}
+            onSend={(text, intent) => c.send(text, null, intent)}
             onPickPhoto={c.pickPhoto}
           />
         ) : null}

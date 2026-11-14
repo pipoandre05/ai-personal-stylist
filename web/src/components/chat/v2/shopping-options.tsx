@@ -1,5 +1,6 @@
+import { useRef } from "react";
 import { cn } from "@/components/ui/cn";
-import { Button, buttonStyles } from "@/components/ui/button";
+import { buttonStyles } from "@/components/ui/button";
 import { IconCheck } from "@/components/ui/icons";
 import type { ChatIntent, OutfitView, ProductOption, ShoppingOptionsBlock } from "@/lib/domain/types";
 import { fmtCLP } from "@/lib/format";
@@ -14,7 +15,7 @@ export type ShoppingOptionsProps = {
   outfit?: OutfitView | null;
   /** Elegir una opción (`selectShoppingOption`) o quitar la elección (`null`). Elegir no compra nada. */
   onSelect?: (optionId: string | null) => void;
-  /** Refinar la búsqueda ("Más baratos"): `intent` tal cual a `streamChat`, `label` es lo que ve la persona. */
+  /** @deprecated Los ajustes de compra ahora se consolidan sobre el compositor en suggested-replies (UI-20). */
   onRefine?: (intent: ChatIntent, label: string) => void;
   busy?: boolean;
   /** Para "visto hoy": se fija en la vista previa; por defecto, ahora. */
@@ -38,15 +39,41 @@ function optionPhoto(o: ProductOption): string | null {
 }
 
 /**
- * Opciones de compra honestas: hasta 3, con tienda, precio en CLP, cuándo se vieron y el aviso de que pueden cambiar,
- * por qué completan el look y si el enlace lleva comisión. "Ver en la tienda" abre la tienda en otra pestaña: nunca va
- * en el color de acción y nunca dice "comprar" (el asesor no compra, DP-09). La opción elegida se dice con palabra.
+ * Opciones de compra honestas en carrusel horizontal (UI-20, Pieza B):
+ * - Contenedor deslizable horizontal con scroll-snap (snap-x snap-mandatory) y navegación por teclado (flechas).
+ * - Si hay 1 sola opción, ocupa el ancho completo sin parecer carrusel roto.
+ * - Tarjetas accesibles (lector de pantalla con "Opción X de Y", min target >= 44 px).
+ * - En la ficha solo queda "Ver en la tienda" (con aviso de afiliación DP-10).
+ * - Los botones de ajuste / refinamientos se extraen y consolidan sobre el compositor en suggested-replies (UI-20, Pieza A).
  */
-export function ShoppingOptions({ block, outfit, onSelect, onRefine, busy = false, now, animate = false, className }: ShoppingOptionsProps) {
+export function ShoppingOptions({
+  block,
+  outfit,
+  onSelect,
+  busy = false,
+  now,
+  animate = false,
+  className,
+}: ShoppingOptionsProps) {
+  const listRef = useRef<HTMLOListElement>(null);
   const options = block.options.slice(0, 3);
   const selected = options.find((o) => o.id === block.selected_option_id) ?? null;
   const selectedIndex = selected ? options.indexOf(selected) + 1 : 0;
-  const refinements = block.refinements;
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLOListElement>) => {
+    if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+    const buttons = listRef.current?.querySelectorAll<HTMLButtonElement>("button");
+    if (!buttons?.length) return;
+    const activeIndex = Array.from(buttons).indexOf(document.activeElement as HTMLButtonElement);
+    if (activeIndex === -1) return;
+    if (e.key === "ArrowRight" && activeIndex < buttons.length - 1) {
+      e.preventDefault();
+      buttons[activeIndex + 1].focus();
+    } else if (e.key === "ArrowLeft" && activeIndex > 0) {
+      e.preventDefault();
+      buttons[activeIndex - 1].focus();
+    }
+  };
 
   if (options.length === 0) {
     return (
@@ -59,7 +86,6 @@ export function ShoppingOptions({ block, outfit, onSelect, onRefine, busy = fals
         <p className="mt-1.5 text-meta text-tinta-suave">
           Prefiero decírtelo a mostrarte algo que no calza con tu clóset o tu tope de gasto. Búsqueda: {block.query}.
         </p>
-        <RefineRow refinements={refinements} onRefine={onRefine} busy={busy} />
       </section>
     );
   }
@@ -73,49 +99,69 @@ export function ShoppingOptions({ block, outfit, onSelect, onRefine, busy = fals
 
       {outfit ? <LookStrip block={block} outfit={outfit} selected={selected} selectedIndex={selectedIndex} /> : null}
 
-      <ol className="mt-3 grid grid-cols-3 gap-2">
-        {options.map((o, i) => {
-          const isSel = o.id === selected?.id;
-          return (
-            <li
-              key={o.id}
-              className={cn(animate && "animate-aparecer")}
-              style={animate ? { animationDelay: `${i * 70}ms` } : undefined}
-            >
-              <button
-                type="button"
-                aria-pressed={isSel}
-                disabled={busy || !onSelect}
-                onClick={() => onSelect?.(isSel ? null : o.id)}
-                className="flex w-full flex-col text-left transition-transform duration-150 ease-salida active:scale-[0.97] disabled:opacity-60"
+      <div
+        role="region"
+        aria-label="Opciones de compra"
+        className="mt-3 -mx-[18px] px-[18px]"
+      >
+        <ol
+          ref={listRef}
+          onKeyDown={handleKeyDown}
+          className={cn(
+            "flex gap-3 pb-2 [scrollbar-width:none]",
+            options.length > 1
+              ? "overflow-x-auto scroll-smooth snap-x snap-mandatory motion-reduce:scroll-auto"
+              : "overflow-x-visible",
+          )}
+        >
+          {options.map((o, i) => {
+            const isSel = o.id === selected?.id;
+            return (
+              <li
+                key={o.id}
+                className={cn(
+                  "snap-start shrink-0",
+                  options.length === 1 ? "w-full" : "w-[240px] sm:w-[260px]",
+                  animate && "animate-aparecer",
+                )}
+                style={animate ? { animationDelay: `${i * 70}ms` } : undefined}
               >
-                <span
-                  className={cn(
-                    "relative grid aspect-square w-full place-items-center rounded-foto bg-hundido",
-                    isSel && "ring-2 ring-inset ring-linea-fuerte",
-                  )}
+                <button
+                  type="button"
+                  aria-pressed={isSel}
+                  aria-label={`Opción ${i + 1} de ${options.length}: ${o.title}, ${o.store_name}`}
+                  disabled={busy || !onSelect}
+                  onClick={() => onSelect?.(isSel ? null : o.id)}
+                  className="flex w-full flex-col text-left transition-transform duration-150 ease-salida active:scale-[0.98] disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-foco rounded-foto"
                 >
-                  <span className="block size-[84%]">
-                    <PieceImage src={optionPhoto(o)} alt={`${o.title}, ${o.store_name}`} category={block.slot} shadow />
-                  </span>
-                  {isSel ? (
-                    <span className="absolute bottom-1.5 left-1.5 inline-flex items-center gap-1 rounded-insignia bg-inverso px-1.5 py-0.5 text-[11px] font-extrabold uppercase tracking-[0.08em] text-sobre-inverso">
-                      <IconCheck className="size-3" />
-                      Elegida
+                  <span
+                    className={cn(
+                      "relative grid aspect-square w-full place-items-center rounded-foto bg-hundido",
+                      isSel && "ring-2 ring-inset ring-linea-fuerte",
+                    )}
+                  >
+                    <span className="block size-[84%]">
+                      <PieceImage src={optionPhoto(o)} alt={`${o.title}, ${o.store_name}`} category={block.slot} shadow />
                     </span>
-                  ) : null}
-                </span>
-                <span className="mt-2 text-[11px] font-extrabold uppercase tracking-[0.12em] text-tinta-suave">
-                  {i + 1} · {o.store_name}
-                </span>
-                <span className="line-clamp-2 text-meta text-tinta">{o.title}</span>
-                <span className="text-nombre tabular-nums text-tinta">{fmtCLP(o.price_clp)}</span>
-                {o.affiliate ? <span className="text-meta text-tinta-suave">Enlace con comisión</span> : null}
-              </button>
-            </li>
-          );
-        })}
-      </ol>
+                    {isSel ? (
+                      <span className="absolute bottom-1.5 left-1.5 inline-flex items-center gap-1 rounded-insignia bg-inverso px-1.5 py-0.5 text-[11px] font-extrabold uppercase tracking-[0.08em] text-sobre-inverso">
+                        <IconCheck className="size-3" />
+                        Elegida
+                      </span>
+                    ) : null}
+                  </span>
+                  <span className="mt-2 text-[11px] font-extrabold uppercase tracking-[0.12em] text-tinta-suave">
+                    {i + 1} · {o.store_name}
+                  </span>
+                  <span className="line-clamp-2 text-meta text-tinta">{o.title}</span>
+                  <span className="text-nombre tabular-nums text-tinta">{fmtCLP(o.price_clp)}</span>
+                  {o.affiliate ? <span className="text-meta text-tinta-suave">Enlace con comisión</span> : null}
+                </button>
+              </li>
+            );
+          })}
+        </ol>
+      </div>
 
       <div aria-live="polite">
         {selected ? (
@@ -127,8 +173,6 @@ export function ShoppingOptions({ block, outfit, onSelect, onRefine, busy = fals
           </p>
         )}
       </div>
-
-      <RefineRow refinements={refinements} onRefine={onRefine} busy={busy} />
     </section>
   );
 }
@@ -234,41 +278,6 @@ function Ficha({ option, now }: { option: ProductOption; now?: Date }) {
           <p className="text-meta text-tinta-suave">No pude validar el enlace de esta tienda, así que no lo muestro.</p>
         )}
       </div>
-    </div>
-  );
-}
-
-function RefineRow({
-  refinements,
-  onRefine,
-  busy,
-}: {
-  refinements: ShoppingOptionsBlock["refinements"];
-  onRefine?: ShoppingOptionsProps["onRefine"];
-  busy: boolean;
-}) {
-  if (refinements.length === 0) return null;
-  return (
-    <div
-      role="group"
-      aria-label="Ajustar la búsqueda"
-      className={cn(
-        "-mx-[18px] mt-3 flex gap-2 overflow-x-auto px-[18px] py-1 [scrollbar-width:none]",
-        refinements.length > 2 && "[mask-image:linear-gradient(to_right,#000_85%,transparent)]",
-      )}
-    >
-      {refinements.map((r) => (
-        <Button
-          key={r.id}
-          variant="contorno"
-          size="mediano"
-          disabled={busy || !onRefine}
-          onClick={() => onRefine?.(r.intent, r.label)}
-          className="shrink-0 whitespace-nowrap"
-        >
-          {r.label}
-        </Button>
-      ))}
     </div>
   );
 }
