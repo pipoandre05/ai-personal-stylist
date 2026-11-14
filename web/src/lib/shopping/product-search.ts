@@ -6,7 +6,7 @@ import type { ProductCandidate } from "@/lib/domain/shopping";
 // `ProductSearch` es la FRONTERA con lo que lee la web de las tiendas. Cuando Felipe entregue la lista de tiendas (A-01),
 // la implementación real es un lector AISLADO (DT-18): recibe solo este encargo —sin perfil, sin clóset, sin historial—,
 // tiene topes propios de tiempo y de resultados, y devuelve fichas con este contrato. Lo que lea es dato, no instrucción
-// (BF-09). No se implementa todavía: hoy hay dos implementaciones, la simulada (asesor simulado y tests) y `none`.
+// (BF-09). Hay tres implementaciones: la simulada (asesor simulado y tests), `none` y la real (`real-product-search.ts`).
 
 /** Encargo al buscador. Nada de datos personales más allá de lo que hace falta para buscar. */
 export type ProductSearchRequest = {
@@ -19,11 +19,18 @@ export type ProductSearchRequest = {
 };
 
 export type ProductSearchResult =
-  | { ok: true; stores_searched: number; results_found: number; candidates: ProductCandidate[] }
+  | {
+      ok: true;
+      stores_searched: number;
+      results_found: number;
+      candidates: ProductCandidate[];
+      /** Tiendas que se intentaron y fallaron (solo el lector real): nombre visible y motivo. */
+      stores_failed?: { store: string; reason: string }[];
+    }
   | { ok: false; reason: "unavailable" };
 
 export interface ProductSearch {
-  readonly kind: "simulated" | "none";
+  readonly kind: "simulated" | "none" | "real";
   search(request: ProductSearchRequest, now?: Date): Promise<ProductSearchResult>;
 }
 
