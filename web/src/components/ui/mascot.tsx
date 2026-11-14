@@ -48,21 +48,23 @@ type MascotHeadProps = {
   /** El asesor está trabajando: la etiqueta se balancea. */
   swinging?: boolean;
   className?: string;
+  /** Fuerza el uso de trazos gruesos y sprite -s (p. ej. para pantallas reducidas de 88px). */
+  small?: boolean;
 };
 
 /** Cabeza de la mascota junto a la firma del asesor. Siempre decorativa: el texto ya dice quién habla. */
-export function MascotHead({ mood = "firma", size = 32, swinging = false, className }: MascotHeadProps) {
-  const small = size <= 40;
+export function MascotHead({ mood = "firma", size = 32, swinging = false, className, small }: MascotHeadProps) {
+  const isSmall = small ?? size <= 40;
   const width = Math.round((size * 152) / 242);
   return (
     <svg
       width={width}
       height={size}
       aria-hidden="true"
-      style={small ? SMALL_STROKES : undefined}
+      style={isSmall ? SMALL_STROKES : undefined}
       className={cn("shrink-0", swinging && "origin-[50%_38%] animate-balanceo", className)}
     >
-      <use href={`${SPRITE}#h-${mood}${small ? "-s" : ""}`} width="100%" height="100%" />
+      <use href={`${SPRITE}#h-${mood}${isSmall ? "-s" : ""}`} width="100%" height="100%" />
     </svg>
   );
 }

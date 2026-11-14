@@ -7,9 +7,12 @@ import { RegisterSW } from "@/components/ui";
  */
 export default function Portada() {
   return (
-    <main id="contenido" className="mx-auto flex h-dvh w-full max-w-app flex-col bg-fondo">
+    <main
+      id="contenido"
+      className="mx-auto flex h-dvh w-full max-w-app flex-col bg-fondo landscape:[@media(max-height:500px)]:max-w-4xl"
+    >
       <RegisterSW />
-      <header className="flex h-14 shrink-0 items-center px-6 pt-seguro">
+      <header className="flex h-14 shrink-0 items-center px-6 pt-seguro landscape:[@media(max-height:500px)]:hidden">
         <span className="font-display text-titulo font-extrabold tracking-[-0.03em]">Prendie</span>
       </header>
       <h1 className="sr-only">Prendie, tu asesor de imagen</h1>
