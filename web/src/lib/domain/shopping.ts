@@ -231,6 +231,35 @@ export function applySelection(rows: RowParts[], outfitId: string, optionId: str
   return changed;
 }
 
+/** Busca la opción `optionId` dentro del bloque `blockId` (búsqueda pedida sin look: `for_outfit_id` nulo). */
+export function findOptionInBlock(rows: RowParts[], blockId: string, optionId: string): ProductOption | null {
+  for (const row of rows) {
+    for (const p of row.parts ?? []) {
+      if (!isShopping(p) || p.id !== blockId || p.for_outfit_id !== null) continue;
+      return p.options.find((o) => o.id === optionId) ?? null;
+    }
+  }
+  return null;
+}
+
+/**
+ * Marca (o desmarca con `null`) la opción elegida en un bloque sin look. Solo toca ese bloque: una búsqueda suelta no
+ * comparte elección con otras. Devuelve los mensajes que cambiaron. Pura.
+ */
+export function applyBlockSelection(rows: RowParts[], blockId: string, optionId: string | null): { id: string; parts: ChatMessagePart[] }[] {
+  const changed: { id: string; parts: ChatMessagePart[] }[] = [];
+  for (const row of rows) {
+    let touched = false;
+    const parts = (row.parts ?? []).map((p) => {
+      if (!isShopping(p) || p.id !== blockId || p.for_outfit_id !== null || p.selected_option_id === optionId) return p;
+      touched = true;
+      return { ...p, selected_option_id: optionId } satisfies ShoppingPart;
+    });
+    if (touched) changed.push({ id: row.id, parts });
+  }
+  return changed;
+}
+
 /** Opción elegida para un look según los bloques del hilo, o null. */
 export function selectedOptionFor(blocks: ShoppingOptionsBlock[], outfitId: string): ProductOption | null {
   for (const b of [...blocks].reverse()) {

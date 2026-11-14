@@ -13,7 +13,7 @@ import {
   useMemo,
   useSyncExternalStore,
 } from "react";
-import { selectShoppingOption } from "@/lib/actions/shopping";
+import { selectShoppingOption, selectShoppingOptionInBlock } from "@/lib/actions/shopping";
 import { updateEventSummary } from "@/lib/actions/event";
 import { setOutfitStatus } from "@/lib/actions/outfits";
 import { streamChat } from "@/lib/client/api";
@@ -506,7 +506,29 @@ export function useConversation({ conversationId, initialMessages, autoStart = f
   const discardOutfit = (o: OutfitView) => void changeOutfitStatus(o, "discarded");
 
   async function selectOption(block: ShoppingOptionsBlock, outfitId: string | null, optionId: string | null) {
-    if (!outfitId) return;
+    // Búsqueda pedida sin look ("quiero unos zapatos nuevos"): la elección vive solo en ese bloque de la conversación.
+    if (!outfitId) {
+      const conversation = convRef.current;
+      if (!conversation) return;
+      const previous = block.selected_option_id;
+      const mark = (id: string | null) =>
+        setItems((prev) =>
+          prev.map((i) =>
+            i.kind === "advisor" && i.shopping_blocks?.some((b) => b.id === block.id)
+              ? { ...i, shopping_blocks: i.shopping_blocks.map((b) => (b.id === block.id ? { ...b, selected_option_id: id } : b)) }
+              : i,
+          ),
+        );
+      setActionBusy(true);
+      mark(optionId);
+      const result = await selectShoppingOptionInBlock(conversation, block.id, optionId);
+      if (!result.ok) {
+        mark(previous);
+        toast({ message: result.error, tone: "error" });
+      }
+      setActionBusy(false);
+      return;
+    }
     const before = block.selected_option_id;
     const apply = (id: string | null) =>
       setItems((prev) =>

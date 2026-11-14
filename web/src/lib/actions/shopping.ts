@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { track } from "@/lib/analytics";
 import { extrasAvailable, markExtrasMissing } from "@/lib/data/outfit-extras";
-import { applySelection, findOptionInThread } from "@/lib/domain/shopping";
+import { applyBlockSelection, applySelection, findOptionInBlock, findOptionInThread } from "@/lib/domain/shopping";
 import type { ActionResult, ChatMessagePart } from "@/lib/domain/types";
 import { getUserCtx, GENERIC_ERROR, NO_SESSION_ERROR } from "@/lib/server/action-helpers";
 import { logError } from "@/lib/server/log";
@@ -73,5 +73,48 @@ export async function selectShoppingOption(outfitId: string, optionId: string | 
 
   if (found) void track("shopping_option_selected", { affiliate: found.option.affiliate }, ctx);
   revalidatePath("/looks");
+  return { ok: true };
+}
+
+/**
+ * Igual que `selectShoppingOption`, para una búsqueda que la persona pidió sin look ("quiero unos zapatos nuevos"):
+ * el bloque no tiene `for_outfit_id`, así que la elección vive solo en ese bloque de la conversación. NO compra nada (DP-09).
+ * La opción debe ser una de las que de verdad se mostraron en ese bloque de una conversación de la persona.
+ */
+export async function selectShoppingOptionInBlock(conversationId: string, blockId: string, optionId: string | null): Promise<ActionResult> {
+  const ctx = await getUserCtx();
+  if (!ctx) return { ok: false, error: NO_SESSION_ERROR };
+  const parsedConversation = Id.safeParse(conversationId);
+  const parsedBlock = z.string().min(1).max(80).safeParse(blockId);
+  const parsedOption = optionId === null ? { success: true as const, data: null } : OptionId.safeParse(optionId);
+  if (!parsedConversation.success || !parsedBlock.success || !parsedOption.success) return { ok: false, error: "No encontramos esa opción." };
+
+  const { supabase, userId } = ctx;
+  const { data: rows, error: rowsError } = await supabase
+    .from("messages")
+    .select("id, parts")
+    .eq("conversation_id", parsedConversation.data)
+    .eq("user_id", userId)
+    .eq("role", "assistant")
+    .order("created_at", { ascending: false })
+    .limit(100)
+    .returns<{ id: string; parts: ChatMessagePart[] | null }[]>();
+  if (rowsError) {
+    logError("actions.shopping.block.messages", rowsError);
+    return { ok: false, error: GENERIC_ERROR };
+  }
+
+  const option = parsedOption.data === null ? null : findOptionInBlock(rows ?? [], parsedBlock.data, parsedOption.data);
+  if (parsedOption.data !== null && !option) return { ok: false, error: "No encontramos esa opción." };
+
+  for (const change of applyBlockSelection(rows ?? [], parsedBlock.data, parsedOption.data)) {
+    const { error } = await supabase.from("messages").update({ parts: change.parts }).eq("id", change.id).eq("user_id", userId);
+    if (error) {
+      logError("actions.shopping.block.update_parts", error);
+      return { ok: false, error: GENERIC_ERROR };
+    }
+  }
+
+  if (option) void track("shopping_option_selected", { affiliate: option.affiliate }, ctx);
   return { ok: true };
 }
