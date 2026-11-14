@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useImperativeHandle, useRef, useState, type KeyboardEvent, type Ref } from "react";
-import { IconCamera, IconClose, IconSend, IconStop } from "@/components/ui";
+import { IconCamera, IconClose, IconSend } from "@/components/ui";
 
 export type ComposerHandle = {
   /** Abre el selector de foto; con `selfie` pide la cámara frontal. */
@@ -23,7 +23,7 @@ type ComposerProps = {
 
 const MAX_FIELD_PX = 128; // 5 líneas
 
-/** Compositor: foto + campo que crece + enviar/detener. Vive dentro del dock sticky de la conversación. */
+/** Compositor: foto + campo blanco con borde de tinta + enviar/detener. */
 export function Composer({ busy, disabled, placeholder, onSend, onStop, onFocusField, ref }: ComposerProps) {
   const [text, setText] = useState("");
   const [staged, setStaged] = useState<{ file: File; url: string } | null>(null);
@@ -86,19 +86,19 @@ export function Composer({ busy, disabled, placeholder, onSend, onStop, onFocusF
   }
 
   return (
-    <div className="px-5 pt-3 pb-seguro">
+    <div className="flex flex-col border-t border-linea bg-superficie px-4 pt-2.5 pb-seguro">
       {staged ? (
         <div className="relative mb-2 w-20">
           {/* Vista previa local (URL de objeto): next/image no aplica. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={staged.url} alt="Foto lista para enviar" className="aspect-[3/4] w-full rounded-md bg-hundido object-cover" />
+          <img src={staged.url} alt="Foto lista para enviar" className="aspect-[4/5] w-full rounded-insignia bg-hundido object-cover" />
           <button
             type="button"
             onClick={() => stage(null)}
             aria-label="Quitar foto"
-            className="absolute -top-3 -right-3 flex size-11 items-center justify-center"
+            className="absolute -top-2.5 -right-2.5 flex size-11 items-center justify-center"
           >
-            <span className="flex size-6 items-center justify-center rounded-full bg-tinta text-superficie">
+            <span className="flex size-6 items-center justify-center rounded-full bg-inverso text-sobre-inverso shadow-flotante">
               <IconClose className="size-4" />
             </span>
           </button>
@@ -112,7 +112,7 @@ export function Composer({ busy, disabled, placeholder, onSend, onStop, onFocusF
           accept="image/*"
           tabIndex={-1}
           aria-hidden="true"
-          className="hidden"
+          className="sr-only"
           onChange={(e) => {
             const picked = e.target.files?.[0];
             e.target.value = ""; // permite elegir la misma foto otra vez
@@ -130,7 +130,7 @@ export function Composer({ busy, disabled, placeholder, onSend, onStop, onFocusF
             inputRef.current?.removeAttribute("capture");
             inputRef.current?.click();
           }}
-          className="flex size-11 shrink-0 items-center justify-center rounded-full border border-linea-fuerte text-tinta transition-[transform,opacity] duration-150 ease-estilo active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-40"
+          className="grid size-11 shrink-0 place-items-center rounded-full border-[1.5px] border-linea-fuerte bg-transparent text-tinta transition-[transform,opacity] duration-150 ease-salida active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-45"
         >
           <IconCamera className="size-5" />
         </button>
@@ -151,7 +151,7 @@ export function Composer({ busy, disabled, placeholder, onSend, onStop, onFocusF
             onChange={(e) => setText(e.target.value)}
             onKeyDown={onKeyDown}
             onFocus={onFocusField}
-            className="block max-h-32 min-h-11 w-full resize-none rounded-lg border border-linea-fuerte bg-superficie px-4 py-2.5 text-base leading-6 text-tinta placeholder:text-tinta-suave focus-visible:border-acento disabled:cursor-not-allowed disabled:opacity-60"
+            className="block max-h-32 min-h-11 w-full min-w-0 resize-none rounded-campo border-[1.5px] border-linea-fuerte bg-superficie px-4 py-2.5 font-body text-base font-medium leading-6 text-tinta placeholder:text-tinta-suave focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-foco disabled:cursor-not-allowed disabled:opacity-45"
           />
         </div>
 
@@ -160,9 +160,9 @@ export function Composer({ busy, disabled, placeholder, onSend, onStop, onFocusF
             type="button"
             onClick={onStop}
             aria-label="Detener respuesta"
-            className="flex size-11 shrink-0 items-center justify-center rounded-full bg-tinta text-superficie transition-[transform,opacity] duration-150 ease-estilo active:scale-[0.96]"
+            className="grid size-11 shrink-0 place-items-center rounded-full bg-inverso text-sobre-inverso transition-[transform,opacity] duration-150 ease-salida active:scale-[0.97]"
           >
-            <IconStop className="size-5" />
+            <span className="size-3 rounded-[2px] bg-sobre-inverso" aria-hidden="true" />
           </button>
         ) : (
           <button
@@ -170,7 +170,7 @@ export function Composer({ busy, disabled, placeholder, onSend, onStop, onFocusF
             onClick={submit}
             disabled={!canSend}
             aria-label="Enviar"
-            className="flex size-11 shrink-0 items-center justify-center rounded-full bg-tinta text-superficie transition-[transform,opacity] duration-150 ease-estilo active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-40"
+            className="grid size-11 shrink-0 place-items-center rounded-full bg-inverso text-sobre-inverso transition-[transform,opacity] duration-150 ease-salida active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-45"
           >
             <IconSend className="size-5" />
           </button>

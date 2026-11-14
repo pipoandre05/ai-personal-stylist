@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { signOut } from "@/lib/actions/auth";
+import { buttonStyles } from "./button";
 import { IconChevron, IconSpace } from "./icons";
 import { Sheet } from "./sheet";
 
@@ -23,16 +24,17 @@ export function AppHeader({ closetCount }: AppHeaderProps) {
 
   return (
     <header className="sticky top-0 z-20 bg-fondo/90 pt-seguro backdrop-blur-md">
-      <div className="flex h-14 items-center justify-between gap-2 px-5">
-        <span className="font-display text-2xl italic">Estilo</span>
+      <div className="flex h-14 items-center justify-between pl-6 pr-4">
+        <span className="font-display text-titulo font-extrabold tracking-[-0.03em]">Estilo</span>
         <button
           type="button"
           onClick={() => setOpen(true)}
           aria-haspopup="dialog"
-          className="-mr-2 flex min-h-11 items-center gap-2 rounded-full px-3 text-sm font-medium text-tinta-suave"
+          aria-expanded={open}
+          className={buttonStyles({ variant: "contorno", size: "mediano" })}
         >
           <IconSpace className="size-5" />
-          Tu espacio
+          <span>Tu espacio</span>
         </button>
       </div>
 

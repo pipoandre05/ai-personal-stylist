@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es-CL"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--fondo:#F2F2EE;--superficie:#FFFFFF;--hundido:#E8E9E4;--linea:#D6D8D2;--linea-fuerte:#121412;--tinta:#121412;--tinta-suave:#5E625D;--inverso:#121412;--sobre-inverso:#FFFFFF;--foco:#2B4BFF;--error:#C2341F;
+--font-display:"Bricolage Grotesque",system-ui,sans-serif;--font-body:Manrope,system-ui,sans-serif;
+--text-titulo:800 26px/1.1 var(--font-display);--text-destacado:600 16px/24px var(--font-body);--text-cuerpo:500 15px/22px var(--font-body);--text-control:700 14px/18px var(--font-body);--text-meta:500 12px/16px var(--font-body);--text-sobretitulo:700 12px/16px var(--font-body);--rounded-campo:20px;--ease-salida:cubic-bezier(.23,1,.32,1)}
+*{box-sizing:border-box}body{margin:0;background:var(--hundido);font-family:var(--font-body);color:var(--tinta);-webkit-font-smoothing:antialiased}
+.mesa{display:flex;flex-wrap:wrap;gap:32px;justify-content:center;padding:32px 16px}
+figure{margin:0}figcaption{font:var(--text-meta);color:var(--tinta-suave);margin-bottom:8px;max-width:390px}
+.pantalla{position:relative;display:flex;flex-direction:column;width:390px;height:844px;overflow:hidden;background:var(--fondo)}
+.pantalla button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}.pantalla p{margin:0}
+.pantalla :focus-visible,.foco{outline:3px solid var(--foco);outline-offset:2px}
+.ic{width:20px;height:20px;flex:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:999px;border:1.5px solid var(--linea-fuerte);font:800 14px/1 var(--font-body);color:var(--tinta);transition:transform 150ms var(--ease-salida)}.btn:active{transform:scale(.97)}
+.cab{flex:none;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 16px 0 24px;background:rgb(242 242 238/.9);backdrop-filter:blur(12px)}
+.marca{font:var(--text-titulo);letter-spacing:-.03em}
+.hilo{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:flex-end;gap:24px;padding:8px 24px 16px}
+.turno{display:flex;flex-direction:column;gap:14px}
+.yo{align-self:flex-end;max-width:82%;width:fit-content;background:var(--hundido);padding:12px 16px;border-radius:var(--rounded-campo);font:var(--text-cuerpo)}
+.asesor{font:var(--text-destacado)}.asesor strong{font-weight:800}.asesor p+p{margin-top:12px}
+.firma{display:block;margin-bottom:4px;color:var(--tinta-suave);font:var(--text-sobretitulo);letter-spacing:.12em;text-transform:uppercase}
+.cursor{display:inline-block;width:2px;height:16px;transform:translateY(2px);background:var(--tinta);animation:r 1.2s cubic-bezier(.45,0,.1,1) infinite}@keyframes r{0%,100%{opacity:.25}50%{opacity:1}}
+.compositor{flex:none;display:flex;align-items:center;gap:8px;padding:10px 16px 28px;background:var(--superficie);border-top:1px solid var(--linea)}
+.foto-btn,.enviar{width:44px;height:44px;flex:none;display:grid!important;place-items:center;border-radius:999px}
+.foto-btn{border:1.5px solid var(--linea-fuerte)!important}
+.campo{flex:1;min-width:0;min-height:44px;display:flex;align-items:center;padding:0 16px;border-radius:var(--rounded-campo);background:var(--superficie);border:1.5px solid var(--linea-fuerte)}
+.ph{font:500 16px/1.2 var(--font-body);color:var(--tinta-suave);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.txt{font:500 16px/1.2 var(--font-body)}
+.enviar{background:var(--inverso)!important;color:var(--sobre-inverso)!important}.enviar[disabled]{opacity:.45}.cuadro{width:12px;height:12px;border-radius:2px;background:var(--sobre-inverso)}
+.nota{max-width:390px;font:var(--text-meta);color:var(--tinta-suave);margin:8px 0 0}.nota b{color:var(--tinta)}
+.espec{max-width:860px;margin:0 auto;padding:0 16px 48px;font:var(--text-cuerpo)}.espec h2{font:800 18px/1.2 var(--font-display)}.espec td,.espec th{text-align:left;padding:6px 12px 6px 0;vertical-align:top;border-bottom:1px solid var(--linea);font-size:13px}code{font-size:12px}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-grid" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></g></symbol>
+<symbol id="i-camera" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></g></symbol>
+<symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7M12 19V5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</defs></svg><div class="mesa"><title>ui-3 · Encabezado (borrador)</title>
+<figure><figcaption>ui-3 · Encabezado, reposo (390×844)</figcaption><div class="pantalla"><header class="cab"><span class="marca">Estilo</span><button class="btn" type="button" aria-haspopup="dialog" aria-expanded="false"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg><span>Tu espacio</span></button></header><section class="hilo" aria-label="Conversación con tu asesor"><div class="turno asesor"><span class="firma">Estilo</span><p><strong>Hola.</strong> Cuéntame qué tienes en mente.</p></div></section></div><p class="nota"><b>h-14 (56 px)</b>, margen izquierdo 24, derecho 16 (el botón ya trae 18 px de aire interno). Nada más: sin clima, campana ni avatar.</p></figure>
+<figure><figcaption>ui-3 · Foco de teclado en Tu espacio</figcaption><div class="pantalla"><header class="cab"><span class="marca">Estilo</span><button class="btn foco" type="button" aria-haspopup="dialog" aria-expanded="false"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg><span>Tu espacio</span></button></header><section class="hilo"></section></div><p class="nota">Anillo azul <code>foto</code> de 3 px, offset 2. Al abrir la hoja: <code>aria-expanded=true</code>.</p></figure>
+</div><section class="espec"><h2>Notas de construcción</h2><table><tr><th>Parte</th><th>Clases / valor</th></tr>
+<tr><td>Contenedor</td><td><code>sticky top-0 z-20 bg-fondo/90 pt-seguro backdrop-blur-md</code> → <code>flex h-14 items-center justify-between pl-6 pr-4</code></td></tr>
+<tr><td>Wordmark</td><td><code>font-display text-titulo</code> "Estilo" (provisional, sin la etiqueta de Prendie). Bricolage 800, 26/1.1, tracking -0.03em.</td></tr>
+<tr><td>Tu espacio</td><td>Botón contorno mediano (píldora, h-11, borde 1.5 <code>linea-fuerte</code>, texto control 800/14) + ícono cuadrícula <code>size-5</code>, trazo 2. <code>aria-haspopup="dialog"</code>, <code>aria-expanded</code> reflejando la hoja.</td></tr>
+<tr><td>Texto</td><td>"Tu espacio" (sin verbo de acción: es un destino, no una orden). Sin emoji.</td></tr>
+<tr><td>Cuidado</td><td>Si la hoja (<code>sheet.tsx</code>) sigue con 3 vínculos hasta ui-15, no se toca aquí. Un solo lima por pantalla: el encabezado no lleva ninguno.</td></tr></table></section></body></html>
