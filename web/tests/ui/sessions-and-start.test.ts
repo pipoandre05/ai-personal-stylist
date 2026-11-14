@@ -50,9 +50,10 @@ describe("UI-20: Sesiones, inicio de cero y respuestas rápidas", () => {
       expect(res.greeting).toMatch(/(fin de semana|Buen|De vuelta|Hola|Buenas)/i);
     });
 
-    it("START_SUGGESTIONS contiene 4 sugerencias en tono de Estilo", () => {
-      expect(START_SUGGESTIONS).toHaveLength(4);
-      expect(START_SUGGESTIONS[0]).toContain("fin de semana");
+    it("START_SUGGESTIONS contiene exactamente las dos sugerencias de inicio", () => {
+      expect(START_SUGGESTIONS).toHaveLength(2);
+      expect(START_SUGGESTIONS[0]).toBe("¿Qué me pongo hoy?");
+      expect(START_SUGGESTIONS[1]).toBe("¿Cómo me visto mañana para el trabajo?");
     });
 
     it("StartScreen renderiza encabezado, subtítulo y píldoras sin lima", () => {
@@ -67,7 +68,7 @@ describe("UI-20: Sesiones, inicio de cero y respuestas rápidas", () => {
       expect(out).not.toContain("Felipe");
       expect(out).toContain('role="group"');
       expect(out).toContain('aria-label="Sugerencias para empezar"');
-      expect(out).toContain("Quiero armar un look");
+      expect(out).toContain("¿Qué me pongo hoy?");
       expect(out).not.toContain("bg-accion");
       expect(out).not.toContain("text-accion");
     });
