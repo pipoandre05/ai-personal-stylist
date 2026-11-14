@@ -63,7 +63,13 @@ export function Composer({ busy, disabled, placeholder, onSend, onStop, onFocusF
     const el = fieldRef.current;
     if (!el) return;
     el.style.height = "auto";
-    el.style.height = `${Math.min(el.scrollHeight, MAX_FIELD_PX)}px`;
+    // `scrollHeight` no cuenta el borde y el campo mide con borde incluido: sin sumarlo quedaba 3 px corto y aparecía
+    // una barra de desplazamiento dentro del campo vacío (visible en escritorio con mouse).
+    const borders = el.offsetHeight - el.clientHeight;
+    const wanted = el.scrollHeight + borders;
+    el.style.height = `${Math.min(wanted, MAX_FIELD_PX)}px`;
+    // Solo se desplaza cuando el texto pasa de las 5 líneas.
+    el.style.overflowY = wanted > MAX_FIELD_PX ? "auto" : "hidden";
   }, [text]);
 
   const canSend = !busy && !disabled && (text.trim().length > 0 || staged !== null);
