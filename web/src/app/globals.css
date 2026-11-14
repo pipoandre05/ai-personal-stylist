@@ -218,3 +218,11 @@
     }
   }
 }
+
+/* Columna de la app en apaisado y pantallas anchas: al girar el teléfono o abrir en escritorio, el hilo, el encabezado y
+   el compositor crecen con la pantalla en vez de quedar con el ancho del teléfono en vertical. */
+@media (min-width: 40rem) {
+  :root {
+    --container-app: 45rem;
+  }
+}

@@ -200,8 +200,10 @@ export function useConversation({ conversationId, initialMessages, autoStart = f
 
   // --- Scroll: abajo al abrir; sigue el texto mientras la persona no haya subido a leer ---
 
+  // En la pantalla de inicio (sin mensajes) no se baja: en una pantalla baja, como el teléfono apaisado, bajar escondía el saludo.
   useLayoutEffect(() => {
-    scrollToBottom(false);
+    if (initialMessages.length > 0) scrollToBottom(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- solo al abrir
   }, []);
 
   useEffect(() => {
@@ -225,7 +227,7 @@ export function useConversation({ conversationId, initialMessages, autoStart = f
     const el = mainRef.current;
     if (!el) return;
     const ro = new ResizeObserver(() => {
-      if (!stick.current) return;
+      if (!stick.current || el.hasAttribute("data-inicio")) return;
       // Una tarjeta alta crece de golpe: el scroll que provocamos nosotros no cuenta como "la persona subió a leer".
       lockUntil.current = Date.now() + 250;
       scrollToBottom(smoothNext.current);
@@ -602,7 +604,7 @@ export function useConversation({ conversationId, initialMessages, autoStart = f
   /** Con el teclado abierto el último mensaje debe seguir a la vista. */
   const onFocusField = () => {
     window.setTimeout(() => {
-      if (stick.current) scrollToBottom(false);
+      if (stick.current && !mainRef.current?.hasAttribute("data-inicio")) scrollToBottom(false);
     }, 300);
   };
 
