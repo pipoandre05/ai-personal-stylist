@@ -7,6 +7,9 @@
  * La paleta por defecto de Tailwind se elimina: solo existen los colores de abajo.
  * Una clase como text-gray-500 o bg-white NO genera CSS (falla en silencio): lo detecta tests/tokens.test.ts.
  */
+/* `escritorio:` = pantalla ancha con mouse. No usar `md:` para cambiar la disposición: un teléfono apaisado también es ancho. */
+@custom-variant escritorio (@media (min-width: 48rem) and (hover: hover) and (pointer: fine));
+
 @theme {
   --color-*: initial;
 
@@ -219,9 +222,15 @@
   }
 }
 
-/* Columna de la app en apaisado y pantallas anchas: al girar el teléfono o abrir en escritorio, el hilo, el encabezado y
-   el compositor crecen con la pantalla en vez de quedar con el ancho del teléfono en vertical. */
-@media (min-width: 40rem) {
+/* Ancho de la columna de la app.
+   - Teléfono y tablet (pantalla táctil), en vertical o apaisado: ocupa todo el ancho, sin franjas a los lados.
+   - Escritorio (mouse): columna centrada y más ancha que la del teléfono, como en los chats de asistentes. */
+@media (pointer: coarse) {
+  :root {
+    --container-app: 100%;
+  }
+}
+@media (min-width: 40rem) and (hover: hover) and (pointer: fine) {
   :root {
     --container-app: 45rem;
   }
