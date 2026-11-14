@@ -81,3 +81,63 @@ Implementacion completa de primitivas de interfaz segun la maqueta v4 aprobada y
    - Creada suite de pruebas unitarias en `web/tests/ui/primitives.test.ts` (13 pruebas pasando).
    - `cd web && npm run verify`: lint, typecheck y vitest (136/136 tests en verde, incluyendo `tokens.test.ts` sin clases inventadas).
    - `cd web && npm run build`: compilacion de produccion exitosa.
+
+### 2026-11-14 14:26 · QA · veredicto · vuelta 0
+
+Humo ejecutado en build de producción con AI_MODE=mock, PORT=3210 contra el asesor simulado en navegador móvil (390x844 y 375x812) y pruebas de renderizado computado de primitivas.
+
+## Humo
+- Botones píldora (buttonStyles/Button/ButtonLink): forma rounded-full con border-[1.5px] y tamaños estándar 52 px (h-[52px] px-6 text-base font-extrabold) y mediano 44 px (h-11 px-[18px] text-sm font-bold) → OK
+- Variantes de botón: principal lima (bg-accion text-sobre-color), inverso (bg-inverso text-sobre-inverso), contorno (border-linea-fuerte text-tinta; sobre inverso border-sobre-inverso text-sobre-inverso), texto (h-11 px-2 text-sm text-tinta underline) y destructivo (bg-error text-sobre-estado) → OK
+- Feedback de botón: active:scale-[0.97] (150ms ease-salida) y disabled:opacity-45; íconos con contenedor accesible size-5 [&>svg]:size-5 [&>svg]:stroke-2 → OK
+- Chips (Chip/ChipGroup): altura visual 36 px (h-9 px-4 rounded-full border-[1.5px] border-linea-fuerte bg-transparent text-control text-tinta) → OK
+- Área táctil accesible en chips: pseudo-elemento after:absolute after:-inset-1 (-4px) garantizando objetivo táctil >= 44 px → OK
+- Selección de chips: bg-inverso border-inverso text-sobre-inverso con aria-pressed/aria-checked; regla de marca respetada (cero lima en chips) → OK
+- Field e Input: min-h-12 (48 px), rounded-campo (20 px), bg-hundido, sin borde estático duro (border-0) y foco azul de 3 px (focus-visible:ring-3 focus-visible:ring-foco #2b4bff) → OK
+- Mensajes de Field: etiqueta en text-control text-tinta; errores en text-meta text-error con IconAlert y role="alert" bajo el campo → OK
+- Toast: región aria-live="polite" fija (bottom-24), rounded-campo (20 px) bg-inverso px-4 py-3 text-cuerpo text-sobre-inverso shadow-flotante con acción accesible → OK
+- Bloque de error (ErrorBlock): role="alert", rounded-campo border-[1.5px] border-error bg-superficie p-4 text-cuerpo text-tinta con ícono/título text-error y botón "Reintentar" (44 px) → OK
+- Íconos (icons.tsx): trazo base 2 px (strokeWidth={2}), strokeLinecap="round", strokeLinejoin="round", aria-hidden="true" → OK
+- cardBase y estilos del chat (chat/styles.ts): cardBase actualizado a rounded-tarjeta (28 px) bg-superficie p-[18px] sin borde ni sombra; eyebrowAccent sin acento transitorio (text-sobretitulo uppercase text-tinta); botones compactos píldora rounded-full → OK
+- Viewport móvil 390x844 y 375x812: sin desbordamiento ni scroll horizontal (hasHorizontalOverflow: false), zoom 200% verificado sin recorte → OK
+- Suite técnica y frontera: npm run verify en verde (136/136 tests vitest, eslint, typecheck), npm run build con AI_MODE=mock exitoso; frontera respetada → OK
+- Servidor de pruebas en puerto 3210 detenido tras finalizar las pruebas → OK
+
+VEREDICTO: QA aprobado sha=25676980ae9112daac6de58cf756890f4b4e1e90
+
+### 2026-11-14 14:26 · Diseño · nota · vuelta 0
+
+Revisión visual sobre commit 25676980ae9112daac6de58cf756890f4b4e1e90 contra la maqueta aprobada v4 (docs/superpowers/mockups/2026-11-14-conversacion-v4.html) y tokens de DESIGN.MD.
+Verificado en navegador a 390x844 (dev server puerto 3220, AI_MODE=mock):
+
+1. Botones (button.tsx, styles.ts):
+- Forma píldora completa (rounded-full) y borde 1.5px (border-[1.5px]).
+- Alturas computadas: estándar 52px (h-[52px], px-6, text-base font-extrabold) y mediano 44px (h-11, px-[18px], text-sm font-bold).
+- Variantes: principal en lima bg-accion (#C9F24D) con text-sobre-color (#121412); inverso bg-inverso (#121412) con text-sobre-inverso (#FFFFFF); contorno con border-linea-fuerte y texto tinta (sobre inverso: border-sobre-inverso y text-sobre-inverso); texto h-11 px-2 text-sm text-tinta subrayado; destructivo bg-error con text-sobre-estado.
+- Feedback táctil: active:scale-[0.97] con curva ease-salida (150ms); disabled:opacity-45.
+- Íconos: contenedor accesible size-5 con SVG trazo 2.
+
+2. Chips (chip.tsx, chip-group.tsx):
+- Altura visual 36px (h-9 px-4), borde 1.5px, tipografía text-control.
+- Área táctil de 44px verificada mediante pseudo-elemento after:absolute after:-inset-1 (-4px a cada lado).
+- Estado seleccionado: bg-inverso, border-inverso, text-sobre-inverso con ícono Check (16px).
+- Regla de marca estricta: cero presencia de lima (bg-accion) en chips.
+
+3. Campo e Input (field.tsx, input.tsx):
+- Altura mínima 48px (min-h-12), radio rounded-campo (20px), fondo hundido (#E8E9E4), sin borde estático.
+- Foco accesible con anillo azul de 3px (focus-visible:ring-3 focus-visible:ring-foco #2B4BFF, box-shadow de 3px verificado).
+- Etiqueta en text-control text-tinta; mensajes de error en text-meta text-error acompañados de ícono de alerta.
+
+4. CardBase y Estilos del Hilo (styles.ts):
+- cardBase actualizado a rounded-tarjeta (28px) bg-superficie (#FFFFFF) p-[18px] sin borde estático ni sombra (superficie limpia sobre fondo).
+- Sobretítulo: text-sobretitulo mayúsculas en text-tinta-suave (eyebrow) y text-tinta (eyebrowAccent), sin usos del alias transitorio acento.
+- Botones compactos del hilo adaptados a rounded-full con tokens de Prendie.
+
+5. Toast y ErrorBlock (toast.tsx, empty-state.tsx):
+- Toast en aria-live="polite", fondo bg-inverso, rounded-campo, shadow-flotante y texto sobre-inverso.
+- ErrorBlock con role="alert", rounded-campo (20px), borde 1.5px border-error (#C2341F), fondo superficie y acción Reintentar (h-11, subrayada).
+
+6. Íconos (icons.tsx):
+- Trazo base 2px (strokeWidth={2}), extremos y uniones redondeadas (round).
+
+Veredicto visual: Conforme sin observaciones. Cero hallazgos abiertos.
