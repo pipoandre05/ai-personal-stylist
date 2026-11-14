@@ -100,3 +100,31 @@ Inspeccionado en navegador a 390x844 y 360 px de ancho (puerto 3220, AI_MODE=moc
 - Adaptabilidad a 360 px: con min-w-0 flex-1 el campo reduce su ancho (222 px) sin desbordar el botón Enviar ni generar scroll horizontal (scrollWidth <= 360 px).
 
 Veredicto visual: Conforme sin observaciones. Cero hallazgos abiertos.
+
+### 2026-11-14 15:46 · QA · veredicto · vuelta 0
+
+Humo ejecutado en build de producción con AI_MODE=mock, PORT=3210 contra el asesor simulado en navegador móvil (390x844 y 360 px de ancho) y pruebas de renderizado computado del bloque base del hilo (UI-3, UI-4, UI-5).
+
+## Humo
+- UI-3 Encabezado: alto 56 px (h-14), sticky top-0, margen pl-6 (24 px) y pr-4 (16 px), wordmark "Estilo" en Bricolage (font-display text-titulo font-extrabold tracking-[-0.03em]) → OK
+- Botón "Tu espacio": botón contorno mediano (h-11, píldora rounded-full, border-[1.5px] border-linea-fuerte) con ícono de cuadrícula size-5, aria-haspopup="dialog" y aria-expanded reflejando la hoja (Sheet) con enlaces a /closet, /looks y /yo → OK
+- Regla de marca en encabezado: cero lima (un solo lima por pantalla, reservado para CTA principal) → OK
+- UI-4 Voz del Asesor: texto editorial a ancho completo sin burbuja ni avatar, text-destacado (Manrope 600 16/24), [&_p+p]:mt-3 en párrafos → OK
+- Firma "Estilo": bloque text-sobretitulo uppercase text-tinta-suave solo en el primer bloque del turno (no se repite en párrafos siguientes) → OK
+- Énfasis del asesor: formato markdown simple a font-extrabold sin cursiva ni color → OK
+- Cursor streaming: indicador 2x16 respirando (animate-respirar bg-tinta) al final del último bloque de transmisión; respetuoso con motion-reduce → OK
+- UI-4 Voz de la Persona: alineado a la derecha (self-end), max-w-[82%], contenedor bg-hundido rounded-campo px-4 py-3 text-cuerpo font-medium text-tinta → OK
+- Estados de envío de la persona: opacity-70 durante transmisión; fallo con text-meta text-error "No se envió." y botón "Reintentar" (h-11) → OK
+- Error del turno del asesor: bloque con borde lateral border-l-[3px] border-error pl-3 text-destacado text-tinta y botón "Reintentar" (h-11) con role="alert" → OK
+- UI-5 Compositor: barra superficie (bg-superficie) con border-t border-linea px-4 pt-2.5 pb-seguro → OK
+- Botón foto: contorno circular size-11 (44 px, border-[1.5px] border-linea-fuerte bg-transparent text-tinta) con selector de imagen accesible → OK
+- Campo de entrada BLANCO: bg-superficie con borde tinta 1.5 px (border-[1.5px] border-linea-fuerte rounded-campo px-4 py-2.5 text-base font-medium text-tinta placeholder:text-tinta-suave) por decisión de producto (18.5:1 contraste) → OK
+- Foco accesible en compositor: anillo azul de 3 px (focus-visible:ring-3 focus-visible:ring-foco #2b4bff) sin borde duro residual → OK
+- Botón Enviar / Detener: Enviar inverso circular size-11 (44 px, bg-inverso text-sobre-inverso); pasa a Detener (cuadrado size-3) mientras responde → OK
+- Placeholders contextuales (computePlaceholder): "Sin conexión" offline, límite diario alcanzado, "O dímelo con tus palabras" con sugerencias, "Pregúntame por la foto…" tras foto, "¿Qué le cambiarías?" tras look, "Escríbele a tu asesor…" en reposo/respondiendo (9 tests unitarios pasando) → OK
+- Responsive y mobile viewport (390x844 y 360 px): a 360 px el campo encoge (min-w-0 flex-1) sin desbordar el botón Enviar ni scroll horizontal (hasOverflow: false) → OK
+- Accesibilidad mínima: contraste AA superado en todos los pares (tinta/fondo 15.5:1, tinta/superficie 18.5:1, tinta-suave 5.6:1), objetivos táctiles >= 44 px (botones 44 px y 52 px) → OK
+- Verificación técnica y suite: npm run verify limpio (eslint 0 warnings/0 errors, typecheck limpio, 145/145 vitest tests pasando); npm run build OK → OK
+- Servidor de pruebas detenido tras finalizar la ejecución (puerto 3210 libre) → OK
+
+VEREDICTO: QA aprobado sha=82679f43ecf44e086c519af3875f2a9fadc9895f
