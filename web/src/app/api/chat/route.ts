@@ -1,3 +1,4 @@
+import { titleFromFirstMessage } from "@/lib/domain/conversation-title";
 import { z } from "zod";
 import { track } from "@/lib/analytics";
 import { friendlyAiError } from "@/lib/ai/errors";
@@ -142,7 +143,7 @@ export async function POST(request: Request) {
       if (!data) return apiError(BAD_INPUT, 400);
       conversationId = body.data.conversation_id;
     } else {
-      const created = await createConversation(ctx, text.slice(0, 60) || "Foto");
+      const created = await createConversation(ctx, titleFromFirstMessage(text, Boolean(image_path)));
       if (!created) return apiError(INTERNAL, 500);
       conversationId = created;
     }
