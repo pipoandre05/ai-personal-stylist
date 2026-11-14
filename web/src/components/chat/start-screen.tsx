@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore, type ReactNode } from "react";
+import { Mascot } from "@/components/ui";
 import { getContextualGreeting, START_SUGGESTIONS } from "./greeting";
 
 type GreetingCopy = { greeting: string; subtitle: string };
@@ -48,7 +49,9 @@ export function StartScreen({
       aria-label="Inicio de conversación"
       className="flex flex-1 flex-col items-center text-center"
     >
-      <div className="mt-auto max-w-md px-6 pt-10">
+      {/* La mascota saluda una vez, en el hilo vacío. Se esconde si la pantalla es muy baja (teléfono apaisado). */}
+      <Mascot pose="saludo" height={132} className="mt-auto [@media(max-height:560px)]:hidden" />
+      <div className="max-w-md px-6 pt-4 [@media(max-height:560px)]:mt-auto [@media(max-height:560px)]:pt-10">
         <h1 className="font-display text-titulo font-extrabold tracking-[-0.02em] text-tinta">
           {/* Mientras no hay saludo se reserva el alto, para que nada salte al aparecer. */}
           {copy ? copy.greeting : <span aria-hidden="true" className="invisible">Hola</span>}

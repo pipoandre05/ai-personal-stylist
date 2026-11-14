@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { Screen, TopBar, cn } from "@/components/ui";
 import { AuthForm } from "./auth-form";
 
-export const metadata: Metadata = { title: "Entrar — Estilo" };
+export const metadata: Metadata = { title: "Entrar — Prendie" };
 
 const tab = (active: boolean) =>
   cn(

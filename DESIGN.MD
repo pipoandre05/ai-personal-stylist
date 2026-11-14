@@ -64,7 +64,9 @@ nunca < 500 en texto corrido). Estilos [N] (tamaño/interlínea, peso, tracking)
 
 **Asesor vs. persona** (ya no hay serif): asesor sin contenedor, a ancho completo, `text-destacado`; persona en bloque
 `bg-hundido` a la derecha, `text-cuerpo`. Énfasis del asesor: `font-extrabold`, sin cursiva ni color.
-Wordmark provisional "Estilo" en `font-display` 800 (logotipo por definir, A-05).
+Wordmark "Prendie" en `font-display` 800 (DP-25; el logotipo con la etiqueta colgante sigue por definir, A-05).
+
+**Mascota (DP-25).** La etiqueta con zapatillas es la cara del asesor. Componentes `Mascot` (cuerpo entero) y `MascotHead` (cabeza junto a la firma) en `web/src/components/ui/mascot.tsx`; sprite en `web/public/mascota/mascota.svg`. Solo donde habla el asesor, una por pantalla, siempre lima, sin redibujar. Cabeza de 32 px en la firma de cada turno: se balancea mientras el asesor trabaja y hace ta-dá cuando llega un look. Cuerpo entero: portada, hilo vacío y errores a pantalla completa. Reglas completas: `prendie/design/mascota/README.md`.
 
 ## 3. Forma, profundidad, movimiento
 
@@ -119,7 +121,7 @@ Moda → Bricolage Grotesque, Hanken → Manrope, `themeColor` `#f2f2ee`. Bloque
 ❌ text-acento / bg-acento-suave      →  ✅ alias transitorios: no usar
 ❌ rounded-md / rounded-lg            →  ✅ insignia · campo · foto · tarjeta
 ❌ Bodoni, serif o cursiva            →  ✅ font-display / font-body
-❌ etiqueta colgante, círculo, Busco  →  ✅ son de Prendie, no de Estilo
+❌ círculo, Busco, etiqueta colgante de préstamos  →  ✅ son de la app de préstamos; aquí solo el nombre y la mascota (DP-25)
 ❌ transition-all / h-screen / fixed  →  ✅ transform+opacity / min-h-dvh / sticky
 ```
 

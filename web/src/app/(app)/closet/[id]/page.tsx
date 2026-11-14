@@ -8,7 +8,7 @@ import { getGarment } from "@/lib/data/queries";
 import { CATEGORY_LABELS } from "@/lib/domain/types";
 import DetailSkeleton from "./skeleton";
 
-export const metadata: Metadata = { title: "Prenda — Estilo" };
+export const metadata: Metadata = { title: "Prenda — Prendie" };
 
 type Params = Promise<{ id: string }>;
 

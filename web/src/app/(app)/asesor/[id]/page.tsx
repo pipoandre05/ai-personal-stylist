@@ -15,7 +15,7 @@ import {
 } from "@/lib/data/queries";
 import { COLOR_SEASON_LABELS } from "@/lib/domain/types";
 
-export const metadata: Metadata = { title: "Tu asesor — Estilo" };
+export const metadata: Metadata = { title: "Tu asesor — Prendie" };
 
 type PageProps = {
   params: Promise<{ id: string }>;

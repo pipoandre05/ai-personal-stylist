@@ -27,3 +27,4 @@ export { Sheet } from "./sheet";
 export { ToastProvider, useToast, type ToastInput } from "./toast";
 export { EmptyState, ErrorBlock, type ErrorBlockProps } from "./empty-state";
 export { RegisterSW } from "./register-sw";
+export { Mascot, MascotHead, type MascotPose } from "./mascot";

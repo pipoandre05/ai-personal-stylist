@@ -5,7 +5,7 @@
 PWA mobile-first (español de Chile) con un **agente de IA de asesoría de imagen y personal shopper**: conoce el
 estilo, la paleta y el clóset de la persona y propone **outfits completos para una ocasión**, explicando el porqué.
 Promesa: "Te ayudo a verte como quieres verte, con lo que ya tienes y con lo que realmente vale la pena comprar".
-Piloto en Chile. Nombre provisional en la UI: **Estilo**.
+Piloto en Chile. Nombre en la UI: **Prendie** (DP-25); la mascota de Prendie es la cara del asesor.
 
 > Este archivo dice **cómo trabajar**. Si un `.md` y el código se contradicen, gana el código. ≤ 6KB, sin `@import`.
 

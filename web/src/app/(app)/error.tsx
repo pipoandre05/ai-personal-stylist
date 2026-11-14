@@ -1,11 +1,12 @@
 "use client";
 
-import { Button, Screen } from "@/components/ui";
+import { Button, Mascot, Screen } from "@/components/ui";
 
 export default function Error({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
   return (
     <Screen className="px-5">
-      <div role="alert" className="py-16">
+      <div role="alert" className="py-12">
+        <Mascot pose="ups" height={168} className="mb-4" />
         <h1 className="font-display text-3xl">No pude cargar esta pantalla.</h1>
         <p className="mt-3 max-w-sm text-tinta-suave">
           Puede ser tu conexión. Tus datos están guardados: inténtalo de nuevo.

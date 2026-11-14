@@ -17,7 +17,7 @@ export type SessionsSheetProps = {
 /**
  * Panel lateral deslizable de sesiones (UI-20, Pieza D) sobre <dialog> nativo:
  * Botón de "Nueva conversación" hacia /asesor, lista histórica ordenada por fecha
- * con fmtDate(), accesibilidad completa (foco al título, Escape, velo) y voz de Estilo.
+ * con fmtDate(), accesibilidad completa (foco al título, Escape, velo) y voz de Prendie.
  */
 export function SessionsSheet({
   open,

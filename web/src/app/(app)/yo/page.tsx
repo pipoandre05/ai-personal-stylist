@@ -9,7 +9,7 @@ import { signOut } from "@/lib/actions/auth";
 import { getActiveColorAnalysis, getStyleProfile, listMemoryFacts } from "@/lib/data/queries";
 import YoSkeleton from "./skeleton";
 
-export const metadata: Metadata = { title: "Tu perfil — Estilo" };
+export const metadata: Metadata = { title: "Tu perfil — Prendie" };
 
 async function YoContent() {
   const [style, palette, facts] = await Promise.all([
