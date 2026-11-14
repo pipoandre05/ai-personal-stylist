@@ -46,7 +46,9 @@ function deadline<T>(p: Promise<T>, ms: number, fallback: T): Promise<T> {
 }
 
 export function createRealProductSearch(opts: RealSearchOptions): ProductSearch {
-  const limits = { ...LIMITS, ...opts.limits };
+  // El tope de solicitudes crece con la lista: cada tienda gasta hasta 3 (robots, detección de plataforma y búsqueda).
+  // Con un tope fijo, las últimas tiendas de una lista larga quedaban sin consultar en una instancia recién levantada.
+  const limits = { ...LIMITS, maxRequests: Math.max(LIMITS.maxRequests, opts.stores.length * 3), ...opts.limits };
   const allowedHosts = new Set(opts.stores.map((s) => s.domain));
   const cache = new TtlCache<Extract<Awaited<ReturnType<ProductSearch["search"]>>, { ok: true }>>(opts.cacheTtlMs ?? DEFAULT_CACHE_TTL_MS, 100);
 

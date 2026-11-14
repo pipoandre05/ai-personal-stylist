@@ -140,3 +140,15 @@ Felipe pidió dejar para después el trabajo de buscar en más tiendas. Orden pr
 2. **Tiendas grandes con plataforma propia** (Falabella, Paris, Hites): adaptador liviano por tienda que lea los datos estructurados de la página o su consulta interna, si `robots.txt` lo permite. Playwright se usa solo para investigar cada sitio, no en producción (lento, frágil, no corre bien en Vercel). No se evade detección de bots ni CAPTCHA.
 3. **Google Shopping como relleno** cuando no hay suficientes opciones: no tiene API oficial de búsqueda, requiere un intermediario de pago y cuenta de Felipe; zona gris de términos de uso.
 4. **Género:** el asesor debe escribir "mujer" u "hombre" en la búsqueda; hoy el lector no conoce a la persona.
+
+## Directorios de Felipe: resultado de la prueba (2026-11-14)
+
+Se probaron los 89 dominios de los dos directorios de Felipe (hombre y mujer) con una consulta de "polera", el mismo User-Agent del lector y su misma regla de `robots.txt`.
+
+- **Funcionan, Shopify (32):** almabar.cl, froens.cl, joandfire.cl, karyncoo.com, killsyou.cl, lamura.cl, mujeron.cl, muth.cl, pilgrim.cl, savillerow.cl, shopcaterpillar.cl, www.atakamaoutdoor.cl, www.bestias.cl, www.bold.cl, www.ciervastore.com, www.columbiachile.cl, www.dockers.cl, www.fashionspark.com, www.guante.cl, www.hakahonu.cl, www.hushpuppies.cl, www.leonisa.cl, www.lippioutdoor.com, www.lounge.cl, www.merrell.cl, www.monarch.cl, www.ozare.cl, www.rkflife.com (Rockford), www.underarmour.cl, www.vans.cl, www.vistetelocal.cl, www.wildlama.com.
+- **Funcionan, VTEX (8):** cl.tommy.com, www.ellus.cl, www.caffarena.cl, www.calvinklein.cl, www.intime.cl, www.oneill.cl, www.reebok.cl, www.trial.cl.
+- **Responden pero `robots.txt` lo prohíbe (5):** nuknu, doite, ferouch, newman, nimtu.
+- **Otra moneda:** lamartina.com (EUR).
+- **Sin catálogo legible por estas dos vías (el resto):** Falabella, Ripley, Paris, Tricot, Zara, H&M, Mango, Nike, Adidas, Puma, Levi's, Lacoste, Guess, Forever 21, Dafiti, Shein, The North Face, Timberland, Skechers, New Balance, Converse, Billabong, Volcom, Rip Curl, Maui and Sons, entre otras. Dominios que no resuelven: antiunderwear.cl, armente.cl, carocriado.cl, catlifestyle.cl, corona.cl (con `www`).
+
+**Tope:** `MAX_STORES = 20` por configuración. Con 40 tiendas válidas hay que elegir 20, o (pendiente) elegir las tiendas según género y categoría de la búsqueda antes de consultar.
