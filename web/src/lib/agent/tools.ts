@@ -691,7 +691,7 @@ async function execSearchProducts(input: unknown, t: ToolContext): Promise<ToolO
   }
 
   const { options } = finalizeOptions(result.candidates, { budgetMaxClp: budget });
-  void track("shopping_search", { slot, trigger: auth.trigger, results: result.results_found, shown: options.length, stores: result.stores_searched }, t.ctx);
+  void track("shopping_search", { slot, trigger: auth.trigger, results: result.results_found, shown: options.length, stores: result.stores_searched, stores_failed: result.stores_failed?.length ?? 0 }, t.ctx);
   const label_done = `Busqué en ${result.stores_searched} ${result.stores_searched === 1 ? "tienda" : "tiendas"}`;
 
   if (options.length === 0) {
