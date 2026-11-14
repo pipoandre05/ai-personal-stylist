@@ -7,7 +7,7 @@
 >
 > Estados: `tomada` · `tomada-reversible` · `requiere aprobación` · `abierta`.
 
-Versión 0.5 — 2026-11-14.
+Versión 0.6 — 2026-11-14.
 
 ## 1. Decisiones de producto
 
@@ -55,6 +55,10 @@ Versión 0.5 — 2026-11-14.
 | DT-15 | Backlog: `PRODUCT_BACKLOG.md` es la fuente hasta que Felipe autorice crear la carpeta en ClickUp; entonces se migra y el archivo deja de mantenerse. | [STACK] + respuesta de Felipe (no autorizó ClickUp hoy) | tomada | Evita dos fuentes de verdad. |
 | DT-16 | **La Torre** (skill `/torre` de Lo Nuestro y Prendie) **no se instala hoy**. Se instala al cumplirse su gatillo: sesiones paralelas con PRs en cola. El backlog usa IDs y campos compatibles con `.torre/plan.yaml` (id, objetivo, prioridad, área, spec) para que el paso sea directo. Hoy la coordinación es una sola sesión integradora con subagentes sobre archivos disjuntos. | [STACK] `project-inception/knowledge/repo-setup.md` ("Lo que NO se instala al arrancar") | tomada | Instalar el freno y los scripts antes de tener PRs en cola es costo sin beneficio; `permissions.deny` cubre lo irreversible mientras tanto. |
 | DT-17 | Desvíos del flujo de `project-inception` por la ventana de hoy: (1) no se ejecuta `superpowers:brainstorming` pregunta a pregunta: el encargo de Felipe ya define el producto y pide autonomía; (2) la maqueta HTML se entrega para revisión visual en paralelo, no como bloqueo previo; (3) ClickUp y Vercel quedan preparados, no creados. | [FELIPE] (autonomía, plazo 20:00) | tomada | Se registran para que no parezcan olvidos. |
+| DT-18 | **El lector de tiendas es un subagente aislado.** El asesor sigue siendo uno solo de cara a la persona (BF-01); lo que lee la web de tiendas corre aparte, sin acceso a datos privados de la persona, y devuelve un resultado con contrato fijo. Ajusta el matiz de DT-06. | [FELIPE] 2026-11-14, sobre la hipótesis de `docs/investigacion-agentes/E` | tomada | Seguridad (datos privados + contenido no confiable + salida a la red no deben coincidir en un mismo contexto) y contexto (contenido voluminoso y desechable). |
+| DT-19 | **Excepción acotada a DT-02 para el estado de ejecución.** El estado del turno (checkpoints, aprobaciones pendientes) y las trazas pueden escribirse con un rol de servidor, en tablas propias que la persona no edita. Los datos de la persona siguen con su sesión y RLS, sin excepción. | [FELIPE] 2026-11-14 | tomada; diseño pendiente | Un turno que se pausa y se reanuda no puede depender de que el cliente no altere su estado. Requiere migración y manejo de una clave de servidor: se diseña antes de implementarla. |
+| DT-20 | **Las trazas viven en Supabase** (tablas propias del proyecto), no en un servicio externo. | [FELIPE] 2026-11-14 | tomada; diseño pendiente | Un solo lugar para datos y observación en el piloto; sin enviar conversaciones a terceros. Revisar volumen y retención al abrir a público. |
+| DT-21 | **Se puede reutilizar código del SDK `openair-webchat`** (OpenAir Technologies) en la interfaz conversacional, quitando todo lo de tenant, consola e incrustación. Autorización dada por Nico (OpenAir) a Felipe en persona el 2026-11-14. Nunca se porta configuración, claves ni integraciones de clientes de OpenAir. Cada pieza portada se anota con su origen en `docs/producto/research/sdk-openair-mapa-de-reutilizacion.md`. | [FELIPE] 2026-11-14 | tomada | Acelera con piezas probadas en producción. La autorización es verbal: conviene dejarla por escrito (un mensaje basta) antes de abrir el producto a terceros, porque el repo no tiene licencia. |
 
 ## 3. Supuestos que requieren validación
 
@@ -126,6 +130,7 @@ Cada observación levantada por los agentes de backlog/specs se resolvió así. 
 
 | Fecha | Cambio |
 |---|---|
+| 2026-11-14 | v0.6 — DT-18 lector de tiendas aislado; DT-19 excepción acotada a DT-02 para estado de ejecución; DT-20 trazas en Supabase. |
 | 2026-11-14 | v0.5 — DP-19 caso de uso que manda; DP-20 bases fijas BF-01…14; DP-21 equipo de bots con merge propio. |
 | 2026-11-14 | v0.4 — DP-18: un solo asesor que también es personal shopper; RF-17 y RF-18 pasan al MVP (RF-18 sujeto a A-01). |
 | 2026-11-14 | v0.3 — DP-17 Conversación primero (feedback de Felipe a la maqueta): sin pestañas, onboarding conversacional real, fotos en el chat, nuevas herramientas del agente. |
