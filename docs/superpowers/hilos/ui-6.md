@@ -51,3 +51,29 @@ Revisión de código completada sin hallazgos:
 7. Hallazgos: 0 bloquea, 0 importante, 0 menor.
 
 VEREDICTO: Revisor aprobado sha=2bcf27732d47a9fbb8bff2617c8c750b3f40de96
+
+### 2026-11-14 16:13 · Diseño · nota · vuelta 0
+
+Revisión visual sobre commit 2bcf27732d47a9fbb8bff2617c8c750b3f40de96 contra la maqueta aprobada docs/superpowers/mockups/2026-11-14-ui-6-sugerencias.html y tokens de DESIGN.MD.
+Inspeccionado en navegador a 390x844 y 360 px de ancho (puerto 3220, AI_MODE=mock):
+
+1. Modo simple (respuestas sugeridas directas):
+- Botones contorno medianos de 44 px (h-11, px-[18px], text-sm font-bold, border-[1.5px] border-linea-fuerte text-tinta bg-transparent hover:bg-hundido).
+- Alineación a la derecha (flex flex-wrap justify-end gap-2 px-6 pb-3), ubicadas inmediatamente sobre el compositor.
+- Opción de foto/selfie: detectada correctamente por PHOTO_ACTION ("Mandar foto"), incluye ícono IconCamera size-5 accesible y activa el selector de fotos.
+- Cero lima: ningún botón usa accion / bg-accion (respetando la regla de marca de reservar lima para la acción principal del asesor).
+
+2. Modo múltiple (selección múltiple de preferencias):
+- Opciones implementadas con chips píldora (Chip mode="toggle", 36 px de alto visual, h-9 px-4 text-control).
+- Área táctil accesible de 44 px verificada mediante pseudo-elemento after:absolute after:-inset-1 (-4 px a cada lado).
+- Estado seleccionado con aria-pressed="true": pasa a fondo inverso (bg-inverso text-sobre-inverso border-inverso) con ícono de check (size-4 text-sobre-inverso).
+- Botón "Listo": botón inverso mediano de 44 px (h-11 px-[18px] text-sm font-bold bg-inverso text-sobre-inverso).
+- Deshabilitado cuando no hay selección (disabled:opacity-45, pointer-events-none / disabled nativo).
+
+3. Comportamiento dinámico y responsivo:
+- Al enviar: animación de salida mediante fade-out de opacidad (transition-opacity duration-150 motion-reduce:transition-none).
+- A 360 px de ancho: el contenedor flex-wrap y justify-end pasa a una segunda fila sin desbordar la pantalla ni generar scroll horizontal (scrollWidth <= 360 px).
+- Foco visible: anillo azul accesible de 3 px con outline-offset de 2 px (:focus-visible ring-foco).
+- Semántica y accesibilidad: role="group" con aria-label="Respuestas sugeridas".
+
+Veredicto visual: Conforme sin observaciones. Cero hallazgos abiertos.
