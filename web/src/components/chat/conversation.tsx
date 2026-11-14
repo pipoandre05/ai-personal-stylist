@@ -1,8 +1,11 @@
 "use client";
 
+import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { AppHeader, type SpaceSummary } from "@/components/ui";
 import type { ChatMessageView, ConversationSummary } from "@/lib/domain/types";
 import { Composer } from "./composer";
+import { NEW_SESSION_PATH, startsNewSession } from "./new-session";
 import { StartScreen } from "./start-screen";
 import { SuggestedReplies } from "./suggested-replies";
 import { Thread } from "./thread";
@@ -19,8 +22,35 @@ type ConversationProps = {
   autoStart?: boolean;
 };
 
+/**
+ * Envoltura que reinicia el hilo al pedir "Nueva conversación".
+ * Tras el primer mensaje la dirección pasa a `/asesor/<id>` sin cambiar de página (`history.replaceState`), así que volver
+ * a `/asesor` no desmonta nada: sin esta envoltura el hilo anterior se quedaba en pantalla. Cambiar la `key` lo desmonta
+ * y parte limpio. El cambio de `/asesor` a `/asesor/<id>` no la toca: no corta una respuesta en curso.
+ */
+export function Conversation(props: ConversationProps) {
+  const pathname = usePathname();
+  const [previousPath, setPreviousPath] = useState(pathname);
+  const [epoch, setEpoch] = useState(0);
+  if (pathname !== previousPath) {
+    setPreviousPath(pathname);
+    if (startsNewSession(previousPath, pathname)) setEpoch((e) => e + 1);
+  }
+  // Al reiniciar se ignoran los mensajes con que se montó la página: una sesión nueva parte vacía.
+  const fresh = epoch > 0 && pathname === NEW_SESSION_PATH;
+  return (
+    <ConversationView
+      key={epoch}
+      {...props}
+      conversationId={fresh ? null : props.conversationId}
+      initialMessages={fresh ? [] : props.initialMessages}
+      autoStart={fresh ? false : props.autoStart}
+    />
+  );
+}
+
 /** Presentación del hilo y pantalla de inicio: solo marcado y clases. La lógica vive en `useConversation`. */
-export function Conversation({
+function ConversationView({
   conversationId,
   initialMessages,
   closetCount,
