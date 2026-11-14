@@ -1,0 +1,130 @@
+# Hilo ui-3 — UI-3 a UI-5: Encabezado, Voces del asesor y persona, y Compositor
+
+- **Rama:** `equipo/ui-3-base-hilo`
+- **Dependencias declaradas:** ninguna
+- **Tope de vueltas QA ↔ Constructor:** 4 (al tope decide el Productor)
+- **Reglas:** append-only con `agentes/scripts/hilo.sh`; nunca se edita un turno anterior. Los VEREDICTO los lee DevOps antes de mergear.
+
+### 2026-11-14 15:28 · Diseño · nota · vuelta 0
+
+Maquetas de ui-3, ui-4 y ui-5 entregadas en docs/superpowers/mockups/ (390x844, tokens de Prendie, referencia v4):
+- 2026-11-14-ui-3-encabezado.html
+- 2026-11-14-ui-4-voces.html
+- 2026-11-14-ui-5-compositor.html
+
+Decisiones clave:
+1. Encabezado h-14 sticky, wordmark provisional "Estilo" en Bricolage (font-display text-titulo). "Tu espacio" es botón contorno mediano con ícono de cuadrícula, aria-haspopup="dialog" y aria-expanded. Sin lima.
+2. Asesor sin burbuja, text-destacado (Manrope 600 16/24); firma "Estilo" en text-sobretitulo solo en el primer bloque del turno.
+3. Persona a la derecha: self-end max-w-[82%] bg-hundido rounded-campo text-cuerpo.
+4. Compositor: barra superficie, foto contorno size-11, campo BLANCO con borde de tinta 1,5 px (linea-fuerte) por indicación de Felipe, no como dice hoy DESIGN.MD/UX_UI_SPEC §7.9 (hundido). Enviar inverso; Detener cuadrado size-3 mientras responde; placeholders contextuales; min-w-0 obligatorio a 360 px.
+5. Pendiente integradora: alinear UX_UI_SPEC §7.9 y DESIGN.MD con el campo blanco.
+
+Sin verificar: no vistas en navegador; sin validación Opus; sin consulta de factibilidad al Constructor (solo tokens y clases de la spec).
+
+### 2026-11-14 15:41 · Constructor · respuesta · vuelta 0
+
+Construcción del bloque base del hilo (UI-3 Encabezado, UI-4 Voces y UI-5 Compositor) completada según maquetas v4 aprobadas y especificaciones.
+
+Cambios realizados:
+1. UI-3 Encabezado (components/ui/app-header.tsx):
+   - Alto 56 px (h-14), sticky, margen izquierdo pl-6 y derecho pr-4.
+   - Wordmark "Estilo" en Bricolage (font-display text-titulo font-extrabold tracking-[-0.03em]).
+   - Botón "Tu espacio": botón contorno mediano (h-11, píldora, border-[1.5px] border-linea-fuerte) con ícono de cuadrícula size-5, aria-haspopup="dialog" y aria-expanded reflejando la hoja. Sin lima.
+2. UI-4 Voces (components/chat/advisor-message.tsx y person-message.tsx):
+   - Asesor: sin burbuja ni avatar, ancho completo en text-destacado (Manrope 600 16/24), [&_p+p]:mt-3.
+   - Firma "Estilo" en text-sobretitulo uppercase text-tinta-suave en el primer bloque del turno.
+   - Énfasis en font-extrabold sin cursiva ni color (con parser de markdown para **negrita**).
+   - Cursor streaming 2x16 respirando (animate-respirar) al final del último bloque.
+   - Error del turno con border-l-[3px] border-error pl-3 text-destacado text-tinta y acción "Reintentar" (h-11).
+   - Persona: a la derecha (self-end), max-w-[82%], contenedor bg-hundido rounded-campo px-4 py-3 text-cuerpo font-medium text-tinta.
+   - Estado enviando en opacity-70; error en text-meta text-error "No se envió." con botón "Reintentar".
+3. UI-5 Compositor (components/chat/composer.tsx, placeholder.ts, use-conversation.ts, conversation.tsx):
+   - Barra en superficie (bg-superficie) con border-t border-linea px-4 pt-2.5 pb-seguro.
+   - Botón foto contorno size-11 (44 px, border-[1.5px] border-linea-fuerte).
+   - Campo de texto BLANCO (bg-superficie) con borde de tinta 1.5 px (border-[1.5px] border-linea-fuerte rounded-campo px-4 py-2.5 text-base font-medium text-tinta placeholder:text-tinta-suave focus-visible:ring-3 focus-visible:ring-foco min-w-0 flex-1) por decisión explícita de Felipe (18.5:1 contraste).
+   - Botón Enviar inverso size-11 (bg-inverso text-sobre-inverso); botón Detener (cuadrado size-3 bg-sobre-inverso) mientras responde.
+   - Placeholders contextuales implementados y probados en components/chat/placeholder.ts: sugerencias ("O dímelo con tus palabras"), tras foto ("Pregúntame por la foto…"), tras look ("¿Qué le cambiarías?"), reposo / respondiendo ("Escríbele a tu asesor…").
+   - A 360 px el campo encoge con min-w-0 flex-1 sin desbordar el botón Enviar.
+4. Verificaciones y tests:
+   - 9 nuevos tests unitarios en web/tests/ui/thread-base.test.ts cubriendo todos los casos de placeholder contextual.
+   - npm run verify limpio (eslint 0 warnings/0 errors, typecheck limpio, 145/145 tests vitest en verde).
+   - Build de producción compilado exitosamente.
+
+Commit: 82679f43ecf44e086c519af3875f2a9fadc9895f
+Verificación: cd web && npm run verify && AI_MODE=mock npm run build
+
+### 2026-11-14 15:44 · Revisor · veredicto · vuelta 0
+
+Revisión de código completada sin hallazgos:
+1. Frontera: verificada con `bash agentes/scripts/verificar-frontera.sh equipo/ui-3-base-hilo` (13 archivos modificados, todos dentro de components/ui/app-header.tsx, components/chat/**, tests/ui/** y docs/superpowers/**).
+2. Seguridad y datos: sin datos personales en marcado/meta tags, URLs de objeto para vistas previas liberadas con revokeObjectURL, llamadas a IA centralizadas exclusivamente en servidor, fotos y links tratados como datos.
+3. Reglas invariantes de CLAUDE.md: zona America/Santiago respetada en formateadores de fecha del hilo, AI_MODE=mock probado y funcionando, vocabulario y tono acordes (asesor en primera persona, tuteo, sin emoji, botones con verbo y objeto claros).
+4. Correctitud contra criterios y maquetas aprobadas:
+   - UI-3 Encabezado: h-14 sticky, márgenes pl-6 pr-4, wordmark font-display text-titulo font-extrabold, botón "Tu espacio" contorno mediano accesible con aria-haspopup="dialog" y aria-expanded. Sin lima.
+   - UI-4 Voces: Asesor sin burbuja en text-destacado (Manrope 600), firma "Estilo" en text-sobretitulo solo en el primer bloque del turno, formato **negrita** sin color ni cursiva, cursor streaming 2x16 respirando (animate-respirar) en el último párrafo, error accesible con borde izquierdo 3px border-error y Reintentar. Persona a la derecha self-end max-w-[82%] bg-hundido rounded-campo text-cuerpo, enviando con opacity-70 y error con FailedLine accesible.
+   - UI-5 Compositor: barra superficie con border-t border-linea px-4 pt-2.5 pb-seguro; botón foto contorno size-11; campo BLANCO con borde de tinta 1.5px (bg-superficie border-[1.5px] border-linea-fuerte rounded-campo px-4 py-2.5 text-base font-medium text-tinta placeholder:text-tinta-suave focus-visible:ring-3 focus-visible:ring-foco min-w-0 flex-1) según decisión explícita de Felipe (contraste 18.5:1); botón Enviar inverso size-11 y Detener cuadrado size-3 respondiendo; placeholders contextuales implementados y probados; adaptación responsive a 360 px sin desbordamiento.
+5. Tokens y CSS: 100% de clases existen en globals.css / DESIGN.MD, tokens.test.ts en verde (cero clases inventadas).
+6. Tests y compilación: `npm run verify` en verde (lint limpio, typecheck sin errores, 145/145 tests vitest pasando, incluyendo 9 pruebas en tests/ui/thread-base.test.ts) y `npm run build` exitoso.
+7. Hallazgos: 0 bloquea, 0 importante, 0 menor.
+
+VEREDICTO: Revisor aprobado sha=82679f43ecf44e086c519af3875f2a9fadc9895f
+
+### 2026-11-14 15:45 · Diseño · nota · vuelta 0
+
+Revisión visual sobre commit 82679f43ecf44e086c519af3875f2a9fadc9895f contra las maquetas aprobadas:
+- docs/superpowers/mockups/2026-11-14-ui-3-encabezado.html
+- docs/superpowers/mockups/2026-11-14-ui-4-voces.html
+- docs/superpowers/mockups/2026-11-14-ui-5-compositor.html
+Inspeccionado en navegador a 390x844 y 360 px de ancho (puerto 3220, AI_MODE=mock):
+
+1. UI-3 Encabezado (components/ui/app-header.tsx):
+- Altura computada: 56 px (h-14), sticky top-0, pl-6 y pr-4.
+- Wordmark "Estilo" en Bricolage Grotesque (font-display text-titulo font-extrabold tracking-[-0.03em]).
+- Botón "Tu espacio": botón contorno mediano (h-11, píldora rounded-full, border-[1.5px] border-linea-fuerte) con ícono de cuadrícula size-5, aria-haspopup="dialog" y aria-expanded={open}. Sin lima.
+
+2. UI-4 Voces del Asesor y Persona (advisor-message.tsx, person-message.tsx):
+- Asesor: sin burbuja ni avatar, ancho completo en text-destacado (Manrope 600 16/24), espaciado [&_p+p]:mt-3.
+- Firma "Estilo": text-sobretitulo mayúsculas en text-tinta-suave (mb-1), presente únicamente en el primer bloque del turno.
+- Énfasis: strong con font-extrabold sin cursiva ni color.
+- Cursor streaming: 2x16 px en bg-tinta con animate-respirar (desactivable con prefers-reduced-motion).
+- Error en respuesta del asesor: border-l-[3px] border-error pl-3 text-destacado text-tinta con botón interactivo "Reintentar" (h-11 subrayado).
+- Persona: bloque alineado a la derecha (self-end), max-w-[82%], contenedor bg-hundido rounded-campo px-4 py-3 text-cuerpo text-tinta font-medium.
+- Estado enviando en opacity-70; error con text-meta text-error "No se envió." y acción "Reintentar".
+
+3. UI-5 Compositor (composer.tsx, placeholder.ts):
+- Barra inferior fija en bg-superficie con border-t border-linea px-4 pt-2.5 pb-seguro.
+- Botón foto: contorno circular size-11 (44 px, border-[1.5px] border-linea-fuerte).
+- Campo de texto: BLANCO (bg-superficie) con borde de tinta 1.5 px (border-[1.5px] border-linea-fuerte), radio rounded-campo (20 px), px-4 py-2.5 text-base font-medium text-tinta placeholder:text-tinta-suave, foco anillo azul 3 px (focus-visible:ring-3 focus-visible:ring-foco). Cumple la decisión de Felipe y mantiene contraste 18.5:1.
+- Botón Enviar / Detener: circular size-11 (44 px), variante inversa bg-inverso text-sobre-inverso; durante streaming muestra cuadrado size-3 bg-sobre-inverso ("Detener respuesta").
+- Placeholders contextuales implementados y verificados ("O dímelo con tus palabras", "Pregúntame por la foto…", "¿Qué le cambiarías?", "Escríbele a tu asesor…").
+- Adaptabilidad a 360 px: con min-w-0 flex-1 el campo reduce su ancho (222 px) sin desbordar el botón Enviar ni generar scroll horizontal (scrollWidth <= 360 px).
+
+Veredicto visual: Conforme sin observaciones. Cero hallazgos abiertos.
+
+### 2026-11-14 15:46 · QA · veredicto · vuelta 0
+
+Humo ejecutado en build de producción con AI_MODE=mock, PORT=3210 contra el asesor simulado en navegador móvil (390x844 y 360 px de ancho) y pruebas de renderizado computado del bloque base del hilo (UI-3, UI-4, UI-5).
+
+## Humo
+- UI-3 Encabezado: alto 56 px (h-14), sticky top-0, margen pl-6 (24 px) y pr-4 (16 px), wordmark "Estilo" en Bricolage (font-display text-titulo font-extrabold tracking-[-0.03em]) → OK
+- Botón "Tu espacio": botón contorno mediano (h-11, píldora rounded-full, border-[1.5px] border-linea-fuerte) con ícono de cuadrícula size-5, aria-haspopup="dialog" y aria-expanded reflejando la hoja (Sheet) con enlaces a /closet, /looks y /yo → OK
+- Regla de marca en encabezado: cero lima (un solo lima por pantalla, reservado para CTA principal) → OK
+- UI-4 Voz del Asesor: texto editorial a ancho completo sin burbuja ni avatar, text-destacado (Manrope 600 16/24), [&_p+p]:mt-3 en párrafos → OK
+- Firma "Estilo": bloque text-sobretitulo uppercase text-tinta-suave solo en el primer bloque del turno (no se repite en párrafos siguientes) → OK
+- Énfasis del asesor: formato markdown simple a font-extrabold sin cursiva ni color → OK
+- Cursor streaming: indicador 2x16 respirando (animate-respirar bg-tinta) al final del último bloque de transmisión; respetuoso con motion-reduce → OK
+- UI-4 Voz de la Persona: alineado a la derecha (self-end), max-w-[82%], contenedor bg-hundido rounded-campo px-4 py-3 text-cuerpo font-medium text-tinta → OK
+- Estados de envío de la persona: opacity-70 durante transmisión; fallo con text-meta text-error "No se envió." y botón "Reintentar" (h-11) → OK
+- Error del turno del asesor: bloque con borde lateral border-l-[3px] border-error pl-3 text-destacado text-tinta y botón "Reintentar" (h-11) con role="alert" → OK
+- UI-5 Compositor: barra superficie (bg-superficie) con border-t border-linea px-4 pt-2.5 pb-seguro → OK
+- Botón foto: contorno circular size-11 (44 px, border-[1.5px] border-linea-fuerte bg-transparent text-tinta) con selector de imagen accesible → OK
+- Campo de entrada BLANCO: bg-superficie con borde tinta 1.5 px (border-[1.5px] border-linea-fuerte rounded-campo px-4 py-2.5 text-base font-medium text-tinta placeholder:text-tinta-suave) por decisión de producto (18.5:1 contraste) → OK
+- Foco accesible en compositor: anillo azul de 3 px (focus-visible:ring-3 focus-visible:ring-foco #2b4bff) sin borde duro residual → OK
+- Botón Enviar / Detener: Enviar inverso circular size-11 (44 px, bg-inverso text-sobre-inverso); pasa a Detener (cuadrado size-3) mientras responde → OK
+- Placeholders contextuales (computePlaceholder): "Sin conexión" offline, límite diario alcanzado, "O dímelo con tus palabras" con sugerencias, "Pregúntame por la foto…" tras foto, "¿Qué le cambiarías?" tras look, "Escríbele a tu asesor…" en reposo/respondiendo (9 tests unitarios pasando) → OK
+- Responsive y mobile viewport (390x844 y 360 px): a 360 px el campo encoge (min-w-0 flex-1) sin desbordar el botón Enviar ni scroll horizontal (hasOverflow: false) → OK
+- Accesibilidad mínima: contraste AA superado en todos los pares (tinta/fondo 15.5:1, tinta/superficie 18.5:1, tinta-suave 5.6:1), objetivos táctiles >= 44 px (botones 44 px y 52 px) → OK
+- Verificación técnica y suite: npm run verify limpio (eslint 0 warnings/0 errors, typecheck limpio, 145/145 vitest tests pasando); npm run build OK → OK
+- Servidor de pruebas detenido tras finalizar la ejecución (puerto 3210 libre) → OK
+
+VEREDICTO: QA aprobado sha=82679f43ecf44e086c519af3875f2a9fadc9895f

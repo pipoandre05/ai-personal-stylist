@@ -47,15 +47,15 @@ export function Conversation({ conversationId, initialMessages, closetCount, dis
         </p>
       ) : null}
 
-      <div className="sticky bottom-0 z-20 border-t border-linea bg-fondo/90 backdrop-blur-md">
+      <div className="sticky bottom-0 z-20 bg-fondo">
         {c.showJump ? (
           <button
             type="button"
             onClick={c.jumpToEnd}
             aria-label="Ir al final"
-            className="absolute bottom-full left-1/2 mb-3 flex size-11 -translate-x-1/2 animate-aparecer items-center justify-center rounded-full bg-tinta text-superficie shadow-flotante"
+            className="absolute bottom-full left-1/2 mb-3 flex size-11 -translate-x-1/2 animate-aparecer items-center justify-center rounded-full bg-inverso text-sobre-inverso shadow-flotante"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="size-5">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="size-5">
               <path d="M12 5v13M6.5 12.5L12 18l5.5-5.5" />
             </svg>
           </button>
