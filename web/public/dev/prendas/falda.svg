@@ -1,0 +1,250 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 262" width="220" height="262"><defs>
+  <filter id="f-tela" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="7" result="r"/>
+    <feColorMatrix in="r" type="saturate" values="0" result="g"/>
+    <feComponentTransfer in="g" result="s"><feFuncR type="linear" slope="0.24" intercept="0.86"/><feFuncG type="linear" slope="0.24" intercept="0.86"/><feFuncB type="linear" slope="0.24" intercept="0.86"/></feComponentTransfer>
+    <feBlend in="SourceGraphic" in2="s" mode="multiply" result="m"/>
+    <feComposite in="m" in2="SourceGraphic" operator="in"/>
+  </filter>
+  <filter id="f-lino" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency="0.05 1.25" numOctaves="2" seed="3" result="r"/>
+    <feColorMatrix in="r" type="saturate" values="0" result="g"/>
+    <feComponentTransfer in="g" result="s"><feFuncR type="linear" slope="0.32" intercept="0.8"/><feFuncG type="linear" slope="0.32" intercept="0.8"/><feFuncB type="linear" slope="0.32" intercept="0.8"/></feComponentTransfer>
+    <feBlend in="SourceGraphic" in2="s" mode="multiply" result="m"/>
+    <feComposite in="m" in2="SourceGraphic" operator="in"/>
+  </filter>
+  <filter id="f-difuso" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="5"/></filter>
+  <filter id="f-difuso-s" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="1.6"/></filter>
+  <filter id="f-sabana" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency="0.0045 0.009" numOctaves="2" seed="21" result="t"/>
+    <feDiffuseLighting in="t" surfaceScale="4.5" diffuseConstant="1.18" lighting-color="#FFF8EE" result="luz"><feDistantLight azimuth="230" elevation="58"/></feDiffuseLighting>
+    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" seed="5" result="fino"/>
+    <feColorMatrix in="fino" type="saturate" values="0" result="finog"/>
+    <feComponentTransfer in="finog" result="finos"><feFuncR type="linear" slope="0.12" intercept="0.93"/><feFuncG type="linear" slope="0.12" intercept="0.93"/><feFuncB type="linear" slope="0.12" intercept="0.93"/></feComponentTransfer>
+    <feComposite in="luz" in2="SourceGraphic" operator="arithmetic" k1="1" k2="0" k3="0" k4="0" result="base"/>
+    <feBlend in="base" in2="finos" mode="multiply"/>
+  </filter>
+
+  <!-- Patrones -->
+  <pattern id="pt-mimbre" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="scale(.62) rotate(2)">
+    <rect width="16" height="16" fill="#8F6638"/>
+    <rect x=".6" y="1" width="6.8" height="2.9" rx="1.4" fill="#D6B27A"/><rect x=".6" y="4.6" width="6.8" height="2.9" rx="1.4" fill="#CCA56C"/>
+    <rect x="9" y=".6" width="2.9" height="6.8" rx="1.4" fill="#C59D63"/><rect x="12.6" y=".6" width="2.9" height="6.8" rx="1.4" fill="#D3AE76"/>
+    <rect x="1" y="8.6" width="2.9" height="6.8" rx="1.4" fill="#C9A169"/><rect x="4.6" y="8.6" width="2.9" height="6.8" rx="1.4" fill="#D6B27A"/>
+    <rect x="8.6" y="9" width="6.8" height="2.9" rx="1.4" fill="#D3AE76"/><rect x="8.6" y="12.6" width="6.8" height="2.9" rx="1.4" fill="#C59D63"/>
+  </pattern>
+  <pattern id="pt-yute" width="8" height="5" patternUnits="userSpaceOnUse">
+    <rect width="8" height="5" fill="#C2A06D"/>
+    <path d="M0 2.5Q2 0 4 2.5T8 2.5" stroke="#9C7A48" stroke-width="1.1" fill="none"/>
+    <path d="M0 4.6Q2 2.4 4 4.6T8 4.6" stroke="#D9BE8E" stroke-width=".7" fill="none"/>
+  </pattern>
+  <pattern id="pt-flores" width="22" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(-8)">
+    <rect width="22" height="22" fill="#B05E3D"/>
+    <g fill="#F1DFC6"><circle cx="5" cy="3.6" r="1.5"/><circle cx="5" cy="6.4" r="1.5"/><circle cx="3.6" cy="5" r="1.5"/><circle cx="6.4" cy="5" r="1.5"/></g>
+    <circle cx="5" cy="5" r="1" fill="#C98A3A"/>
+    <g fill="#E9CBA8"><circle cx="16" cy="14.6" r="1.2"/><circle cx="16" cy="17.4" r="1.2"/><circle cx="14.6" cy="16" r="1.2"/><circle cx="17.4" cy="16" r="1.2"/></g>
+    <circle cx="16" cy="16" r=".8" fill="#6E3A26"/>
+    <circle cx="14" cy="5" r=".7" fill="#E9CBA8"/><circle cx="6" cy="16" r=".7" fill="#E9CBA8"/>
+  </pattern>
+
+  <!-- Degradados de luz (luz cenital desde arriba a la izquierda) -->
+  <linearGradient id="g-seda" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F6EFE2"/><stop offset=".42" stop-color="#ECE2CE"/><stop offset=".58" stop-color="#F5EEE0"/><stop offset="1" stop-color="#D9CBB0"/></linearGradient>
+  <linearGradient id="g-lino" x1="0" y1="0" x2=".8" y2="1"><stop offset="0" stop-color="#D8C7A6"/><stop offset=".55" stop-color="#CBB894"/><stop offset="1" stop-color="#B9A47F"/></linearGradient>
+  <linearGradient id="g-falda-luz" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#1d2416" stop-opacity=".22"/></linearGradient>
+  <linearGradient id="g-camel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C08850"/><stop offset="1" stop-color="#94602F"/></linearGradient>
+  <linearGradient id="g-terracota" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C46E48"/><stop offset="1" stop-color="#8C4126"/></linearGradient>
+  <linearGradient id="g-crudo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F2EBDD"/><stop offset="1" stop-color="#D8CDB8"/></linearGradient>
+  <linearGradient id="g-taco" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6E4524"/><stop offset=".5" stop-color="#8A5A30"/><stop offset="1" stop-color="#5E3A1D"/></linearGradient>
+  <linearGradient id="g-blanco" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#E7E3DC"/></linearGradient>
+  <radialGradient id="g-bolso-sombra" cx=".45" cy=".3" r=".8"><stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#2a1a08" stop-opacity=".38"/></radialGradient>
+  <linearGradient id="g-vestido-luz" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#2a0f05" stop-opacity=".28"/></linearGradient>
+
+  <radialGradient id="g-foto-luz" cx=".42" cy=".35" r=".85"><stop offset="0" stop-color="#FFE7C2" stop-opacity=".16"/><stop offset=".55" stop-color="#FFE7C2" stop-opacity="0"/><stop offset="1" stop-color="#2E1C0C" stop-opacity=".42"/></radialGradient>
+
+  <!-- Formas base (sin relleno: lo pone quien las usa) -->
+  <path id="p-blusa" d="M78 28L50 40Q28 70 12 108L36 120Q50 104 58 92Q54 160 56 226Q110 234 166 226Q168 160 162 92Q170 104 184 120L208 108Q192 70 170 40L142 28Q126 40 110 70Q94 40 78 28Z"/>
+  <clipPath id="c-blusa"><use href="#p-blusa"/></clipPath>
+  <path id="p-blazer" d="M98 20L62 30Q44 36 38 62L16 236Q28 246 44 242L62 118L60 264Q120 271 180 264L178 118L196 242Q212 246 224 236L202 62Q196 36 178 30L142 20Q120 26 98 20Z"/>
+  <clipPath id="c-blazer"><use href="#p-blazer"/></clipPath>
+  <path id="p-bolso" d="M26 88L174 88Q170 150 156 178Q100 190 44 178Q30 150 26 88Z"/>
+  <clipPath id="c-bolso"><use href="#p-bolso"/></clipPath>
+  <path id="p-vestido" d="M84 18Q110 32 136 18L156 26L180 60L164 72L152 62L150 112L152 124Q172 200 198 286Q110 298 22 286Q48 200 68 124L70 112L68 62L56 72L40 60L64 26Z"/>
+  <clipPath id="c-vestido"><use href="#p-vestido"/></clipPath>
+  <path id="p-suela" d="M12 128Q12 119 26 118L106 113Q134 109 154 97Q168 87 182 83L206 81L206 89L186 91Q168 97 152 111Q132 125 104 129L28 135Q12 136 12 128Z"/>
+  <path id="p-taco" d="M183 89L206 87L204 137L186 137Q183 113 183 89Z"/>
+
+  <!-- Un zapato de taco ancho (base común) -->
+  <g id="z-base">
+    <use href="#p-taco" fill="url(#g-taco)"/>
+    <path d="M185 100L205 98M185 112L205 110M185 124L204 122" stroke="#4A2E16" stroke-width=".8" opacity=".55"/>
+    <use href="#p-suela" fill="#5B3A1E"/>
+    <path d="M18 121Q60 118 106 114Q134 110 154 98Q168 88 184 84L204 82" stroke="#E2C59C" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+  </g>
+</defs>
+
+<!-- 1 · Blusa de seda cruda -->
+<symbol id="blusa" viewBox="0 0 220 240">
+  <g filter="url(#f-tela)">
+    <use href="#p-blusa" fill="url(#g-seda)"/>
+    <g clip-path="url(#c-blusa)">
+      <g filter="url(#f-difuso)" fill="none" stroke-linecap="round">
+        <path d="M74 112Q96 168 86 232" stroke="#A8936B" stroke-width="11" opacity=".32"/>
+        <path d="M142 104Q130 170 142 234" stroke="#fff" stroke-width="16" opacity=".55"/>
+        <path d="M116 86Q110 150 118 232" stroke="#A8936B" stroke-width="6" opacity=".22"/>
+        <path d="M18 104Q34 86 52 52" stroke="#A8936B" stroke-width="8" opacity=".25"/>
+        <path d="M202 104Q186 86 168 52" stroke="#fff" stroke-width="8" opacity=".5"/>
+      </g>
+    </g>
+  </g>
+  <path d="M78 28Q110 22 142 28Q126 38 110 64Q94 38 78 28Z" fill="#D6C7A9"/>
+  <path d="M78 28Q94 40 110 70Q126 40 142 28" stroke="#E9DFCB" stroke-width="3.2" fill="none"/>
+  <path d="M50 40Q62 66 58 92M170 40Q158 66 162 92" stroke="#8E7A55" stroke-width="1" opacity=".35" fill="none"/>
+  <path d="M60 220Q110 228 162 220M18 110L38 118M202 110L182 118" stroke="#8E7A55" stroke-width=".9" stroke-dasharray="2.2 2.4" opacity=".45" fill="none"/>
+</symbol>
+
+<!-- 2 · Falda midi plisada salvia -->
+<symbol id="falda" viewBox="0 0 220 262">
+  <g filter="url(#f-tela)">
+    <path d="M76.0 30.0L79.1 30.0L26.5 247.5L18.0 242.0Z" fill="#A3AE93"/><path d="M79.1 30.0L81.2 30.0L32.2 246.0L26.5 247.5Z" fill="#7D896E"/><path d="M79.1 30.0L26.5 247.5" stroke="#C3CCB4" stroke-width="0.9" opacity=".7"/><path d="M81.2 30.0L84.4 30.0L40.6 251.0L32.2 246.0Z" fill="#A3AE93"/><path d="M84.4 30.0L86.5 30.0L46.3 249.3L40.6 251.0Z" fill="#7D896E"/><path d="M84.4 30.0L40.6 251.0" stroke="#C3CCB4" stroke-width="0.9" opacity=".7"/><path d="M86.5 30.0L89.6 30.0L54.8 254.0L46.3 249.3Z" fill="#A3AE93"/><path d="M89.6 30.0L91.7 30.0L60.5 251.9L54.8 254.0Z" fill="#7D896E"/><path d="M89.6 30.0L54.8 254.0" stroke="#C3CCB4" stroke-width="0.9" opacity=".7"/><path d="M91.7 30.0L94.8 30.0L69.0 256.2L60.5 251.9Z" fill="#A3AE93"/><path d="M94.8 30.0L96.9 30.0L74.6 253.9L69.0 256.2Z" fill="#7D896E"/><path d="M94.8 30.0L69.0 256.2" stroke="#C3CCB4" stroke-width="0.9" opacity=".7"/><path d="M96.9 30.0L100.1 30.0L83.1 257.8L74.6 253.9Z" fill="#A3AE93"/><path d="M100.1 30.0L102.2 30.0L88.8 255.3L83.1 257.8Z" fill="#7D896E"/><path d="M100.1 30.0L83.1 257.8" stroke="#C3CCB4" stroke-width="0.9" opacity=".7"/><path d="M102.2 30.0L105.3 30.0L97.3 258.7L88.8 255.3Z" fill="#A3AE93"/><path d="M105.3 30.0L107.4 30.0L102.9 255.9L97.3 258.7Z" fill="#7D896E"/><path d="M105.3 30.0L97.3 258.7" stroke="#C3CCB4" stroke-width="0.9" opacity=".7"/><path d="M107.4 30.0L110.5 30.0L111.4 259.0L102.9 255.9Z" fill="#A3AE93"/><path d="M110.5 30.0L112.6 30.0L117.1 255.9L111.4 259.0Z" fill="#7D896E"/><path d="M110.5 30.0L111.4 259.0" stroke="#C3CCB4" stroke-width="0.9" opacity=".7"/><path d="M112.6 30.0L115.8 30.0L125.6 258.6L117.1 255.9Z" fill="#A3AE93"/><path d="M115.8 30.0L117.8 30.0L131.2 255.3L125.6 258.6Z" fill="#7D896E"/><path d="M115.8 30.0L125.6 258.6" stroke="#C3CCB4" stroke-width="0.9" opacity=".7"/><path d="M117.8 30.0L121.0 30.0L139.7 257.5L131.2 255.3Z" fill="#A3AE93"/><path d="M121.0 30.0L123.1 30.0L145.4 253.9L139.7 257.5Z" fill="#7D896E"/><path d="M121.0 30.0L139.7 257.5" stroke="#C3CCB4" stroke-width="0.9" opacity=".7"/><path d="M123.1 30.0L126.2 30.0L153.9 255.8L145.4 253.9Z" fill="#A3AE93"/><path d="M126.2 30.0L128.3 30.0L159.5 251.9L153.9 255.8Z" fill="#7D896E"/><path d="M126.2 30.0L153.9 255.8" stroke="#C3CCB4" stroke-width="0.9" opacity=".7"/><path d="M128.3 30.0L131.4 30.0L168.0 253.4L159.5 251.9Z" fill="#A3AE93"/><path d="M131.4 30.0L133.5 30.0L173.7 249.3L168.0 253.4Z" fill="#7D896E"/><path d="M131.4 30.0L168.0 253.4" stroke="#C3CCB4" stroke-width="0.9" opacity=".7"/><path d="M133.5 30.0L136.7 30.0L182.2 250.4L173.7 249.3Z" fill="#A3AE93"/><path d="M136.7 30.0L138.8 30.0L187.8 246.0L182.2 250.4Z" fill="#7D896E"/><path d="M136.7 30.0L182.2 250.4" stroke="#C3CCB4" stroke-width="0.9" opacity=".7"/><path d="M138.8 30.0L141.9 30.0L196.3 246.7L187.8 246.0Z" fill="#A3AE93"/><path d="M141.9 30.0L144.0 30.0L202.0 242.0L196.3 246.7Z" fill="#7D896E"/><path d="M141.9 30.0L196.3 246.7" stroke="#C3CCB4" stroke-width="0.9" opacity=".7"/>
+    <path d="M76 30L144 30L202 242Q110 270 18 242Z" fill="url(#g-falda-luz)"/>
+  </g>
+  <path d="M74 14L146 14L146 31L74 31Z" fill="#7E8A70"/>
+  <path d="M74 14L146 14L146 18L74 18Z" fill="#94A085"/>
+  <path d="M76 28.5L144 28.5" stroke="#5F6A52" stroke-width=".8" stroke-dasharray="2 2" opacity=".7"/>
+  <circle cx="139" cy="22.5" r="3" fill="#E8E1D2"/><circle cx="139" cy="22.5" r="3" fill="none" stroke="#5F6A52" stroke-width=".6"/>
+</symbol>
+
+<!-- 3 · Blazer de lino arena -->
+<symbol id="blazer" viewBox="0 0 240 280">
+  <g filter="url(#f-lino)">
+    <use href="#p-blazer" fill="url(#g-lino)"/>
+    <g clip-path="url(#c-blazer)">
+      <path d="M38 62L16 236Q28 246 44 242L62 118L64 32Z" fill="#7A6440" opacity=".14"/>
+      <path d="M202 62L224 236Q212 246 196 242L178 118L176 32Z" fill="#7A6440" opacity=".2"/>
+      <g filter="url(#f-difuso)" fill="none" stroke-linecap="round">
+        <path d="M80 150Q90 210 84 262" stroke="#fff" stroke-width="12" opacity=".35"/>
+        <path d="M156 130Q150 200 160 262" stroke="#6E5836" stroke-width="10" opacity=".22"/>
+        <path d="M36 120Q30 180 28 236" stroke="#fff" stroke-width="7" opacity=".3"/>
+      </g>
+    </g>
+  </g>
+  <path d="M64 32Q72 74 64 116M176 32Q168 74 176 116" stroke="#6E5836" stroke-width="1" opacity=".45" fill="none"/>
+  <path d="M98 20Q120 26 142 20L138 30Q120 35 102 30Z" fill="#AD9773"/>
+  <path d="M102 30Q120 35 138 30L122 150L118 150Z" fill="#9B8460"/>
+  <path d="M98 20L80 46L92 52L84 62L118 150L102 30Z" fill="#D7C6A4"/>
+  <path d="M142 20L160 46L148 52L156 62L122 150L138 30Z" fill="#CDBB97"/>
+  <path d="M80 46L92 52L84 62L118 150M160 46L148 52L156 62L122 150" stroke="#6E5836" stroke-width="1" opacity=".5" fill="none"/>
+  <path d="M120 150Q121 210 122 266" stroke="#6E5836" stroke-width="1.1" opacity=".45" fill="none"/>
+  <path d="M74 200L106 198L106 207L74 209Z" fill="#BEA983" stroke="#6E5836" stroke-width=".7" stroke-opacity=".5"/>
+  <path d="M134 198L166 200L166 209L134 207Z" fill="#B7A27D" stroke="#6E5836" stroke-width=".7" stroke-opacity=".5"/>
+  <path d="M140 98L162 96L162 101L140 103Z" fill="#BCA781" stroke="#6E5836" stroke-width=".6" stroke-opacity=".5"/>
+  <g fill="#4E3B28"><circle cx="121" cy="172" r="4.6"/><circle cx="121.5" cy="206" r="4.6"/></g>
+  <g fill="#7A6146"><circle cx="120" cy="171" r="1.6"/><circle cx="120.5" cy="205" r="1.6"/></g>
+  <g fill="#4E3B28"><circle cx="30" cy="226" r="2.2"/><circle cx="33" cy="219" r="2.2"/><circle cx="210" cy="226" r="2.2"/><circle cx="207" cy="219" r="2.2"/></g>
+</symbol>
+
+<!-- 4 · Cartera de mimbre -->
+<symbol id="bolso" viewBox="0 0 200 196">
+  <path d="M60 92Q62 20 100 20Q138 20 140 92" stroke="#6E441F" stroke-width="7.5" fill="none" stroke-linecap="round"/>
+  <path d="M60 92Q62 20 100 20Q138 20 140 92" stroke="#A06A38" stroke-width="3" fill="none" stroke-linecap="round" opacity=".7"/>
+  <use href="#p-bolso" fill="url(#pt-mimbre)"/>
+  <use href="#p-bolso" fill="url(#g-bolso-sombra)"/>
+  <path d="M24 82L176 82L175 97L25 97Z" fill="#8A5A2C"/>
+  <path d="M26 86L174 86" stroke="#D9B07E" stroke-width=".8" stroke-dasharray="2 2"/>
+  <path d="M54 82h14v24h-14zM132 82h14v24h-14z" fill="#7A4D24"/>
+  <circle cx="61" cy="100" r="1.8" fill="#C9A06A"/><circle cx="139" cy="100" r="1.8" fill="#C9A06A"/>
+</symbol>
+
+<!-- 5a · Sandalia de cuero camel, taco cuadrado (Tienda A) -->
+<symbol id="zapato-a" viewBox="0 0 220 150">
+  <use href="#z-base"/>
+  <path d="M170 86Q166 62 178 54Q192 50 202 60L206 81L198 82Q196 66 186 64Q176 64 178 85Z" fill="url(#g-camel)"/>
+  <path d="M150 97Q150 68 176 54" stroke="#9A6534" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <rect x="168" y="52" width="9" height="7" rx="1.5" fill="none" stroke="#D8C08F" stroke-width="1.6" transform="rotate(-28 172 55)"/>
+  <path d="M30 118Q46 90 74 92Q92 95 98 113L88 114Q82 103 72 102Q52 101 41 118Z" fill="url(#g-camel)"/>
+  <path d="M38 114Q52 97 72 97Q86 99 92 112" stroke="#E2BF8E" stroke-width=".8" stroke-dasharray="2 2" fill="none"/>
+</symbol>
+<symbol id="par-a" viewBox="0 0 240 170"><use href="#zapato-a" x="18" y="0" width="220" height="150" opacity=".92"/><use href="#zapato-a" x="0" y="20" width="220" height="150"/></symbol>
+
+<!-- 5b · Mule terracota, taco bloque (Tienda B) -->
+<symbol id="zapato-b" viewBox="0 0 220 150">
+  <use href="#z-base"/>
+  <path d="M26 118Q38 78 84 80Q116 82 126 110L112 111Q104 94 86 93Q56 92 42 118Z" fill="url(#g-terracota)"/>
+  <path d="M40 112Q56 88 86 88Q108 89 118 108" stroke="#E7A07C" stroke-width=".8" opacity=".7" fill="none"/>
+</symbol>
+<symbol id="par-b" viewBox="0 0 240 170"><use href="#zapato-b" x="18" y="0" width="220" height="150" opacity=".92"/><use href="#zapato-b" x="0" y="20" width="220" height="150"/></symbol>
+
+<!-- 5c · Alpargata de plataforma en yute (Tienda C) -->
+<symbol id="zapato-c" viewBox="0 0 220 150">
+  <path d="M12 120Q14 112 28 111L106 104Q140 98 168 84Q186 76 206 72L206 137L20 137Q10 134 12 120Z" fill="url(#pt-yute)"/>
+  <path d="M14 133L206 133L206 138L20 138Q14 137 14 133Z" fill="#4B3B2B"/>
+  <path d="M24 112Q36 82 80 80Q114 80 128 100L110 103Q98 92 82 92Q52 92 40 112Z" fill="url(#g-crudo)"/>
+  <path d="M168 84Q166 64 182 58Q196 56 204 66L206 74Z" fill="url(#g-crudo)"/>
+  <path d="M184 58Q172 28 148 22M188 58Q198 30 216 26" stroke="#E8DECB" stroke-width="3" fill="none" stroke-linecap="round"/>
+</symbol>
+<symbol id="par-c" viewBox="0 0 240 170"><use href="#zapato-c" x="18" y="0" width="220" height="150" opacity=".92"/><use href="#zapato-c" x="0" y="20" width="220" height="150"/></symbol>
+
+<!-- Zapato faltante: silueta punteada -->
+<symbol id="par-falta" viewBox="0 0 240 170">
+  <g fill="none" stroke="#8F8478" stroke-width="1.6" stroke-dasharray="4 4">
+    <use href="#p-suela" y="20"/><use href="#p-taco" y="20"/>
+    <path d="M30 138Q46 110 74 112Q92 115 98 133" />
+  </g>
+</symbol>
+
+<!-- Vestido midi estampado (llega en la foto) -->
+<symbol id="vestido" viewBox="0 0 220 300">
+  <g filter="url(#f-tela)">
+    <use href="#p-vestido" fill="url(#pt-flores)"/>
+    <use href="#p-vestido" fill="url(#g-vestido-luz)"/>
+    <g clip-path="url(#c-vestido)" filter="url(#f-difuso)" fill="none">
+      <path d="M92 130Q80 210 70 290" stroke="#2a0f05" stroke-width="10" opacity=".22"/>
+      <path d="M130 130Q142 210 156 290" stroke="#fff" stroke-width="12" opacity=".14"/>
+    </g>
+  </g>
+  <path d="M84 18Q110 32 136 18Q122 26 110 30Q98 26 84 18Z" fill="#7A3A23"/>
+  <path d="M69 112L151 112L152 124L68 124Z" fill="#8E4329"/>
+  <path d="M108 124Q100 150 92 170M114 124Q122 152 126 168" stroke="#8E4329" stroke-width="5" fill="none" stroke-linecap="round"/>
+</symbol>
+
+<!-- Zapatillas blancas -->
+<symbol id="zapatillas" viewBox="0 0 230 130">
+  <g transform="translate(16 0)" opacity=".94">
+    <path d="M10 92Q10 104 24 106L196 106Q210 104 210 92L210 84L10 84Z" fill="#E4E0D8"/>
+    <path d="M14 84Q12 64 40 58L92 44Q110 40 124 50L158 40Q184 36 200 50Q210 62 208 84Z" fill="url(#g-blanco)"/>
+  </g>
+  <g transform="translate(0 18)">
+    <path d="M10 92Q10 104 24 106L196 106Q210 104 210 92L210 84L10 84Z" fill="#ECE8E1"/>
+    <path d="M10 92L210 92" stroke="#CFC9BF" stroke-width="1"/>
+    <path d="M14 84Q12 64 40 58L92 44Q110 40 124 50L158 40Q184 36 200 50Q210 62 208 84Z" fill="url(#g-blanco)"/>
+    <path d="M96 50L120 66M104 47L128 62M112 45L136 58M120 44L142 54" stroke="#C9C2B6" stroke-width="1.6" stroke-linecap="round"/>
+    <path d="M40 60Q36 74 46 84M186 44L196 84" stroke="#D6D0C5" stroke-width="1" fill="none"/>
+    <path d="M196 46Q206 54 208 70L200 70Z" fill="#B9B2A6"/>
+  </g>
+</symbol>
+
+<!-- Botines café -->
+<symbol id="botines" viewBox="0 0 200 130">
+  <path d="M20 112Q20 96 40 92L100 86Q118 84 128 70L132 24L176 24L178 96L186 100L186 118L150 118L146 108Q90 116 30 120Q20 120 20 112Z" fill="#3E2C21"/>
+  <path d="M132 24L176 24L176 30L132 30Z" fill="#5A4233"/>
+  <path d="M28 114Q90 108 146 104" stroke="#6B5141" stroke-width="1" fill="none"/>
+  <path d="M150 104L186 104L186 118L150 118Z" fill="#241913"/>
+</symbol>
+
+<!-- Pantalón azul marino -->
+<symbol id="pantalon" viewBox="0 0 220 260">
+  <g filter="url(#f-tela)">
+    <path d="M58 10L162 10L176 250L130 252L112 72L108 72L90 252L44 250Z" fill="#2F3647"/>
+    <path d="M58 10L162 10L163 24L57 24Z" fill="#262C3B"/>
+    <path d="M110 24L110 70M72 24Q74 50 90 60M148 24Q146 50 130 60" stroke="#4A5266" stroke-width="1" fill="none"/>
+  </g>
+</symbol>
+
+<!-- Polera blanca -->
+<symbol id="polera" viewBox="0 0 220 230">
+  <g filter="url(#f-tela)">
+    <path d="M78 20Q110 36 142 20L196 44L180 82L158 72L160 220L60 220L62 72L40 82L24 44Z" fill="url(#g-blanco)"/>
+    <path d="M78 20Q110 36 142 20" stroke="#D2CCC1" stroke-width="4" fill="none"/>
+  </g>
+</symbol>
+<use href="#falda" width="220" height="262"/></svg>
