@@ -25,7 +25,15 @@ export type ClosetFit = {
 /** Margen confirmado por Felipe: la prenda está en el nivel del marco o a un nivel de distancia. */
 export const FORMALITY_MARGIN = 1;
 
+/** Nivel de gala o etiqueta: no admite margen hacia abajo (Felipe, 2026-11-14). */
+export const GALA_LEVEL = 5;
+
+/**
+ * ¿La prenda llega a la formalidad del marco? Un nivel de distancia en cualquier sentido, salvo en gala (5):
+ * ahí solo llegan prendas de gala. Un blazer con mocasines (4) no cubre una etiqueta; debe decirse que falta.
+ */
 export function reachesFormality(formality: number, target: number): boolean {
+  if (target >= GALA_LEVEL) return formality >= GALA_LEVEL;
   return Math.abs(formality - target) <= FORMALITY_MARGIN;
 }
 

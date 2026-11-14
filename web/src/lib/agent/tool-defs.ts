@@ -44,7 +44,7 @@ export const AGENT_TOOLS: Anthropic.Beta.BetaTool[] = [
         formality: {
           type: "integer",
           enum: [1, 2, 3, 4, 5],
-          description: "Nivel de formalidad que pide el marco: 1 deportivo, 2 casual relajado (asado, día a día), 3 casual cuidado u oficina, 4 formal (matrimonio de día, cena elegante), 5 gala o etiqueta.",
+          description: "Nivel de formalidad que pide el marco: 1 deportivo, 2 casual relajado (asado, día a día), 3 casual cuidado u oficina, 4 formal (matrimonio de día o de noche, cena elegante), 5 gala o etiqueta estricta (esmoquin, traje largo): úsalo solo si la invitación pide etiqueta o gala.",
         },
       },
       additionalProperties: false,

@@ -26,10 +26,23 @@ describe("N4 · ¿el clóset alcanza para la formalidad del marco? (D-03)", () =
     expect(fit.reaching.top).not.toContain("polera-gris");
   });
 
-  it("gala (5): solo llegan las prendas de nivel 4; sigue alcanzando", () => {
+  it("gala (5) no admite margen: con un clóset que llega a formal (4) no hay base, y dice qué falta", () => {
+    expect(reachesFormality(4, 5)).toBe(false);
+    expect(reachesFormality(5, 5)).toBe(true);
     const fit = closetFit(demo, 5);
-    expect(fit.result).toBe("alcanza");
-    expect(fit.reaching.top).toEqual(["camisa-blanca"]);
+    expect(fit.result).toBe("no_hay_base");
+    expect(fit.gaps).toEqual([
+      { category: "top", reason: "falta_mas_formal" },
+      { category: "bottom", reason: "falta_mas_formal" },
+      { category: "shoes", reason: "falta_mas_formal" },
+    ]);
+  });
+
+  it("gala (5) con prendas de gala alcanza; y si solo falta el calzado, es una pieza", () => {
+    const gala = [g("camisa-esmoquin", "top", 5), g("pantalon-esmoquin", "bottom", 5), g("zapato-charol", "shoes", 5)];
+    expect(closetFit(gala, 5).result).toBe("alcanza");
+    const sinZapato = [gala[0], gala[1], g("mocasines", "shoes", 4)];
+    expect(closetFit(sinZapato, 5)).toMatchObject({ result: "falta_una_pieza", gaps: [{ category: "shoes", reason: "falta_mas_formal" }] });
   });
 
   it("falta una pieza: el calzado no llega (típico)", () => {
