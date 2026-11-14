@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
-import { buttonStyles, Screen, SpaceHeader } from "@/components/ui";
+import { Screen, SpaceHeader } from "@/components/ui";
 import { PaletteAdjust } from "@/components/espacio/palette-adjust";
+import { SpacePhotoButton } from "@/components/espacio/photo-flow";
 import { getActiveColorAnalysis } from "@/lib/data/queries";
 import { COLOR_SEASON_LABELS } from "@/lib/domain/types";
 import PaletaSkeleton from "./skeleton";
@@ -29,12 +29,13 @@ async function PaletaContent() {
             Mándale una selfie a tu asesor y te doy una orientación de los colores que tienden a iluminarte la cara.
             Es solo una orientación, no un diagnóstico.
           </p>
-          <Link
-            href="/asesor"
-            className={buttonStyles({ variant: "contorno", size: "mediano", className: "mt-4" })}
-          >
-            Mandar una foto al asesor
-          </Link>
+          <SpacePhotoButton
+            kind="selfie"
+            label="Mandar una foto al asesor"
+            variant="contorno"
+            id="b-paleta"
+            className="mt-4"
+          />
         </div>
       </div>
     );

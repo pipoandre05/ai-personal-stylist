@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
-import { IconCamera, Screen, SpaceHeader } from "@/components/ui";
+import { Screen, SpaceHeader } from "@/components/ui";
 import { CategoryFilter } from "@/components/espacio/category-filter";
 import { ClosetGrid } from "@/components/espacio/closet-grid";
+import { SpacePhotoButton } from "@/components/espacio/photo-flow";
 import { listGarments } from "@/lib/data/queries";
 import { CATEGORY_LABELS_SHORT, GARMENT_CATEGORIES, type GarmentCategory } from "@/lib/domain/types";
 import ClosetSkeleton from "./skeleton";
@@ -37,13 +37,11 @@ async function ClosetContent({ searchParams }: { searchParams: SearchParams }) {
           <p className="mt-3 mb-6 font-body text-destacado text-tinta">
             Mándame una foto de una prenda y la sumo yo.
           </p>
-          <Link
-            href="/asesor"
-            className="inline-flex h-[52px] items-center justify-center gap-2 rounded-full bg-accion px-6 font-body text-base font-extrabold text-tinta transition-transform duration-140 active:scale-[0.96] focus-visible:ring-3 focus-visible:ring-foco"
-          >
-            <IconCamera className="size-5" aria-hidden="true" />
-            <span>Mandar una foto al asesor</span>
-          </Link>
+          <SpacePhotoButton
+            kind="garment"
+            label="Mandar una foto al asesor"
+            variant="accion"
+          />
         </div>
       </div>
     );
@@ -76,9 +74,16 @@ async function ClosetContent({ searchParams }: { searchParams: SearchParams }) {
         )}
       </div>
 
-      <p className="mt-8 font-body text-meta text-tinta-suave">
-        Para sumar una prenda, mándale la foto a tu asesor en la conversación.
-      </p>
+      <div className="mt-8 flex flex-col items-start gap-2">
+        <p className="font-body text-meta text-tinta-suave">
+          Para sumar una prenda, mándale una foto a tu asesor.
+        </p>
+        <SpacePhotoButton
+          kind="garment"
+          label="Mandar una foto al asesor"
+          variant="contorno"
+        />
+      </div>
     </div>
   );
 }
