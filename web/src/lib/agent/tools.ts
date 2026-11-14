@@ -208,6 +208,17 @@ async function execGetCloset(input: unknown, t: ToolContext): Promise<ToolOutput
       const fitGarments: FitGarment[] = all.map((g) => ({ id: g.id, name: g.name, category: g.category, formality: g.formality }));
       const verdict = closetFit(fitGarments, formality);
       t.state.fit = { verdict, closet: fitGarments };
+      // Registro de N4: solo el nivel, el resultado y conteos. Sin ids de la persona, nombres ni prendas.
+      console.info(
+        "[closet-fit]",
+        JSON.stringify({
+          target: verdict.target,
+          result: verdict.result,
+          gaps: verdict.gaps.map((g) => `${g.category}:${g.reason}`),
+          garments: fitGarments.length,
+          no_shoes_loaded: verdict.no_shoes_loaded,
+        }),
+      );
       viabilidad = {
         formalidad_del_marco: verdict.target,
         resultado: verdict.result,
@@ -307,8 +318,14 @@ async function execProposeOutfit(input: unknown, t: ToolContext): Promise<ToolOu
       return f === undefined ? [] : [{ id: g.id, name: g.name, category: g.category, formality: f }];
     });
     const formalityIssue = checkOutfitFormality(outfitFit, t.state.fit.closet, t.state.fit.verdict, missing_piece?.category ?? null);
-    if (formalityIssue) return fail(formalityIssue);
+    if (formalityIssue) {
+      console.info("[closet-fit]", JSON.stringify({ target: t.state.fit.verdict.target, outfit_rejected: true }));
+      return fail(formalityIssue);
+    }
   }
+
+  // Un look propuesto sin haber pasado por la regla (el asesor no indicó la formalidad en este turno).
+  if (!t.state.fit && t.state.event) console.info("[closet-fit]", JSON.stringify({ skipped: true, reason: "sin formality con evento" }));
 
   // Dos looks para elegir (D-04): el segundo debe ser el otro de la variante y diferir en al menos dos prendas.
   if (variant) {
