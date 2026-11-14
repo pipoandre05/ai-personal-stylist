@@ -12,10 +12,8 @@ export type GreetingData = {
 };
 
 export const START_SUGGESTIONS = [
-  "Quiero armar un look para salir el fin de semana",
-  "¿Qué me pongo para ir a trabajar mañana?",
-  "Tengo un matrimonio y no sé qué ponerme",
-  "¿Cómo combinar unas prendas de mi clóset para una cena?",
+  "¿Qué me pongo hoy?",
+  "¿Cómo me visto mañana para el trabajo?",
 ] as const;
 
 export function getContextualGreeting(
