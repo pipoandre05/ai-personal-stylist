@@ -49,3 +49,35 @@
 
 Maqueta de referencia `docs/superpowers/mockups/2026-11-14-conversacion-v4.html` aprobada por Felipe para ui-2 y todo el bloque de migración a la identidad de Prendie. Los componentes deben replicar fielmente los tokens, tamaños (52 y 44 px en botones, 36 px en chips con 44 px táctil, campo hundido, foco azul 3 px, cardBase sin bordes duros) y comportamiento de la spec UX_UI_SPEC §7.1 y §7.18.
 Paso a construcción.
+
+### 2026-11-14 14:21 · Constructor · respuesta · vuelta 0
+
+Implementacion completa de primitivas de interfaz segun la maqueta v4 aprobada y criterios del hilo ui-2:
+
+1. **Botones (`components/ui/button.tsx`, `components/chat/styles.ts`):**
+   - Forma pildora completa (`rounded-full`), borde de 1.5 px (`border-[1.5px]`).
+   - Tamanos: estandar de 52 px (`h-[52px] px-6 text-base`) y mediano de 44 px (`h-11 px-[18px] text-sm`).
+   - Variantes: principal lima (`bg-accion text-sobre-color`), inverso (`bg-inverso text-sobre-inverso`), contorno (`border-linea-fuerte text-tinta bg-transparent`; sobre inverso `border-sobre-inverso text-sobre-inverso`), texto (`h-11 px-2 text-sm text-tinta underline underline-offset-4`) y destructivo (`bg-error text-sobre-estado`).
+   - Feedback: presion `active:scale-[0.97]` (140-150 ms con curva `ease-salida`) y deshabilitado `disabled:opacity-45`.
+   - Icono con contenedor accesible y estilos `size-5 [&>svg]:size-5 [&>svg]:stroke-2`.
+2. **Chips (`components/ui/chip.tsx`, `chip-group.tsx`):**
+   - Altura visual 36 px (`h-9 px-4 rounded-full border-[1.5px] border-linea-fuerte bg-transparent text-control text-tinta`).
+   - Area tactil accesible de 44 px mediante pseudo-elemento `after:absolute after:-inset-1`.
+   - Estado seleccionado (`aria-pressed="true"` / `aria-checked="true"`): `bg-inverso border-inverso text-sobre-inverso`.
+   - Regla de marca respetada: nunca lima en chips.
+3. **Field e Input (`components/ui/field.tsx`, `input.tsx`):**
+   - Campo base: `min-h-12 w-full rounded-campo bg-hundido px-4 text-base font-medium text-tinta placeholder:text-tinta-suave` sin borde duro estatico.
+   - Foco con anillo azul de 3 px (`focus-visible:ring-3 focus-visible:ring-foco`).
+   - Etiqueta en tipografia `text-control`; mensaje de error en `text-meta text-error` con icono de alerta.
+4. **Toast y Error (`components/ui/toast.tsx`, `empty-state.tsx`):**
+   - Toast en region `aria-live="polite"` (`fixed bottom-24`): `rounded-campo bg-inverso px-4 py-3 text-cuerpo text-sobre-inverso shadow-flotante animate-subir`.
+   - Bloque de error accesible (`ErrorBlock`, `role="alert"`): `rounded-campo border-[1.5px] border-error bg-superficie p-4 text-cuerpo text-tinta` con icono y titulo `text-error`, mas boton de accion "Reintentar".
+5. **Iconos (`components/ui/icons.tsx`):**
+   - Actualizado trazo base a 2 px (`strokeWidth={2}`), con `strokeLinecap="round"` y `strokeLinejoin="round"`.
+6. **`cardBase` y estilos del hilo (`components/chat/styles.ts`):**
+   - `cardBase` actualizado a `rounded-tarjeta bg-superficie p-[18px]` (sin borde duro ni sombras).
+   - Reemplazado alias transitorio `acento` en `eyebrowAccent` por `text-sobretitulo uppercase text-tinta`.
+7. **Verificacion tecnica:**
+   - Creada suite de pruebas unitarias en `web/tests/ui/primitives.test.ts` (13 pruebas pasando).
+   - `cd web && npm run verify`: lint, typecheck y vitest (136/136 tests en verde, incluyendo `tokens.test.ts` sin clases inventadas).
+   - `cd web && npm run build`: compilacion de produccion exitosa.
