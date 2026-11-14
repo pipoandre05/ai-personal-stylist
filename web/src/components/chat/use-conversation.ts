@@ -3,6 +3,7 @@
 // Todo el estado y la lógica del hilo. Los componentes de presentación no deben saber de streamChat, refs ni eventos SSE.
 
 import { useRouter } from "next/navigation";
+import { takePendingPhoto } from "./pending-photo";
 import {
   useCallback,
   useEffect,
@@ -592,6 +593,17 @@ export function useConversation({ conversationId, initialMessages, autoStart = f
     greet();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- solo al montar
   }, [autoStart]);
+
+  // Foto elegida en Tu espacio: la conversación nueva se abre al instante y el turno se ve aquí (foto subiendo, el asesor
+  // pensando, su respuesta), en vez de esperar en la otra pantalla hasta que el asesor termine.
+  const sendPendingPhoto = useEffectEvent(() => {
+    if (conversationId || initialMessages.length > 0) return;
+    const photo = takePendingPhoto();
+    if (photo) send(photo.text, photo.file);
+  });
+  useEffect(() => {
+    sendPendingPhoto();
+  }, []);
 
   const jumpToEnd = useCallback(() => {
     stick.current = true;
