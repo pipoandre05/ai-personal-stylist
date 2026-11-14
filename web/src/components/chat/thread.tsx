@@ -8,9 +8,12 @@ import { OutfitCard } from "./outfit-card";
 import { PaletteCard } from "./palette-card";
 import { PersonMessage } from "./person-message";
 import { PhotoMessage } from "./photo-message";
-import type { AdvisorItem, PersonItem, ThreadItem } from "./thread-types";
+import { isV2Turn, type AdvisorItem, type PersonItem, type ThreadItem } from "./thread-types";
+import { buildTurnItems, freshOutfitIdOf, ThreadItemV2View, type GarmentLookup, type ThreadV2Handlers } from "./v2";
 import { ToolStatus } from "./tool-status";
 import { cn } from "@/components/ui";
+import type { OutfitView } from "@/lib/domain/types";
+import { useMemo } from "react";
 import type { AgentToolName } from "@/lib/domain/types";
 
 const TZ = "America/Santiago";
@@ -51,10 +54,34 @@ type ThreadProps = {
   onRetryPerson: (key: string) => void;
   onRetryAdvisor: (key: string) => void;
   onAsk: (text: string) => void;
+  /** Acciones de las tarjetas v2. */
+  handlers?: ThreadV2Handlers;
+  /** Hay una acción en vuelo (guardar, elegir, corregir). */
+  actionBusy?: boolean;
 };
 
+/** Prendas por id (de los looks y de las tarjetas del hilo) para las miniaturas del rastro. */
+function garmentLookup(items: ThreadItem[]): GarmentLookup {
+  const out: GarmentLookup = {};
+  for (const i of items) {
+    if (i.kind !== "advisor") continue;
+    for (const o of i.outfits) for (const g of o.items) out[g.garment_id] = { name: g.name, photo_url: g.photo_url, category: g.category };
+    for (const g of i.garments) out[g.id] = { name: g.name, photo_url: g.photo_url, category: g.category };
+  }
+  return out;
+}
+
 /** El hilo: mensajes y tarjetas en orden. No lleva aria-live (se anuncia aparte, al terminar cada turno). */
-export function Thread({ items, busy, tool, showStatus, todayKey, onRetryPerson, onRetryAdvisor, onAsk }: ThreadProps) {
+export function Thread({ items, busy, tool, showStatus, todayKey, onRetryPerson, onRetryAdvisor, onAsk, handlers, actionBusy }: ThreadProps) {
+  const garments = useMemo(() => garmentLookup(items), [items]);
+  const outfitIndex = useMemo(() => {
+    const m = new Map<string, OutfitView>();
+    for (const i of items) if (i.kind === "advisor") for (const o of i.outfits) m.set(o.id, o);
+    return m;
+  }, [items]);
+  // "Look recién propuesto" (superficie inverso): solo el último look (no par) del último turno del asesor.
+  const lastAdvisorKey = items.findLast((i) => i.kind === "advisor")?.key;
+  const lastKey = items.at(-1)?.key;
   return (
     <section aria-label="Conversación con tu asesor" aria-busy={busy} className="flex flex-1 flex-col gap-6 px-5 pt-6 pb-4">
       {items.map((item, i) => {
@@ -72,6 +99,12 @@ export function Thread({ items, busy, tool, showStatus, todayKey, onRetryPerson,
                 showStatus={showStatus && item.streaming}
                 onRetry={() => onRetryAdvisor(item.key)}
                 onAsk={onAsk}
+                handlers={handlers}
+                garments={garments}
+                findOutfit={(id) => outfitIndex.get(id)}
+                isLast={item.key === lastKey}
+                isLastAdvisor={item.key === lastAdvisorKey}
+                actionBusy={actionBusy}
               />
             )}
           </div>
@@ -117,14 +150,40 @@ function AdvisorTurn({
   showStatus,
   onRetry,
   onAsk,
+  handlers,
+  garments,
+  findOutfit,
+  isLast,
+  isLastAdvisor,
+  actionBusy,
 }: {
   item: AdvisorItem;
   tool: AgentToolName | null;
   showStatus: boolean;
   onRetry: () => void;
   onAsk: (text: string) => void;
+  handlers?: ThreadV2Handlers;
+  garments: GarmentLookup;
+  findOutfit: (id: string) => OutfitView | undefined;
+  isLast: boolean;
+  isLastAdvisor: boolean;
+  actionBusy?: boolean;
 }) {
   const animate = item.fresh;
+  const v2 = isV2Turn(item);
+  const v2Items = v2
+    ? buildTurnItems(
+        {
+          id: item.id ?? item.key,
+          tool_steps: item.tool_steps,
+          event_summary: item.event_summary,
+          outfits: item.outfits,
+          search_offer: item.search_offer,
+          shopping_blocks: item.shopping_blocks,
+        },
+        { isLastMessage: isLast && !item.streaming, freshOutfitId: isLastAdvisor ? freshOutfitIdOf(item.outfits) : null, findOutfit },
+      )
+    : [];
   return (
     <div className={cn("flex flex-col gap-3.5", animate && "animate-aparecer")}>
       <AdvisorMessage text={item.text} streaming={item.streaming && !showStatus} />
@@ -132,13 +191,23 @@ function AdvisorTurn({
         <GarmentCard key={g.id} garment={g} animate={animate} />
       ))}
       {item.palette ? <PaletteCard analysis={item.palette} animate={animate} /> : null}
-      {item.outfits.map((o) => (
-        <OutfitCard key={o.id} outfit={o} animate={animate} onAsk={onAsk} />
-      ))}
+      {v2
+        ? v2Items.map((it) => (
+            <ThreadItemV2View
+              key={it.key}
+              item={it}
+              handlers={handlers}
+              garments={garments}
+              closetHref={(id) => `/closet/${id}`}
+              busy={actionBusy}
+              animate={animate}
+            />
+          ))
+        : item.outfits.map((o) => <OutfitCard key={o.id} outfit={o} animate={animate} onAsk={onAsk} />)}
       {item.memories.map((m, i) => (
         <MemoryNote key={`${i}-${m}`} fact={m} />
       ))}
-      {showStatus ? <ToolStatus tool={tool} /> : null}
+      {showStatus && v2Items.length === 0 ? <ToolStatus tool={tool} /> : null}
       {item.error ? (
         <div role="alert" className="border-l-[3px] border-error pl-3 text-destacado text-tinta">
           <p>{item.error}</p>
