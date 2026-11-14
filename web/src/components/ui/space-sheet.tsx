@@ -72,7 +72,9 @@ export function SpaceSheet({ open, onClose, summary }: SpaceSheetProps) {
       onClick={(e) => {
         if (e.target === ref.current) onClose();
       }}
-      className="m-0 fixed inset-x-0 bottom-0 z-50 mx-auto w-full max-w-app max-h-[90dvh] overflow-y-auto rounded-t-tarjeta bg-superficie px-6 pt-2 pb-seguro text-tinta shadow-flotante backdrop:bg-tinta/40 open:animate-subir"
+      // `top-auto`: el navegador le pone `inset: 0` a todo <dialog>; sin soltar el borde de arriba, la hoja se ancla arriba
+      // en vez de abajo y se corta.
+      className="m-0 fixed inset-x-0 top-auto bottom-0 z-50 mx-auto w-full max-w-app max-h-[90dvh] overflow-y-auto rounded-t-tarjeta bg-superficie px-6 pt-2 pb-seguro text-tinta shadow-flotante backdrop:bg-tinta/40 open:animate-subir"
     >
       {/* Asa decorativa */}
       <span className="mx-auto block h-[5px] w-9 rounded-full bg-linea" aria-hidden="true" />
