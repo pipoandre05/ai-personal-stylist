@@ -1,0 +1,274 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>D-02 a D-05 y D-10 · Recorrido de entrada</title><style>
+:root{--fondo:#F2F2EE;--sup:#fff;--hundido:#E8E9E4;--linea:#D6D8D2;--tinta:#121412;--suave:#5E625D;--foco:#2B4BFF}
+*{box-sizing:border-box;margin:0}
+body{font:400 16px/24px Manrope,system-ui,sans-serif;background:#cfd1cb;color:var(--tinta);padding:24px;display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
+h1,h2,.eb{font-family:"Bricolage Grotesque",system-ui,sans-serif}
+.cap{font:700 13px Manrope;margin-bottom:6px;max-width:390px}
+.tel{background:var(--fondo);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;position:relative;padding-top:12px}
+.tel.v{width:390px;height:844px}.tel.b{width:360px;height:640px}.tel.l{width:844px;height:390px;flex-direction:row}
+.arr{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;text-align:center;padding:24px 24px 0}
+.mc{height:176px;flex:none}
+.tt{display:flex;flex-direction:column;align-items:center}
+.eb{margin-top:20px;font:800 12px/16px Manrope;letter-spacing:.12em;text-transform:uppercase;color:var(--suave)}
+.tt .eb{font-family:Manrope}
+h2{margin-top:8px;max-width:24rem;font:800 26px/30px "Bricolage Grotesque",sans-serif;letter-spacing:-.02em}
+.tx{margin-top:12px;max-width:24rem;color:var(--suave)}
+.pr{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;list-style:none;padding:0;max-width:24rem}
+.pr li{background:var(--hundido);border-radius:999px;padding:6px 12px;font:700 13px/18px Manrope}
+.pie{padding:8px 24px calc(16px + env(safe-area-inset-bottom,0px))}
+.fila{display:grid;grid-template-columns:76px 1fr 76px;align-items:center}
+.atras{height:44px;min-width:44px;font:700 14px Manrope;background:none;border:0;color:var(--tinta);text-align:left;padding:0;cursor:pointer}
+.atras.ph{visibility:hidden}
+.dots{display:flex;justify-content:center}
+.dot{width:44px;height:44px;border:0;background:none;position:relative;padding:0}
+.dot .c,.dot .p{position:absolute;left:50%;top:50%;margin:-4px 0 0 -12px;width:24px;height:8px;border-radius:999px;background:var(--tinta);transition:opacity 200ms cubic-bezier(.23,1,.32,1),transform 200ms cubic-bezier(.23,1,.32,1)}
+.dot .c{width:8px;margin-left:-4px;opacity:1}
+.dot .p{opacity:0;transform:scaleX(.3333)}
+.dot[aria-current=step] .c{opacity:0}.dot[aria-current=step] .p{opacity:1;transform:scaleX(1)}
+.cta{display:flex;height:52px;width:100%;align-items:center;justify-content:center;border-radius:999px;background:var(--tinta);color:#fff;font:700 14px Manrope;border:0;margin-top:4px;text-decoration:none}
+.enl{display:flex;justify-content:center;gap:4px;margin-top:6px;height:44px}
+.lnk{display:inline-flex;min-height:44px;align-items:center;padding:0 12px;font:14px Manrope;text-decoration:underline;text-underline-offset:4px;color:var(--suave)}.lnk.b{font-weight:700;color:var(--tinta)}
+.priv{margin-top:4px;text-align:center;font-size:12px;line-height:16px;color:var(--suave)}
+.hd{height:88px;width:55px;flex:none}
+.cab{display:flex;align-items:center;gap:12px;align-self:stretch;justify-content:center}
+.cab .eb{margin:0}
+.b .arr{padding-top:12px}.b h2{margin-top:6px;font-size:22px;line-height:26px}.b .tx{margin-top:8px;font-size:15px;line-height:22px}.b .pr{margin-top:12px}
+.b .tt .eb{display:none}
+.l .izq{flex:1;display:flex;align-items:center;gap:20px;padding:12px 8px 12px 32px;min-width:0}
+.l .tt{align-items:flex-start;text-align:left}.l .tt .eb{margin-top:0}.l h2{font-size:24px;line-height:28px}.l .pr{justify-content:flex-start;margin-top:12px}
+.l .der{width:320px;display:flex;align-items:center;border-left:0}.l .pie{width:100%;padding-bottom:12px}
+.l .priv{display:none}
+.nota{width:100%;max-width:900px;font:13px/20px Manrope;background:#fff;border-radius:12px;padding:16px}
+.nota code{background:var(--hundido);padding:0 4px;border-radius:4px}
+</style></head><body>
+
+<svg style="position:absolute;width:0;height:0" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="0" height="0" aria-hidden="true" focusable="false">
+<title>Prendie · mascota</title>
+<desc>Variables CSS: --w-o (6px), --w-i (3px), --w-b (7px), --w-e (3.6px), --w-m (4.6px), --trama (inline), --sombra (inline), --halo (none; Noche: url(#halo)), --halo-s (none; Noche: url(#halo-s)). Cabeza chica, atributo style del svg contenedor: --w-o:13px;--w-i:7px;--w-e:7px;--w-b:10px;--w-m:8px. Noche inline: --halo:url(#halo);--halo-s:url(#halo-s);--sombra:none.</desc>
+<defs>
+  
+  <filter id="halo" x="-14%" y="-10%" width="128%" height="120%" color-interpolation-filters="sRGB">
+    <feMorphology in="SourceAlpha" operator="dilate" radius="3" result="d"/>
+    <feFlood flood-color="#F4F5F0"/><feComposite in2="d" operator="in" result="h"/>
+    <feMerge><feMergeNode in="h"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <filter id="halo-s" x="-20%" y="-12%" width="140%" height="124%" color-interpolation-filters="sRGB">
+    <feMorphology in="SourceAlpha" operator="dilate" radius="6" result="d"/>
+    <feFlood flood-color="#F4F5F0"/><feComposite in2="d" operator="in" result="h"/>
+    <feMerge><feMergeNode in="h"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  
+  <pattern id="trama" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(28)">
+    <circle cx="1.5" cy="1.5" r="1.05" fill="#121412"/><circle cx="4.5" cy="4.5" r="1.05" fill="#121412"/>
+  </pattern>
+  <pattern id="trama-f" width="4.4" height="4.4" patternUnits="userSpaceOnUse" patternTransform="rotate(28)">
+    <circle cx="1.1" cy="1.1" r="0.8" fill="#121412"/><circle cx="3.3" cy="3.3" r="0.8" fill="#121412"/>
+  </pattern>
+
+  
+  <path id="p-etq" d="M61.2 67.2 L120 14 L178.8 67.2 V188.8 Q178.8 211.6 153.6 211.6 H86.4 Q61.2 211.6 61.2 188.8 Z"/>
+  <clipPath id="cl-etq"><use href="#p-etq"/></clipPath>
+  <mask id="mk-luz" maskUnits="userSpaceOnUse" x="40" y="0" width="160" height="230">
+    <rect x="40" y="0" width="160" height="230" fill="#fff"/>
+    <use href="#p-etq" transform="translate(-17 -13)" fill="#000"/>
+  </mask>
+
+  
+  <g id="cuerpo">
+    <use href="#p-etq" fill="#C9F24D"/>
+    <g clip-path="url(#cl-etq)" style="display:var(--trama,inline)"><rect x="40" y="0" width="160" height="230" fill="url(#trama)" mask="url(#mk-luz)"/></g>
+    <use href="#p-etq" style="fill:none;stroke:#121412;stroke-width:var(--w-o,6px);stroke-linejoin:round;stroke-linecap:round"/>
+    <circle cx="120" cy="76" r="15.5" fill="#121412"/>
+  </g>
+  
+  <path id="cordon" d="M120 76 C 118 52, 112 40, 118 26 C 124 12, 140 6, 148 -2" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/>
+  
+  <path id="cordon-c" d="M120 76 C 118 54, 114 42, 120 28 C 124 18, 134 12, 142 8" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/>
+
+  
+  <ellipse id="ojo-b" cx="0" cy="0" rx="14" ry="19"/>
+  <clipPath id="cl-pupila"><ellipse cx="0" cy="0" rx="7.6" ry="10.8"/></clipPath>
+  <g id="pupila">
+    <ellipse cx="0" cy="0" rx="7.6" ry="10.8" fill="#121412"/>
+    <path d="M0 -1 L10 -14 L11 3 Z" fill="#FFFFFF" clip-path="url(#cl-pupila)"/>
+  </g>
+  <g id="pupila-s">
+    <ellipse cx="0" cy="0" rx="7.4" ry="10.6" fill="#121412"/>
+    <circle cx="2.6" cy="-4.4" r="2.8" fill="#FFFFFF"/>
+  </g>
+
+  
+  <g id="g-forma">
+    <ellipse cx="0" cy="0" rx="11" ry="10"/>
+    <rect x="-10.6" y="-19" width="6.6" height="17" rx="3.3"/>
+    <rect x="-3.3" y="-22" width="6.6" height="20" rx="3.3"/>
+    <rect x="4" y="-19" width="6.6" height="17" rx="3.3"/>
+    <rect x="-17" y="-8" width="6.4" height="14" rx="3.2" transform="rotate(-34 -14 -1)"/>
+  </g>
+  <clipPath id="cl-palma"><ellipse cx="0" cy="0" rx="11" ry="10"/></clipPath>
+  <g id="guante">
+    <use href="#g-forma" style="fill:#121412;stroke:#121412;stroke-width:10px;stroke-linejoin:round"/>
+    <use href="#g-forma" style="fill:#FFFFFF;stroke:none"/>
+    <ellipse cx="4" cy="6" rx="9" ry="6" fill="#E8E9E4" clip-path="url(#cl-palma)"/>
+    <path d="M-3.4 -21 V-13 M3.4 -19 V-12" style="fill:none;stroke:#121412;stroke-width:2.6px;stroke-linecap:round"/>
+    <path d="M-3 -3 V2 M1 -3 V3 M5 -3 V2" transform="translate(0 2)" style="fill:none;stroke:#121412;stroke-width:2.6px;stroke-linecap:round"/>
+  </g>
+  <g id="guante-p">
+    <use href="#g-forma" style="fill:#121412;stroke:#121412;stroke-width:10px;stroke-linejoin:round"/>
+    <use href="#g-forma" style="fill:#FFFFFF;stroke:none"/>
+    <ellipse cx="4" cy="6" rx="9" ry="6" fill="#E8E9E4" clip-path="url(#cl-palma)"/>
+    <path d="M-3.4 -21 V-13 M3.4 -19 V-12" style="fill:none;stroke:#121412;stroke-width:2.6px;stroke-linecap:round"/>
+  </g>
+
+  
+  <clipPath id="cl-zap"><path d="M-18 18 C-22 6 -16 -9 -4 -9 L8 -9 C13 -9 16 0 26 2 C42 2 50 8 50 18 Z"/></clipPath>
+  <g id="zapatilla">
+    <path d="M-18 18 C-22 6 -16 -9 -4 -9 L8 -9 C13 -9 16 0 26 2 C42 2 50 8 50 18 Z" style="fill:#FFFFFF;stroke:#121412;stroke-width:5px;stroke-linejoin:round"/>
+    <path d="M-18 6 Q 8 10 30 6 L52 6 L52 20 L-20 20 Z" fill="#E8E9E4" clip-path="url(#cl-zap)" opacity="0"/>
+    <path d="M-17 7 Q 6 9 28 8" style="fill:none;stroke:#121412;stroke-width:var(--w-i,3px);stroke-linejoin:round;stroke-linecap:round;--w-i:3px"/>
+    <path d="M7 -3 L14 3 M13 -5 L20 1 M19 -7 L26 -1" style="fill:none;stroke:#121412;stroke-width:var(--w-i,3px);stroke-linejoin:round;stroke-linecap:round;--w-i:3px"/>
+    <path d="M33 4 Q38 10 36 17" style="fill:none;stroke:#121412;stroke-width:var(--w-i,3px);stroke-linejoin:round;stroke-linecap:round;--w-i:2.6px"/>
+    <path d="M-22 16 H52 Q57 16 57 22 Q57 29 51 29 H-17 Q-24 29 -24 22 Q-24 16 -22 16 Z" fill="#FFFFFF" stroke="#121412" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M-17 25.5 H51" stroke="#E8E9E4" stroke-width="3.6" stroke-linecap="round" fill="none"/>
+  </g>
+
+  
+  <g id="base-pies">
+    <ellipse cx="120" cy="306" rx="86" ry="8" fill="url(#trama)" style="display:var(--sombra,inline)"/>
+    <path d="M106 206 C106 238, 100 258, 98 278" style="fill:none;stroke:#121412;stroke-width:17px;stroke-linecap:round;stroke-linejoin:round"/><path d="M106 206 C106 238, 100 258, 98 278" style="fill:none;stroke:#C9F24D;stroke-width:7px;stroke-linecap:round;stroke-linejoin:round"/>
+    <path d="M134 206 C134 238, 140 258, 142 278" style="fill:none;stroke:#121412;stroke-width:17px;stroke-linecap:round;stroke-linejoin:round"/><path d="M134 206 C134 238, 140 258, 142 278" style="fill:none;stroke:#C9F24D;stroke-width:7px;stroke-linecap:round;stroke-linejoin:round"/>
+    <use href="#zapatilla" transform="translate(97 274) scale(-1 1)"/>
+    <use href="#zapatilla" transform="translate(143 274)"/>
+  </g>
+
+  
+  <g id="mejillas" style="display:var(--trama,inline)">
+    <ellipse cx="82" cy="160" rx="9" ry="6" fill="url(#trama)"/>
+    <ellipse cx="160" cy="160" rx="9" ry="6" fill="url(#trama)"/>
+  </g>
+
+  
+  
+  <g id="ojos"><use href="#ojo-b" x="100" y="138" style="fill:#FFFFFF;stroke:#121412;stroke-width:var(--w-e,3.6px)"/><use href="#ojo-b" x="142" y="138" style="fill:#FFFFFF;stroke:#121412;stroke-width:var(--w-e,3.6px)"/></g>
+
+  
+  <symbol id="m-saludo" viewBox="0 -16 240 336">
+    <g style="filter:var(--halo,none)">
+    <use href="#base-pies"/>
+    <path d="M70 142 C46 152, 38 178, 44 200" style="fill:none;stroke:#121412;stroke-width:17px;stroke-linecap:round;stroke-linejoin:round"/><path d="M70 142 C46 152, 38 178, 44 200" style="fill:none;stroke:#C9F24D;stroke-width:7px;stroke-linecap:round;stroke-linejoin:round"/>
+    <path d="M170 140 C200 142, 212 120, 210 94" style="fill:none;stroke:#121412;stroke-width:17px;stroke-linecap:round;stroke-linejoin:round"/><path d="M170 140 C200 142, 212 120, 210 94" style="fill:none;stroke:#C9F24D;stroke-width:7px;stroke-linecap:round;stroke-linejoin:round"/>
+    <use href="#cuerpo"/><use href="#cordon"/>
+    <use href="#ojos"/><use href="#pupila" x="103" y="140"/><use href="#pupila" x="145" y="140"/>
+    <path d="M85 114 Q99 108 114 113" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/><path d="M130 100 Q143 88 158 100" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/>
+    <path d="M103 172 Q124 190 148 168" style="fill:none;stroke:#121412;stroke-width:var(--w-m,4.6px);stroke-linecap:round;stroke-linejoin:round"/><path d="M148 168 L153 164" style="fill:none;stroke:#121412;stroke-width:var(--w-i,3px);stroke-linejoin:round;stroke-linecap:round"/>
+    <use href="#guante" transform="translate(44 210) rotate(176)"/>
+    <use href="#guante-p" transform="translate(212 80) rotate(10)"/>
+    <path d="M233 66 Q239 76 234 88 M226 56 Q235 56 238 64" style="fill:none;stroke:#121412;stroke-width:var(--w-i,3px);stroke-linejoin:round;stroke-linecap:round"/></g>
+  </symbol>
+
+  
+  <symbol id="m-pensando" viewBox="0 -16 240 336">
+    <g style="filter:var(--halo,none)">
+    <use href="#base-pies"/>
+    <use href="#cuerpo"/><use href="#cordon"/>
+    <use href="#ojos"/><use href="#pupila" x="98" y="130"/><use href="#pupila" x="140" y="130"/>
+    <path d="M85 112 Q99 110 114 116" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/><path d="M130 100 Q143 86 158 98" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/>
+    <path d="M108 176 Q122 170 134 176" style="fill:none;stroke:#121412;stroke-width:var(--w-m,4.6px);stroke-linecap:round;stroke-linejoin:round"/><path d="M134 176 L138 172" style="fill:none;stroke:#121412;stroke-width:var(--w-i,3px);stroke-linejoin:round;stroke-linecap:round"/>
+    <path d="M68 150 C54 196, 100 220, 176 208" style="fill:none;stroke:#121412;stroke-width:17px;stroke-linecap:round;stroke-linejoin:round"/><path d="M68 150 C54 196, 100 220, 176 208" style="fill:none;stroke:#C9F24D;stroke-width:7px;stroke-linecap:round;stroke-linejoin:round"/>
+    <use href="#guante" transform="translate(180 210) rotate(100)"/>
+    <path d="M172 148 C206 160, 198 202, 164 198" style="fill:none;stroke:#121412;stroke-width:17px;stroke-linecap:round;stroke-linejoin:round"/><path d="M172 148 C206 160, 198 202, 164 198" style="fill:none;stroke:#C9F24D;stroke-width:7px;stroke-linecap:round;stroke-linejoin:round"/>
+    <use href="#guante-p" transform="translate(156 190) rotate(-24)"/></g>
+  </symbol>
+
+  
+  <symbol id="m-ceja" viewBox="0 -16 240 336">
+    <g style="filter:var(--halo,none)">
+    <use href="#base-pies"/>
+    <path d="M172 146 C206 152, 216 172, 206 192" style="fill:none;stroke:#121412;stroke-width:17px;stroke-linecap:round;stroke-linejoin:round"/><path d="M172 146 C206 152, 216 172, 206 192" style="fill:none;stroke:#C9F24D;stroke-width:7px;stroke-linecap:round;stroke-linejoin:round"/>
+    <use href="#cuerpo"/><use href="#cordon"/>
+    <use href="#ojos"/><use href="#pupila" x="105" y="138"/><use href="#pupila" x="147" y="138"/>
+    <path d="M85 116 Q99 114 114 120" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/><path d="M128 98 Q144 78 162 94" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/>
+    <path d="M108 176 Q124 180 150 166" style="fill:none;stroke:#121412;stroke-width:var(--w-m,4.6px);stroke-linecap:round;stroke-linejoin:round"/><path d="M150 166 L155 161" style="fill:none;stroke:#121412;stroke-width:var(--w-i,3px);stroke-linejoin:round;stroke-linecap:round"/>
+    <path d="M68 144 C34 150, 28 188, 62 196" style="fill:none;stroke:#121412;stroke-width:17px;stroke-linecap:round;stroke-linejoin:round"/><path d="M68 144 C34 150, 28 188, 62 196" style="fill:none;stroke:#C9F24D;stroke-width:7px;stroke-linecap:round;stroke-linejoin:round"/>
+    <use href="#guante" transform="translate(74 198) rotate(78)"/>
+    <use href="#guante-p" transform="translate(206 176) rotate(-12)"/></g>
+  </symbol>
+
+  
+  <symbol id="m-tada" viewBox="0 -16 240 336">
+    <g style="filter:var(--halo,none)">
+    <use href="#base-pies"/>
+    <path d="M68 148 C38 146, 22 124, 30 98" style="fill:none;stroke:#121412;stroke-width:17px;stroke-linecap:round;stroke-linejoin:round"/><path d="M68 148 C38 146, 22 124, 30 98" style="fill:none;stroke:#C9F24D;stroke-width:7px;stroke-linecap:round;stroke-linejoin:round"/>
+    <path d="M172 148 C202 146, 218 124, 210 98" style="fill:none;stroke:#121412;stroke-width:17px;stroke-linecap:round;stroke-linejoin:round"/><path d="M172 148 C202 146, 218 124, 210 98" style="fill:none;stroke:#C9F24D;stroke-width:7px;stroke-linecap:round;stroke-linejoin:round"/>
+    <use href="#cuerpo"/><use href="#cordon"/>
+    <use href="#ojos"/><use href="#pupila" x="101" y="136"/><use href="#pupila" x="143" y="136"/>
+    <path d="M84 108 Q99 96 114 106" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/><path d="M128 106 Q143 94 158 108" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/>
+    <path d="M100 166 Q124 202 150 166 Z" style="fill:#FFFFFF;stroke:#121412;stroke-width:var(--w-m,4.6px);stroke-linecap:round;stroke-linejoin:round"/>
+    <path d="M110 184 Q124 176 138 184 Q124 196 110 184 Z" fill="#E8E9E4" stroke="none"/>
+    <use href="#guante-p" transform="translate(30 84) rotate(-16)"/>
+    <use href="#guante-p" transform="translate(210 84) rotate(16) scale(-1 1)"/>
+    <path d="M14 56 L9 49 M30 50 L30 41 M46 56 L51 49 M194 56 L189 49 M210 50 L210 41 M226 56 L231 49" style="fill:none;stroke:#121412;stroke-width:var(--w-i,3px);stroke-linejoin:round;stroke-linecap:round"/></g>
+  </symbol>
+
+  
+  <symbol id="m-ups" viewBox="0 -16 240 336">
+    <g style="filter:var(--halo,none)">
+    <use href="#base-pies"/>
+    <path d="M68 150 C50 176, 52 200, 62 216" style="fill:none;stroke:#121412;stroke-width:17px;stroke-linecap:round;stroke-linejoin:round"/><path d="M68 150 C50 176, 52 200, 62 216" style="fill:none;stroke:#C9F24D;stroke-width:7px;stroke-linecap:round;stroke-linejoin:round"/>
+    <use href="#guante" transform="translate(63 228) rotate(176)"/>
+    <use href="#cuerpo"/><use href="#cordon"/>
+    <use href="#mejillas"/>
+    <use href="#ojos"/><use href="#pupila" x="96" y="141"/><use href="#pupila" x="138" y="141"/>
+    <path d="M85 118 Q99 112 114 104" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/><path d="M130 104 Q145 112 158 118" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/>
+    <path d="M104 178 q5 -7 10 0 t10 0 t10 0 t10 0" style="fill:none;stroke:#121412;stroke-width:var(--w-m,4.6px);stroke-linecap:round;stroke-linejoin:round"/>
+    <path d="M172 144 C216 132, 216 88, 188 74" style="fill:none;stroke:#121412;stroke-width:17px;stroke-linecap:round;stroke-linejoin:round"/><path d="M172 144 C216 132, 216 88, 188 74" style="fill:none;stroke:#C9F24D;stroke-width:7px;stroke-linecap:round;stroke-linejoin:round"/>
+    <use href="#guante" transform="translate(178 66) rotate(-52)"/>
+    <path d="M70 84 C70 84 61 96 61 103 A9 9 0 0 0 79 103 C79 96 70 84 70 84 Z" fill="#FFFFFF" stroke="#121412" stroke-width="3.4" stroke-linejoin="round"/></g>
+  </symbol>
+  
+  <symbol id="h-etiqueta" viewBox="44 -16 152 242"><g style="filter:var(--halo,none)"><use href="#p-etq" fill="#C9F24D"/><use href="#p-etq" style="fill:none;stroke:#121412;stroke-width:var(--w-o,6px);stroke-linejoin:round;stroke-linecap:round"/><circle cx="120" cy="76" r="15.5" fill="#121412"/></g></symbol>
+  <symbol id="h-cordon" viewBox="44 -16 152 242"><g style="filter:var(--halo,none)"><use href="#cuerpo"/><use href="#cordon-c"/></g></symbol>
+  
+  <symbol id="h-firma" viewBox="44 -16 152 242">
+    <g style="filter:var(--halo,none)"><use href="#cuerpo"/><use href="#cordon-c"/>
+    <use href="#ojos"/><use href="#pupila" x="103" y="140"/><use href="#pupila" x="145" y="140"/>
+    <path d="M85 114 Q99 108 114 113" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/><path d="M130 100 Q143 88 158 100" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/>
+    <path d="M103 172 Q124 190 148 168" style="fill:none;stroke:#121412;stroke-width:var(--w-m,4.6px);stroke-linecap:round;stroke-linejoin:round"/><path d="M148 168 L153 164" style="fill:none;stroke:#121412;stroke-width:var(--w-i,3px);stroke-linejoin:round;stroke-linecap:round"/></g>
+  </symbol>
+  <symbol id="h-tada" viewBox="44 -16 152 242">
+    <g style="filter:var(--halo,none)"><use href="#cuerpo"/><use href="#cordon-c"/>
+    <use href="#ojos"/><use href="#pupila" x="101" y="136"/><use href="#pupila" x="143" y="136"/>
+    <path d="M84 108 Q99 96 114 106" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/><path d="M128 106 Q143 94 158 108" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/>
+    <path d="M100 166 Q124 202 150 166 Z" style="fill:#FFFFFF;stroke:#121412;stroke-width:var(--w-m,4.6px);stroke-linecap:round;stroke-linejoin:round"/>
+    <path d="M110 184 Q124 176 138 184 Q124 196 110 184 Z" fill="#E8E9E4" stroke="none"/></g>
+  </symbol>
+  
+  <g id="cuerpo-s">
+    <use href="#p-etq" fill="#C9F24D"/>
+    <use href="#p-etq" style="fill:none;stroke:#121412;stroke-width:var(--w-o,6px);stroke-linejoin:round;stroke-linecap:round"/>
+    <circle cx="120" cy="78" r="17" fill="#121412"/>
+  </g>
+  <path id="cordon-s" d="M120 78 C 118 56, 114 44, 120 30 C 124 20, 134 14, 142 10" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/>
+  <symbol id="h-firma-s" viewBox="44 -16 152 242">
+    <g style="filter:var(--halo-s,none)"><use href="#cuerpo-s"/><use href="#cordon-s"/>
+    <ellipse cx="98" cy="142" rx="16" ry="21" style="fill:#FFFFFF;stroke:#121412;stroke-width:var(--w-e,3.6px)"/><ellipse cx="144" cy="142" rx="16" ry="21" style="fill:#FFFFFF;stroke:#121412;stroke-width:var(--w-e,3.6px)"/>
+    <use href="#pupila-s" x="101" y="145"/><use href="#pupila-s" x="147" y="145"/>
+    <path d="M80 112 Q96 106 114 111" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/><path d="M128 96 Q144 82 162 96" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/>
+    <path d="M100 182 Q124 202 152 176" style="fill:none;stroke:#121412;stroke-width:var(--w-m,4.6px);stroke-linecap:round;stroke-linejoin:round"/></g>
+  </symbol>
+  <symbol id="h-tada-s" viewBox="44 -16 152 242">
+    <g style="filter:var(--halo-s,none)"><use href="#cuerpo-s"/><use href="#cordon-s"/>
+    <ellipse cx="98" cy="140" rx="16" ry="21" style="fill:#FFFFFF;stroke:#121412;stroke-width:var(--w-e,3.6px)"/><ellipse cx="144" cy="140" rx="16" ry="21" style="fill:#FFFFFF;stroke:#121412;stroke-width:var(--w-e,3.6px)"/>
+    <use href="#pupila-s" x="100" y="141"/><use href="#pupila-s" x="146" y="141"/>
+    <path d="M80 106 Q96 92 114 104" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/><path d="M128 104 Q144 92 162 106" style="fill:none;stroke:#121412;stroke-width:var(--w-b,7px);stroke-linecap:round;stroke-linejoin:round"/>
+    <path d="M98 172 Q124 212 154 172 Z" style="fill:#FFFFFF;stroke:#121412;stroke-width:var(--w-m,4.6px);stroke-linecap:round;stroke-linejoin:round"/></g>
+  </symbol>
+</defs>
+</svg>
+<div><p class="cap">A · Vertical 390×844: pantalla 1</p><div class="tel v"><div class="arr"><svg class="mc" viewBox="0 -16 240 336" aria-hidden="true"><use href="#m-saludo" width="100%" height="100%"/></svg><div class="tt"><p class="eb">Prendie</p><h2>Hola, soy tu asesor de imagen.</h2><p class="tx">Te ayudo a verte como quieres verte, con la ropa que ya tienes y con lo que de verdad vale la pena comprar.</p></div></div><div class="pie"><div class="fila"><span class="atras ph"></span><div class="dots" role="group" aria-label="Pantallas"><button class="dot" aria-label="Ir a la pantalla 1" aria-current=step><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 2"><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 3"><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 4"><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 5"><span class="c"></span><span class="p"></span></button></div><span class="atras ph"></span></div><button class="cta">Siguiente</button><div class="enl"><a class="lnk b">Ya tengo cuenta</a><a class="lnk s">Saltar</a></div><p class="priv">Tus fotos son privadas. Puedes borrar todo cuando quieras.</p></div></div></div><div><p class="cap">A · Pantalla 2 (aparece Atrás; mascota y botón no se mueven)</p><div class="tel v"><div class="arr"><svg class="mc" viewBox="0 -16 240 336" aria-hidden="true"><use href="#m-ceja" width="100%" height="100%"/></svg><div class="tt"><p class="eb">Primero te conozco</p><h2>Conversamos, sin formularios.</h2><p class="tx">Te pregunto cómo te vistes y cómo te gustaría verte, de a una cosa. Lo que me cuentas lo recuerdo.</p><ul class="pr"><li>Tu estilo</li><li>Tus ocasiones</li><li>Fotos de tu ropa</li><li>Una selfie para tu paleta</li></ul></div></div><div class="pie"><div class="fila"><button class="atras">Atrás</button><div class="dots" role="group" aria-label="Pantallas"><button class="dot" aria-label="Ir a la pantalla 1"><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 2" aria-current=step><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 3"><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 4"><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 5"><span class="c"></span><span class="p"></span></button></div><span class="atras ph"></span></div><button class="cta">Siguiente</button><div class="enl"><a class="lnk b">Ya tengo cuenta</a><a class="lnk s">Saltar</a></div><p class="priv">Tus fotos son privadas. Puedes borrar todo cuando quieras.</p></div></div></div><div><p class="cap">A · Pantalla 3</p><div class="tel v"><div class="arr"><svg class="mc" viewBox="0 -16 240 336" aria-hidden="true"><use href="#m-pensando" width="100%" height="100%"/></svg><div class="tt"><p class="eb">Así pienso un look</p><h2>Me cuentas el plan y yo lo armo.</h2><p class="tx">Un matrimonio, un asado, la oficina. Miro qué tan formal es, el clima de ese día y lo que hay en tu clóset.</p><ul class="pr"><li>El evento</li><li>El clima</li><li>Tu clóset</li></ul></div></div><div class="pie"><div class="fila"><button class="atras">Atrás</button><div class="dots" role="group" aria-label="Pantallas"><button class="dot" aria-label="Ir a la pantalla 1"><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 2"><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 3" aria-current=step><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 4"><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 5"><span class="c"></span><span class="p"></span></button></div><span class="atras ph"></span></div><button class="cta">Siguiente</button><div class="enl"><a class="lnk b">Ya tengo cuenta</a><a class="lnk s">Saltar</a></div><p class="priv">Tus fotos son privadas. Puedes borrar todo cuando quieras.</p></div></div></div><div><p class="cap">A · Pantalla 5 (Crear mi cuenta, misma altura 52)</p><div class="tel v"><div class="arr"><svg class="mc" viewBox="0 -16 240 336" aria-hidden="true"><use href="#m-saludo" width="100%" height="100%"/></svg><div class="tt"><p class="eb">Si te falta algo</p><h2>Te busco opciones en tiendas chilenas.</h2><p class="tx">Hasta tres, con foto y precio. Yo no compro nada: tú eliges y compras en la tienda.</p></div></div><div class="pie"><div class="fila"><button class="atras">Atrás</button><div class="dots" role="group" aria-label="Pantallas"><button class="dot" aria-label="Ir a la pantalla 1"><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 2"><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 3"><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 4"><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 5" aria-current=step><span class="c"></span><span class="p"></span></button></div><span class="atras ph"></span></div><a class="cta">Crear mi cuenta</a><div class="enl"><a class="lnk b">Ya tengo cuenta</a></div><p class="priv">Tus fotos son privadas. Puedes borrar todo cuando quieras.</p></div></div></div><div><p class="cap">B · Pantalla baja 360×640: cabeza chica junto al rótulo</p><div class="tel b"><div class="arr"><div class="cab"><svg class="hd" viewBox="44 -16 152 242" aria-hidden="true" style="--w-o:13px;--w-i:7px;--w-e:7px;--w-b:10px;--w-m:8px"><use href="#h-firma-s" width="100%" height="100%"/></svg><p class="eb">Primero te conozco</p></div><div class="tt"><h2>Conversamos, sin formularios.</h2><p class="tx">Te pregunto cómo te vistes y cómo te gustaría verte, de a una cosa. Lo que me cuentas lo recuerdo.</p><ul class="pr"><li>Tu estilo</li><li>Tus ocasiones</li><li>Fotos de tu ropa</li><li>Una selfie para tu paleta</li></ul></div></div><div class="pie"><div class="fila"><button class="atras">Atrás</button><div class="dots" role="group" aria-label="Pantallas"><button class="dot" aria-label="Ir a la pantalla 1"><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 2" aria-current=step><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 3"><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 4"><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 5"><span class="c"></span><span class="p"></span></button></div><span class="atras ph"></span></div><button class="cta">Siguiente</button><div class="enl"><a class="lnk b">Ya tengo cuenta</a><a class="lnk s">Saltar</a></div><p class="priv">Tus fotos son privadas. Puedes borrar todo cuando quieras.</p></div></div></div><div><p class="cap">B · Pantalla baja 360×640: pantalla 4</p><div class="tel b"><div class="arr"><div class="cab"><svg class="hd" viewBox="44 -16 152 242" aria-hidden="true" style="--w-o:13px;--w-i:7px;--w-e:7px;--w-b:10px;--w-m:8px"><use href="#h-firma-s" width="100%" height="100%"/></svg><p class="eb">Lo que recibes</p></div><div class="tt"><h2>Dos looks, y el porqué de cada uno.</h2><p class="tx">Uno más seguro y otro más atrevido, armados con tu propia ropa. Guardas el que te gusta o me pides ajustarlo.</p><ul class="pr"><li>Más seguro</li><li>Más atrevido</li></ul></div></div><div class="pie"><div class="fila"><button class="atras">Atrás</button><div class="dots" role="group" aria-label="Pantallas"><button class="dot" aria-label="Ir a la pantalla 1"><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 2"><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 3"><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 4" aria-current=step><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 5"><span class="c"></span><span class="p"></span></button></div><span class="atras ph"></span></div><button class="cta">Siguiente</button><div class="enl"><a class="lnk b">Ya tengo cuenta</a><a class="lnk s">Saltar</a></div><p class="priv">Tus fotos son privadas. Puedes borrar todo cuando quieras.</p></div></div></div><div><p class="cap">C · Apaisado 844×390: pantalla 2</p><div class="tel l"><div class="izq"><svg class="hd" viewBox="44 -16 152 242" aria-hidden="true" style="--w-o:13px;--w-i:7px;--w-e:7px;--w-b:10px;--w-m:8px"><use href="#h-firma-s" width="100%" height="100%"/></svg><div class="tt"><p class="eb">Primero te conozco</p><h2>Conversamos, sin formularios.</h2><p class="tx">Te pregunto cómo te vistes y cómo te gustaría verte, de a una cosa. Lo que me cuentas lo recuerdo.</p><ul class="pr"><li>Tu estilo</li><li>Tus ocasiones</li><li>Fotos de tu ropa</li><li>Una selfie para tu paleta</li></ul></div></div><div class="der"><div class="pie"><div class="fila"><button class="atras">Atrás</button><div class="dots" role="group" aria-label="Pantallas"><button class="dot" aria-label="Ir a la pantalla 1"><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 2" aria-current=step><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 3"><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 4"><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 5"><span class="c"></span><span class="p"></span></button></div><span class="atras ph"></span></div><button class="cta">Siguiente</button><div class="enl"><a class="lnk b">Ya tengo cuenta</a><a class="lnk s">Saltar</a></div><p class="priv">Tus fotos son privadas. Puedes borrar todo cuando quieras.</p></div></div></div></div><div><p class="cap">C · Apaisado 844×390: pantalla 3</p><div class="tel l"><div class="izq"><svg class="hd" viewBox="44 -16 152 242" aria-hidden="true" style="--w-o:13px;--w-i:7px;--w-e:7px;--w-b:10px;--w-m:8px"><use href="#h-firma-s" width="100%" height="100%"/></svg><div class="tt"><p class="eb">Así pienso un look</p><h2>Me cuentas el plan y yo lo armo.</h2><p class="tx">Un matrimonio, un asado, la oficina. Miro qué tan formal es, el clima de ese día y lo que hay en tu clóset.</p><ul class="pr"><li>El evento</li><li>El clima</li><li>Tu clóset</li></ul></div></div><div class="der"><div class="pie"><div class="fila"><button class="atras">Atrás</button><div class="dots" role="group" aria-label="Pantallas"><button class="dot" aria-label="Ir a la pantalla 1"><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 2"><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 3" aria-current=step><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 4"><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 5"><span class="c"></span><span class="p"></span></button></div><span class="atras ph"></span></div><button class="cta">Siguiente</button><div class="enl"><a class="lnk b">Ya tengo cuenta</a><a class="lnk s">Saltar</a></div><p class="priv">Tus fotos son privadas. Puedes borrar todo cuando quieras.</p></div></div></div></div><div><p class="cap">C · Apaisado 844×390: pantalla 4</p><div class="tel l"><div class="izq"><svg class="hd" viewBox="44 -16 152 242" aria-hidden="true" style="--w-o:13px;--w-i:7px;--w-e:7px;--w-b:10px;--w-m:8px"><use href="#h-firma-s" width="100%" height="100%"/></svg><div class="tt"><p class="eb">Lo que recibes</p><h2>Dos looks, y el porqué de cada uno.</h2><p class="tx">Uno más seguro y otro más atrevido, armados con tu propia ropa. Guardas el que te gusta o me pides ajustarlo.</p><ul class="pr"><li>Más seguro</li><li>Más atrevido</li></ul></div></div><div class="der"><div class="pie"><div class="fila"><button class="atras">Atrás</button><div class="dots" role="group" aria-label="Pantallas"><button class="dot" aria-label="Ir a la pantalla 1"><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 2"><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 3"><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 4" aria-current=step><span class="c"></span><span class="p"></span></button><button class="dot" aria-label="Ir a la pantalla 5"><span class="c"></span><span class="p"></span></button></div><span class="atras ph"></span></div><button class="cta">Siguiente</button><div class="enl"><a class="lnk b">Ya tengo cuenta</a><a class="lnk s">Saltar</a></div><p class="priv">Tus fotos son privadas. Puedes borrar todo cuando quieras.</p></div></div></div></div><div class="nota"><b>Notas para el Constructor (intro-carousel.tsx)</b><br>
+<b>D-04 · altura estable.</b> El contenido de cada pantalla se alinea arriba (<code>justify-start</code>, no centrado) con la mascota en una caja fija de 176 px: la mascota queda a la misma altura en las cinco. Pie con alturas fijas: fila de puntos 44, botón 52, enlaces 44. «Crear mi cuenta» y «Siguiente» miden 52 px en las cinco (usar <code>size</code> grande del Button del sistema, también para «Siguiente»).<br>
+<b>D-05 · Atrás.</b> Botón de texto «Atrás» (44 px) a la izquierda de la fila de puntos, desde la pantalla 2. En la 1 el espacio queda reservado e invisible (<code>invisible</code>, y <code>tabIndex=-1</code>/<code>aria-hidden</code>) para que los puntos no se muevan. Llama a <code>goTo(index - 1)</code>.<br>
+<b>D-10 · tokens.</b> «Siguiente»: <code>bg-inverso text-sobre-inverso</code>, 52 px, <code>text-sm font-bold</code>, <code>active:scale-[0.98]</code> sobre transform. Puntos: cada uno es una caja de 24×8 con dos capas (círculo y pastilla) que cruzan con <code>opacity</code> y <code>scale-x</code> en 200 ms con la curva de salida del sistema; cero <code>transition-all</code>. Con <code>prefers-reduced-motion</code>, sin transición.<br>
+<b>D-03 · pantallas bajas.</b> Con alto ≤ 700 px la mascota de cuerpo entero se cambia por la cabeza chica <code>h-firma-s</code> (88 px; trazos engrosados como indica mascota.svg), junto al rótulo (vertical bajo) o a la izquierda del texto (apaisado). La pose por pantalla se pierde solo en esos tamaños; la cabeza es la misma en las cinco, así que no salta.<br>
+<b>D-02 · apaisado (alto ≤ 500 px).</b> Dos columnas: texto a la izquierda y pie de 320 px a la derecha, centrado en vertical. Se oculta la línea de privacidad solo ahí (queda en vertical). Nada se corta: contenido máximo 214 px de alto en la pantalla 2.<br>
+Sin verificar: no probado en táctil real ni con el teclado de iOS; el carril de deslizamiento no está en la maqueta (cada cuadro es estático).</div></body></html>
