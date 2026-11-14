@@ -45,3 +45,39 @@ Maqueta aprobada (commit c69b727, docs/superpowers/mockups/2026-11-14-ui-0.html)
 4. Mobile 390 y 375, objetivo táctil 48 px, un solo h1, foco por outline global. OK.
 5. Verificación sin sesión: la declara QA.
 Decisión: texto exacto de la maqueta es el texto final. Validación Opus del protocolo omitida por decisión del Productor (ahorro de cuota; humo del equipo). Maqueta no vista en navegador por Diseño; QA y Diseño la contrastan con lo construido.
+
+### 2026-11-14 13:36 · QA · nota · vuelta 0
+
+Plan de humo ui-0 (build de producción, AI_MODE=mock, PORT=3210, navegador a 390x844 y luego 375x812).
+
+HALLAZGO DE VISIBILIDAD SIN SESIÓN (probado hoy sobre la rama, sha previo a la implementación, con build real):
+- /ruta-que-no-existe -> 307 a /entrar (200). /asesor sin sesión -> 307 a /entrar. Causa: web/src/lib/auth/proxy-rules.ts, toda ruta no pública sin sesión redirige a /entrar; la 404 con un enlace roto normal NO se ve sin sesión.
+- Sí se ve la 404 sin sesión (HTTP 404, renderiza not-found.tsx) en rutas que el proxy deja pasar: /no-existe.json, /robots.txt (pública y sin archivo), y rutas con extensión de asset (.png, .json, .js, .css, .txt...). /api/no-existe también da 404 (HTML del layout).
+- Conclusión: la 404 se verifica sin sesión con http://localhost:3210/no-existe.json (y /robots.txt como segunda ruta). No hay credenciales ni cuenta; la 404 desde una ruta de aplicación autenticada queda "no verificable por QA" y se declara. Esto cumple el criterio 5. Sin cambios de código pedidos.
+- Estado actual (antes de construir): muestra "Error 404", h1 "Esta página no existe.", CTA "Ir al asesor".
+
+Comprobaciones (una por criterio, tras el commit del Constructor):
+1. Voz (crit. 1): h1 exacto "No encuentro esta página."; apoyo exacto de la maqueta; sin "Error 404", sin emoji, tuteo, sin jerga.
+2. CTA único (crit. 2): un solo enlace/botón "Volver al asesor", href=/asesor; al tocarlo sin sesión llega a /entrar (esperado por el proxy, se anota, no es fallo); contar enlaces/botones del cuerpo = 1.
+3. Tokens (crit. 3): revisar el diff de not-found.tsx: solo clases de tokens (bg-fondo, text-tinta, text-tinta-suave, bg-acento, font-display, ButtonLink primary); cero hex, cero px arbitrarios, cero colores de Tailwind por defecto. Verificar en navegador el color computado del filete = acento.
+4a. Mobile (crit. 4): a 390x844 y 375x812 sin scroll horizontal (scrollWidth <= innerWidth), sin scroll vertical innecesario, contenido centrado vertical.
+4b. Táctil: alto del CTA >= 44 px (maqueta dice 48).
+4c. Foco: Tab lleva el foco al CTA con outline acento visible; Enter activa.
+4d. Contraste AA: tinta/fondo y tinta-suave/fondo >= 4.5:1; CTA superficie/tinta.
+4e. Un único h1 en el DOM (document.querySelectorAll('h1').length===1) y filete aria-hidden.
+5. Visibilidad sin sesión (crit. 5): /no-existe.json y /robots.txt devuelven 404 con la página; /ruta-que-no-existe redirige a /entrar (declarado). Estado HTTP 404 en ambas.
+6. Fidelidad a la maqueta: comparar captura 390x844 con docs/superpowers/mockups/2026-11-14-ui-0.html (espaciado, filete, jerarquía).
+7. Recarga y volver atrás: recargar la 404 la mantiene; atrás desde la 404 vuelve a la página previa; texto grande del sistema (200%) sin recorte.
+8. Regresión mínima: / y /entrar siguen cargando 200; npm run build sin errores; el diff solo toca web/src/app/not-found.tsx (verificar-frontera.sh).
+Paralelo: Revisor y QA y Diseño pueden correr a la vez sobre el mismo sha; al terminar apago el servidor.
+
+### 2026-11-14 13:39 · Constructor · respuesta · vuelta 0
+
+Implementado web/src/app/not-found.tsx segun la maqueta y criterios aprobados:
+- Filete decorativo: w-10 h-0.5 bg-acento mb-5 (aria-hidden="true").
+- h1 unico: "No encuentro esta página." (font-display text-4xl).
+- Apoyo: "Puede que el enlace esté mal escrito o que ya no exista. Volvamos a la conversación y seguimos con tu look." (mt-3 max-w-sm text-tinta-suave).
+- CTA unico: ButtonLink primary fullWidth hacia /asesor con texto "Volver al asesor" en contenedor mt-6.
+- Sin "Error 404", sin emoji, tuteo en primera persona del asesor.
+- Solo tokens vigentes de globals.css.
+- Verificado: npm run verify (lint, typecheck, vitest) en verde, npm run build OK, frontera verificada.
