@@ -49,3 +49,12 @@ export function chatDailyLimit(): number {
   const n = Number.parseInt(process.env.CHAT_DAILY_LIMIT ?? "", 10);
   return Number.isFinite(n) && n > 0 ? n : 60;
 }
+
+/**
+ * Búsqueda de opciones de compra (DT-18). `SHOPPING_SEARCH`: `real` | `mock` (o `simulada`) | `none`; vacío = el valor por
+ * defecto lo decide `getProductSearch`. `SHOP_STORES`: dominios de las tiendas del lector real, separados por coma
+ * (`dominio` o `dominio|Nombre` o `dominio|Nombre|afiliado`); vacío = lector real apagado.
+ */
+export function shoppingConfig(): { mode: string; storesRaw: string } {
+  return { mode: (process.env.SHOPPING_SEARCH ?? "").trim().toLowerCase(), storesRaw: process.env.SHOP_STORES ?? "" };
+}
