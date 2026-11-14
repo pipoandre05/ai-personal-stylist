@@ -4,11 +4,14 @@ import { trackAiUsage } from "@/lib/analytics";
 import { getAnthropic } from "@/lib/ai/client";
 import type { LoadedImage } from "@/lib/ai/image";
 import { aiConfig, isMockAI } from "@/lib/env";
-import type { ChatEvent, ChatMessagePart, QuickReplies } from "@/lib/domain/types";
+import type { ChatEvent, ChatIntent, ChatMessagePart, EventSummary, QuickReplies } from "@/lib/domain/types";
+import { describeEventForAdvisor } from "@/lib/domain/event-summary";
+import { renderIntentBlock, type ResolvedIntent } from "@/lib/domain/intents";
 import type { UserCtx } from "@/lib/server/types";
 import { logError } from "@/lib/server/log";
 import { loadPersonContext } from "./context";
 import { HISTORY_LIMIT, toMessageParams, type StoredMessage } from "./history";
+import { assistantNotes, userIntentLine } from "./history-notes";
 import { runMockAgent } from "./mock-agent";
 import { SYSTEM_PROMPT } from "./system-prompt";
 import { AGENT_TOOLS } from "./tool-defs";
@@ -27,6 +30,8 @@ export type AgentRunInput = {
   image?: { path: string; loaded: LoadedImage | null } | null;
   /** Primer turno: no hay mensaje de la persona, el asesor saluda. */
   start?: boolean;
+  /** Botón que tocó la persona, ya verificado por la ruta (ids de la persona). */
+  intent?: ResolvedIntent | null;
   emit: (event: ChatEvent) => void;
   signal?: AbortSignal;
 };
@@ -40,6 +45,20 @@ export type AgentRunResult = {
 };
 
 type HistoryRow = { role: "user" | "assistant"; text: string; parts: ChatMessagePart[] | null };
+
+const RECENT_TEXTS = 4;
+
+/** Lo que el turno necesita saber del hilo, aparte de los mensajes que ve el modelo. */
+export type HistoryFacts = {
+  /** Mensajes de la persona, los más nuevos primero. */
+  recentUserTexts: string[];
+  /** Botones que tocó la persona en esta conversación (más nuevos primero). */
+  intents: ChatIntent[];
+  /** Último resumen del evento (con las correcciones de la persona). */
+  event: EventSummary | null;
+  /** Cuántas veces se mostró el resumen con datos por completar: aproxima las preguntas ya hechas (tope D-01). */
+  eventQuestionsAsked: number;
+};
 
 async function loadHistory(ctx: UserCtx, conversationId: string) {
   const { data, error } = await ctx.supabase
@@ -69,15 +88,32 @@ async function loadHistory(ctx: UserCtx, conversationId: string) {
     text: r.text,
     outfitTitles: (r.parts ?? []).flatMap((p) => (p.type === "outfit" && titles.has(p.outfit_id) ? [titles.get(p.outfit_id) as string] : [])),
     imagePaths: r.role === "user" ? (r.parts ?? []).flatMap((p) => (p.type === "image" ? [p.path] : [])) : [],
+    ...(r.role === "assistant" ? { notes: assistantNotes(r.parts ?? []) } : { intentLine: userIntentLine(r.parts ?? []) }),
   }));
-  return { stored, truncated: rows.length >= HISTORY_LIMIT };
+
+  const userRows = rows.filter((r) => r.role === "user");
+  const eventParts = rows.flatMap((r) => (r.parts ?? []).flatMap((p) => (p.type === "event_summary" ? [p] : [])));
+  const lastEvent = eventParts[eventParts.length - 1];
+  let event: EventSummary | null = null;
+  if (lastEvent) {
+    const { type: _t, ...summary } = lastEvent;
+    void _t;
+    event = summary;
+  }
+  const facts: HistoryFacts = {
+    recentUserTexts: userRows.map((r) => r.text).filter(Boolean).reverse().slice(0, RECENT_TEXTS),
+    intents: userRows.flatMap((r) => (r.parts ?? []).flatMap((p) => (p.type === "intent" ? [p.intent] : []))).reverse(),
+    event,
+    eventQuestionsAsked: eventParts.filter((p) => p.missing.length > 0).length,
+  };
+  return { stored, truncated: rows.length >= HISTORY_LIMIT, facts };
 }
 
 /** Un turno del asesor: bucle de herramientas con streaming, máximo `MAX_ITERATIONS` vueltas. */
 export async function runStylistTurn(input: AgentRunInput): Promise<AgentRunResult> {
   const { ctx, conversationId, userText, emit, signal } = input;
   const person = await loadPersonContext(ctx.supabase, ctx.userId);
-  const { stored, truncated } = await loadHistory(ctx, conversationId);
+  const { stored, truncated, facts } = await loadHistory(ctx, conversationId);
 
   // Solo las fotos recientes de la conversación pueden pasar a add_garment / analyze_palette.
   const allowed = stored.flatMap((m) => m.imagePaths);
@@ -86,7 +122,12 @@ export async function runStylistTurn(input: AgentRunInput): Promise<AgentRunResu
     conversationId,
     city: person.city,
     emit,
-    state: newToolState(allowed),
+    state: newToolState(allowed, {
+      event: facts.event,
+      intent: input.intent ?? null,
+      intents: [...(input.intent ? [input.intent.intent] : []), ...facts.intents],
+      recentUserTexts: [userText, ...facts.recentUserTexts.filter((t) => t !== userText)].filter(Boolean),
+    }),
   };
   const finish = (text: string): AgentRunResult => ({
     text: text.trim(),
@@ -98,7 +139,17 @@ export async function runStylistTurn(input: AgentRunInput): Promise<AgentRunResu
 
   if (isMockAI()) {
     const text = await runMockAgent(
-      { userText, hasImage: Boolean(input.image), imagePath: input.image?.path ?? null, start: Boolean(input.start), person },
+      {
+        userText,
+        hasImage: Boolean(input.image),
+        imagePath: input.image?.path ?? null,
+        start: Boolean(input.start),
+        person,
+        intent: input.intent ?? null,
+        event: facts.event,
+        eventQuestionsAsked: facts.eventQuestionsAsked,
+        recentUserTexts: tctx.state.recentUserTexts,
+      },
       tctx,
       signal,
     );
@@ -118,7 +169,11 @@ export async function runStylistTurn(input: AgentRunInput): Promise<AgentRunResu
           : null,
       }
     : null;
-  const messages = toMessageParams(stored, person.text, { truncated, current });
+  // Lo que cambia por turno (evento actual, botón tocado) va al final del último mensaje: no rompe el prefijo cacheado.
+  const turnBlocks: string[] = [];
+  if (facts.event) turnBlocks.push(`<evento_actual>\n${describeEventForAdvisor(facts.event)}\n</evento_actual>`);
+  if (input.intent) turnBlocks.push(renderIntentBlock(input.intent));
+  const messages = toMessageParams(stored, person.text, { truncated, current, turnBlocks });
   let text = "";
 
   const push = (delta: string) => {

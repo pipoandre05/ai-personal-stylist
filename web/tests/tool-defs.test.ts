@@ -10,19 +10,24 @@ describe("herramientas del agente", () => {
       "analyze_palette",
       "get_closet",
       "get_weather",
+      "offer_search",
       "propose_outfit",
       "remember",
+      "search_products",
+      "set_event_summary",
       "suggest_replies",
       "update_profile",
     ]);
   });
 
-  it("cada herramienta tiene etiqueta de estado (suggest_replies, vacía a propósito)", () => {
+  it("cada herramienta tiene etiqueta de estado (suggest_replies y offer_search, vacías a propósito)", () => {
     for (const t of AGENT_TOOLS) expect(TOOL_STATUS_LABELS).toHaveProperty(t.name);
     expect(TOOL_STATUS_LABELS.suggest_replies).toBe("");
+    expect(TOOL_STATUS_LABELS.offer_search).toBe("");
   });
 
-  it("todas son strict salvo update_profile (14 opcionales) y con additionalProperties:false en cada objeto", () => {
+  it("todas son strict salvo las de muchos parámetros opcionales y con additionalProperties:false en cada objeto", () => {
+    const NOT_STRICT = ["update_profile", "search_products", "set_event_summary"];
     const visit = (schema: unknown) => {
       if (!schema || typeof schema !== "object") return;
       const s = schema as Record<string, unknown>;
@@ -30,7 +35,7 @@ describe("herramientas del agente", () => {
       Object.values(s).forEach(visit);
     };
     for (const tool of AGENT_TOOLS) {
-      expect(tool.strict).toBe(tool.name === "update_profile" ? undefined : true);
+      expect(tool.strict).toBe(NOT_STRICT.includes(tool.name) ? undefined : true);
       visit(tool.input_schema);
     }
   });

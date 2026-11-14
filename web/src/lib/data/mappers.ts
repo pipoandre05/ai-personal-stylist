@@ -1,6 +1,9 @@
 // Mapeo puro de filas de Postgres a los DTO de types.ts. Sin Supabase: testeable.
 import type {
   Garment,
+  OutfitEvidence,
+  OutfitVariant,
+  ProductOption,
   GarmentCategory,
   GarmentView,
   MissingPiece,
@@ -79,3 +82,24 @@ export const OUTFIT_SELECT =
   "id, title, occasion, rationale, status, weather, missing_piece, created_at, " +
   "outfit_items!outfit_items_outfit_id_fkey(position, garments!outfit_items_garment_id_fkey(id, name, category, photo_path)), " +
   "outfit_feedback!outfit_feedback_outfit_id_fkey(rating)";
+
+/** Columnas de la migración 20261114020000 (opcionales: pueden no existir todavía). */
+export type OutfitExtrasRow = {
+  id: string;
+  variant: OutfitVariant | null;
+  pair_id: string | null;
+  evidence: OutfitEvidence[] | null;
+  selected_option: ProductOption | null;
+};
+
+/** Suma al look lo que guardó la migración nueva; sin fila, el look queda como estaba. */
+export function withOutfitExtras(view: OutfitView, extras: OutfitExtrasRow | undefined): OutfitView {
+  if (!extras) return view;
+  return {
+    ...view,
+    ...(extras.evidence ? { evidence: extras.evidence } : {}),
+    variant: extras.variant ?? null,
+    pair_id: extras.pair_id ?? null,
+    selected_option: extras.selected_option ?? null,
+  };
+}

@@ -1,10 +1,13 @@
 import "server-only";
-import { hashString } from "@/lib/ai/mock";
 import { CATEGORY_LABELS, COLOR_SEASON_LABELS, type ChatEvent, type ColorSeason, type GarmentCategory } from "@/lib/domain/types";
 import type { LoadedContext } from "./context";
 import { CHAT_REPLY_OPTIONS, INVITE_TEXT, parseProfileAnswer, planMockTurn, questionFor } from "./mock-script";
-import { EMPTY_CLOSET_TEXT, isFormalRequest, missingPieceText, planMockLook } from "./pick-outfit";
+import { isFormalRequest } from "./pick-outfit";
+import { dayLookFlow, eventAnswerFlow, eventFlow, intentFlow, newLookFlow, type FlowInput, type MockEnv } from "./mock-flow";
 import { fetchCloset, runTool, type ToolContext } from "./tools";
+import type { ResolvedIntent } from "@/lib/domain/intents";
+import type { EventSummary, MissingPiece } from "@/lib/domain/types";
+import { todayInSantiago } from "@/lib/format";
 import { logError } from "@/lib/server/log";
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -33,6 +36,14 @@ export type MockTurnInput = {
   imagePath: string | null;
   start: boolean;
   person: LoadedContext;
+  /** Botón que tocó la persona, verificado. */
+  intent?: ResolvedIntent | null;
+  /** Lo último que se entendió del evento (del hilo). */
+  event?: EventSummary | null;
+  /** Veces que ya se mostró el resumen con datos por completar (tope de preguntas, D-01). */
+  eventQuestionsAsked?: number;
+  /** Mensajes recientes de la persona, los más nuevos primero. */
+  recentUserTexts?: string[];
 };
 
 /**
@@ -53,50 +64,54 @@ export async function runMockAgent(input: MockTurnInput, t: ToolContext, signal?
     if (q.options.length) await replies(q.options, q.multiple);
   };
 
-  const plan = planMockTurn({ text: userText, hasImage: input.hasImage, start: input.start, missing: person.missing });
-  const seed = hashString(userText || imagePath || "inicio");
+  const plan = planMockTurn({
+    text: userText,
+    hasImage: input.hasImage,
+    start: input.start,
+    missing: person.missing,
+    intent: input.intent?.intent ?? null,
+    event: input.event ?? null,
+  });
 
-  /**
-   * Intenta proponer un look. Devuelve "outfit" si lo propuso; "empty" o "missing" (con el texto ya dicho) si no
-   * había con qué: en esos casos no hay tarjeta y el texto explica qué hacer o qué prenda falta.
-   */
-  const proposeLook = async (intro: string): Promise<"outfit" | "empty" | "missing" | "failed"> => {
-    await runTool("get_closet", {}, t);
-    const closet = await fetchCloset(t.ctx).catch((err) => {
-      logError("mock.fetchCloset", err);
-      return [];
-    });
-    await runTool("get_weather", {}, t);
-    const formal = isFormalRequest(userText);
-    const look = planMockLook(closet, seed, t.state.weather, { formal });
-    const sep = intro.match(/^\n+/)?.[0] ?? "";
-    if (look.kind === "empty") {
-      await say(sep + EMPTY_CLOSET_TEXT);
-      return "empty";
-    }
-    if (look.kind === "missing") {
-      await say(sep + missingPieceText(look.piece));
-      return "missing";
-    }
-    const items = look.items;
-    const names = items.map((g) => g.name.toLowerCase()).join(", ");
-    const result = await runTool(
-      "propose_outfit",
-      {
-        title: formal ? "Look para tu evento" : "Look del día",
-        occasion: userText.trim().slice(0, 60) || "día a día",
-        garment_ids: items.map((g) => g.id),
-        rationale: `Combina ${names}. Las prendas comparten un nivel de formalidad parecido y los colores se acompañan sin competir, así que el conjunto se ve coherente y cómodo para usar.`,
-      },
-      t,
-    );
-    if (result.isError) return "failed";
-    // Solo se dice que se propuso el look si la tarjeta realmente salió.
-    if (t.state.outfitIds.length === 0) return "failed";
-    await say(
-      `${intro}Te propuse un look con ${names}. Funciona porque las prendas tienen una formalidad parecida y los colores se complementan, así que se ve armado sin esfuerzo. Si quieres, lo ajusto para otra ocasión.`,
-    );
-    return "outfit";
+  const env: MockEnv = {
+    say,
+    replies: async (options, multiple = false) => {
+      await replies(options, multiple);
+    },
+    tool: (name, toolInput) => runTool(name, toolInput, t),
+    closet: () =>
+      fetchCloset(t.ctx).catch((err) => {
+        logError("mock.fetchCloset", err);
+        return [];
+      }),
+    outfitItems: async (outfitId) => {
+      const { data } = await t.ctx.supabase
+        .from("outfit_items")
+        .select("garment_id, position")
+        .eq("outfit_id", outfitId)
+        .eq("user_id", t.ctx.userId)
+        .order("position")
+        .returns<{ garment_id: string }[]>();
+      return (data ?? []).map((r) => r.garment_id);
+    },
+    outfitMissing: async (outfitId) => {
+      const { data } = await t.ctx.supabase
+        .from("outfits")
+        .select("missing_piece")
+        .eq("id", outfitId)
+        .eq("user_id", t.ctx.userId)
+        .maybeSingle<{ missing_piece: MissingPiece | null }>();
+      return data?.missing_piece ?? null;
+    },
+    event: () => t.state.event,
+    weather: () => t.state.weather,
+    today: todayInSantiago(),
+  };
+  const flowInput: FlowInput = {
+    userText,
+    intent: input.intent ?? null,
+    eventQuestionsAsked: input.eventQuestionsAsked ?? 0,
+    recentUserTexts: input.recentUserTexts ?? [userText],
   };
 
   switch (plan.kind) {
@@ -148,9 +163,7 @@ export async function runMockAgent(input: MockTurnInput, t: ToolContext, signal?
         .select("id", { count: "exact", head: true })
         .eq("user_id", t.ctx.userId);
       if (ready >= 3 && (count ?? 0) === 0) {
-        if ((await proposeLook("\n\nYa tengo prendas suficientes para armarte algo. ")) === "failed") {
-          await say("\n\nNo pude armar el look ahora. Pídemelo de nuevo en un momento.");
-        }
+        await dayLookFlow(env, flowInput, false, "\n\nYa tengo prendas suficientes para armarte algo. ");
       } else if (ready < 3) {
         await say(`Llevas ${ready} de 3 a 5. Mándame otra cuando quieras.`);
       }
@@ -158,10 +171,27 @@ export async function runMockAgent(input: MockTurnInput, t: ToolContext, signal?
     }
 
     case "look": {
-      await say("Dame un segundo, reviso tu clóset. ");
-      if ((await proposeLook("\n\n")) === "failed") {
-        await say("\n\nNo pude armar el look ahora. ¿Me lo pides de nuevo en un momento?");
-      }
+      await dayLookFlow(env, flowInput, isFormalRequest(userText));
+      break;
+    }
+
+    case "event": {
+      await eventFlow(env, flowInput);
+      break;
+    }
+
+    case "event_answer": {
+      await eventAnswerFlow(env, flowInput);
+      break;
+    }
+
+    case "new_look": {
+      await newLookFlow(env, flowInput, plan.piece);
+      break;
+    }
+
+    case "intent": {
+      await intentFlow(env, flowInput);
       break;
     }
 

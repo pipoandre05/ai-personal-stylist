@@ -2,11 +2,14 @@ import { z } from "zod";
 import { track } from "@/lib/analytics";
 import { friendlyAiError } from "@/lib/ai/errors";
 import { downloadImage } from "@/lib/ai/image";
+import { resolveIntent } from "@/lib/agent/intent";
 import { runStylistTurn, type AgentRunInput } from "@/lib/agent/run";
+import { createTurnCollector } from "@/lib/chat/collector";
 import { encodeSSE } from "@/lib/chat/sse";
+import { ChatIntentSchema } from "@/lib/domain/intents";
 import { logError } from "@/lib/server/log";
 import { isOwnPhotoPath } from "@/lib/domain/photo-path";
-import type { ChatEvent, ChatMessagePart, QuickReplies } from "@/lib/domain/types";
+import type { ChatEvent, ChatMessagePart } from "@/lib/domain/types";
 import { chatDailyLimit, isMockAI } from "@/lib/env";
 import { startOfTodayInSantiagoISO } from "@/lib/format";
 import { apiError, authenticate, BAD_INPUT, INTERNAL, readJson, UNAUTHORIZED } from "@/lib/server/route-helpers";
@@ -22,6 +25,12 @@ const Body = z
     image_path: z.string().max(200).optional(),
     start: z.boolean().optional(),
     /**
+     * Botón que tocó la persona (refinar un look o una búsqueda, aceptar o no buscar opciones). `text` lleva el rótulo del
+     * botón, que es lo que ve la persona en el hilo; `intent` es lo que entiende el asesor, y solo después de que el
+     * servidor verifica que cada id es de la persona. Requiere `conversation_id`.
+     */
+    intent: ChatIntentSchema.optional(),
+    /**
      * Idempotencia (opcional). El cliente genera un uuid (`crypto.randomUUID()`) POR MENSAJE DE LA PERSONA y lo
      * envía igual en cada reintento de ese mismo mensaje (no uno nuevo por request). El servidor lo usa como `id`
      * del mensaje: si ya existe, no lo vuelve a guardar; si el turno del asesor ya terminó devuelve su `done`, y si
@@ -29,7 +38,8 @@ const Body = z
      */
     client_message_id: z.string().uuid().optional(),
   })
-  .refine((b) => b.start || b.text.length > 0 || b.image_path, { message: "empty" });
+  .refine((b) => b.start || b.text.length > 0 || b.image_path || b.intent, { message: "empty" })
+  .refine((b) => !b.intent || b.conversation_id, { message: "intent sin conversación" });
 
 const EMPTY_REPLY = "No logré armar una respuesta. ¿Lo intentamos de nuevo?";
 const LIMIT_REACHED = "Llegaste al máximo de mensajes de hoy. Mañana seguimos con tus looks.";
@@ -58,7 +68,7 @@ export async function POST(request: Request) {
 
   const body = Body.safeParse(await readJson(request));
   if (!body.success) return apiError(BAD_INPUT, 400);
-  const { text, image_path, start, client_message_id } = body.data;
+  const { text, image_path, start, client_message_id, intent } = body.data;
   if (image_path !== undefined && !isOwnPhotoPath(image_path, ctx.userId)) return apiError(BAD_INPUT, 400);
   const { supabase, userId } = ctx;
 
@@ -138,6 +148,13 @@ export async function POST(request: Request) {
     }
   }
 
+  // El botón se verifica antes de guardar nada: ids de otra persona o de otra conversación no llegan al asesor.
+  let resolvedIntent: AgentRunInput["intent"] = null;
+  if (intent && !start) {
+    resolvedIntent = await resolveIntent(ctx, conversationId, intent);
+    if (!resolvedIntent) return apiError(BAD_INPUT, 400);
+  }
+
   // La foto se lee antes de guardar nada: si no se puede leer, no queda un mensaje huérfano.
   let image: AgentRunInput["image"] = null;
   if (image_path) {
@@ -151,7 +168,10 @@ export async function POST(request: Request) {
 
   if (!start && !previous) {
     // El mensaje de la persona se guarda antes de llamar al modelo: si el modelo falla no se pierde.
-    const parts: ChatMessagePart[] = image_path ? [{ type: "image", path: image_path }] : [];
+    const parts: ChatMessagePart[] = [
+      ...(image_path ? [{ type: "image", path: image_path } as const] : []),
+      ...(intent ? [{ type: "intent", intent } as const] : []),
+    ];
     const { error } = await supabase.from("messages").insert({
       ...(client_message_id ? { id: client_message_id } : {}),
       conversation_id: conversationId,
@@ -172,7 +192,7 @@ export async function POST(request: Request) {
     }
   }
 
-  return streamTurn({ ctx, conversationId, userText: text, image, start: Boolean(start), request });
+  return streamTurn({ ctx, conversationId, userText: text, image, start: Boolean(start), intent: resolvedIntent, request });
 }
 
 async function findOwnMessage(ctx: UserCtx, id: string) {
@@ -206,29 +226,21 @@ function streamTurn(args: {
   userText: string;
   image: AgentRunInput["image"];
   start: boolean;
+  intent: AgentRunInput["intent"];
   request: Request;
 }): Response {
-  const { ctx, conversationId, userText, image, start, request } = args;
+  const { ctx, conversationId, userText, image, start, intent, request } = args;
   const { supabase, userId } = ctx;
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       let open = true;
-      let reply = "";
-      const outfitIds: string[] = [];
-      const garmentIds: string[] = [];
-      let paletteId: string | null = null;
-      let quickReplies: QuickReplies | null = null;
-      const memoryNotes: { id: string; fact: string }[] = [];
+      // Reduce los eventos del turno a lo que se guarda (texto y `parts`): ver lib/chat/collector.ts.
+      const collector = createTurnCollector();
 
       const emit = (event: ChatEvent) => {
-        if (event.type === "text_delta") reply += event.text;
-        if (event.type === "outfit") outfitIds.push(event.outfit.id);
-        if (event.type === "garment") garmentIds.push(event.garment.id);
-        if (event.type === "palette") paletteId = event.analysis.id;
-        if (event.type === "memory") memoryNotes.push({ id: event.id, fact: event.fact });
-        if (event.type === "quick_replies") quickReplies = { options: event.options, multiple: event.multiple };
+        collector.push(event);
         if (!open) return;
         try {
           controller.enqueue(encoder.encode(encodeSSE(event)));
@@ -240,7 +252,7 @@ function streamTurn(args: {
       let failure: string | null = null;
       emit({ type: "conversation", id: conversationId });
       try {
-        await runStylistTurn({ ctx, conversationId, userText, image, start, emit, signal: request.signal });
+        await runStylistTurn({ ctx, conversationId, userText, image, start, intent, emit, signal: request.signal });
       } catch (err) {
         if (!request.signal.aborted) {
           console.error("[chat]", err instanceof Error ? err.message : err);
@@ -249,14 +261,10 @@ function streamTurn(args: {
       }
 
       // Se guarda lo que haya, también si el turno se cortó: prendas, paleta y looks ya quedaron persistidos.
-      const finalText = reply.trim() || (outfitIds.length || garmentIds.length || paletteId || failure || request.signal.aborted ? "" : EMPTY_REPLY);
-      const parts: ChatMessagePart[] = [
-        ...outfitIds.map((outfit_id): ChatMessagePart => ({ type: "outfit", outfit_id })),
-        ...garmentIds.map((garment_id): ChatMessagePart => ({ type: "garment", garment_id })),
-        ...(paletteId ? [{ type: "palette", analysis_id: paletteId } as const] : []),
-        ...memoryNotes.map((m): ChatMessagePart => ({ type: "memory", memory_id: m.id, fact: m.fact })),
-        ...(quickReplies ? [{ type: "quick_replies", ...(quickReplies as QuickReplies) } as const] : []),
-      ];
+      const reply = collector.text;
+      const hasWork = collector.outfitIds.length > 0 || collector.garmentIds.length > 0 || collector.paletteId !== null;
+      const finalText = reply.trim() || (hasWork || failure || request.signal.aborted ? "" : EMPTY_REPLY);
+      const parts: ChatMessagePart[] = collector.parts();
       if (finalText || parts.length) {
         const { data: saved, error: saveError } = await supabase
           .from("messages")

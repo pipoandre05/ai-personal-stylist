@@ -13,6 +13,10 @@ export type StoredMessage = {
   text: string;
   outfitTitles: string[];
   imagePaths: string[];
+  /** Lo que el asistente mostró y el texto no dice (resumen del evento, opciones de compra, ofertas): una línea por cosa. */
+  notes?: string[];
+  /** Botón que tocó la persona en este mensaje (línea ya renderizada). */
+  intentLine?: string;
 };
 
 export type CurrentImage = { path: string; block: Anthropic.Beta.BetaImageBlockParam | null };
@@ -28,7 +32,12 @@ export type CurrentImage = { path: string; block: Anthropic.Beta.BetaImageBlockP
 export function toMessageParams(
   stored: StoredMessage[],
   contextBlock: string,
-  opts: { truncated?: boolean; current?: CurrentImage | null } = {},
+  opts: {
+    truncated?: boolean;
+    current?: CurrentImage | null;
+    /** Bloques del sistema para el último mensaje de la persona (evento actual, intención verificada). */
+    turnBlocks?: string[];
+  } = {},
 ): Anthropic.Beta.BetaMessageParam[] {
   const lastIndex = stored.length - 1;
   const entries: { role: "user" | "assistant"; blocks: Block[] }[] = [];
@@ -44,8 +53,10 @@ export function toMessageParams(
     for (const p of older) blocks.push({ type: "text", text: `[Foto enviada, image_path: ${p}]` });
     const text = m.text.trim();
     if (text) blocks.push({ type: "text", text });
+    if (m.role === "user" && m.intentLine) blocks.push({ type: "text", text: m.intentLine });
     if (m.role === "assistant") {
       for (const title of m.outfitTitles) blocks.push({ type: "text", text: `[Propuse el look "${title}"]` });
+      for (const note of m.notes ?? []) blocks.push({ type: "text", text: note });
     }
     if (blocks.length) entries.push({ role: m.role, blocks });
   });
@@ -56,6 +67,11 @@ export function toMessageParams(
     entries.unshift({ role: "user", blocks: [{ type: "text", text: opts.truncated ? CONTINUE_MARKER : START_MARKER }] });
   }
   entries[0].blocks.unshift({ type: "text", text: contextBlock });
+  // Lo que cambia en cada turno va al final, después del prefijo cacheable (contexto de la persona).
+  const last = entries[entries.length - 1];
+  if (opts.turnBlocks?.length && last.role === "user") {
+    for (const text of opts.turnBlocks) last.blocks.push({ type: "text", text });
+  }
 
   return entries.map(({ role, blocks }) => ({
     role,

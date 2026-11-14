@@ -1,7 +1,6 @@
 import "server-only";
 import { cache } from "react";
 import type {
-  ChatMessagePart,
   ChatMessageView,
   ColorAnalysis,
   Garment,
@@ -20,6 +19,7 @@ import { logError } from "@/lib/server/log";
 import { signPaths } from "./media";
 import { toGarmentView } from "./mappers";
 import { loadOutfitViews } from "./outfits";
+import { assembleThread, type ThreadRow } from "./thread";
 
 // Todas las lecturas usan la sesión de la persona: RLS filtra por user_id; el filtro explícito
 // por `id`/`user_id` solo evita depender de una sola capa.
@@ -133,13 +133,7 @@ export async function listMemoryFacts(): Promise<MemoryFact[]> {
   return data ?? [];
 }
 
-type MessageRow = {
-  id: string;
-  role: "user" | "assistant";
-  text: string;
-  parts: ChatMessagePart[] | null;
-  created_at: string;
-};
+type MessageRow = ThreadRow;
 
 /**
  * Última conversación con el hilo completo: outfits, prendas y paleta de `parts` se resuelven a sus DTO,
@@ -216,37 +210,12 @@ export async function getLatestConversation(): Promise<{ id: string; messages: C
       : Promise.resolve(new Set<string>()),
   ]);
   const garmentUrls = await signPaths(db, garmentRows.map((g) => g.photo_path));
-  const outfits = new Map(outfitViews.map((o) => [o.id, o]));
-  const garments = new Map(garmentRows.map((g) => [g.id, toGarmentView(g, garmentUrls)]));
-  const palettes = new Map(paletteRows.map((a) => [a.id, a]));
-
-  const lastIndex = ordered.length - 1;
-  const messages: ChatMessageView[] = ordered.map((m, index) => {
-    const mp = m.parts ?? [];
-    const image = mp.find((p): p is Extract<ChatMessagePart, { type: "image" }> => p.type === "image");
-    const quick = mp.find((p): p is Extract<ChatMessagePart, { type: "quick_replies" }> => p.type === "quick_replies");
-    const paletteId = mp.find((p): p is Extract<ChatMessagePart, { type: "palette" }> => p.type === "palette")?.analysis_id;
-    return {
-      id: m.id,
-      role: m.role,
-      text: m.text,
-      created_at: m.created_at,
-      outfits: mp.flatMap((p) => {
-        const o = p.type === "outfit" ? outfits.get(p.outfit_id) : undefined;
-        return o ? [o] : [];
-      }),
-      garments: mp.flatMap((p) => {
-        const g = p.type === "garment" ? garments.get(p.garment_id) : undefined;
-        return g ? [g] : [];
-      }),
-      palette: paletteId ? (palettes.get(paletteId) ?? null) : null,
-      image_url: image ? (imageUrls.get(image.path) ?? null) : null,
-      memory_notes: mp.flatMap((p) =>
-        p.type === "memory" && liveMemoryIds.has(p.memory_id) ? [{ id: p.memory_id, fact: p.fact }] : [],
-      ),
-      quick_replies:
-        index === lastIndex && m.role === "assistant" && quick ? { options: quick.options, multiple: quick.multiple } : null,
-    };
+  const messages = assembleThread(ordered, {
+    outfits: new Map(outfitViews.map((o) => [o.id, o])),
+    garments: new Map(garmentRows.map((g) => [g.id, toGarmentView(g, garmentUrls)])),
+    palettes: new Map(paletteRows.map((a) => [a.id, a])),
+    imageUrls,
+    liveMemoryIds,
   });
   return { id: conv.id, messages };
 }
