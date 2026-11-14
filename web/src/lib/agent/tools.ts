@@ -651,7 +651,7 @@ async function profileBudget(t: ToolContext): Promise<number | null> {
 async function execSearchProducts(input: unknown, t: ToolContext): Promise<ToolOutput> {
   const parsed = SearchProductsInput.safeParse(input);
   if (!parsed.success) return fail("Entrada inválida para search_products: slot, description y authorization son obligatorios.");
-  const { for_outfit_id, slot, description, color, max_price_clp, size, authorization, quote } = parsed.data;
+  const { for_outfit_id, slot, description, color, max_price_clp, size, audience, authorization, quote } = parsed.data;
 
   const refiningIntent = t.state.intent?.intent.kind === "refine_search" ? t.state.intent : null;
   const auth = authorizeSearch({
@@ -678,7 +678,7 @@ async function execSearchProducts(input: unknown, t: ToolContext): Promise<ToolO
 
   const budget = effectiveBudget({ toolMaxClp: max_price_clp, profileBudgetClp: await profileBudget(t) });
   const search = getProductSearch();
-  const result = await search.search({ description, category: slot, ...(color ? { color } : {}), ...(budget ? { max_price_clp: budget } : {}), ...(size ? { size } : {}) });
+  const result = await search.search({ description, category: slot, ...(color ? { color } : {}), ...(budget ? { max_price_clp: budget } : {}), ...(size ? { size } : {}), ...(audience ? { audience } : {}) });
 
   if (!result.ok) {
     return ok(

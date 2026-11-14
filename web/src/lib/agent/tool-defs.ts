@@ -133,6 +133,7 @@ export const AGENT_TOOLS: Anthropic.Beta.BetaTool[] = [
         color: { type: "string", description: "Color buscado, si importa." },
         max_price_clp: { type: "integer", description: "Tope de precio en pesos chilenos, solo si la persona lo dijo." },
         size: { type: "string", description: "Talla, solo si la persona la dijo." },
+        audience: { type: "string", enum: ["mujer", "hombre"], description: "Para quién es la pieza según la ropa que usa la persona (su perfil). Omítelo si usa unisex o no lo sabes." },
         authorization: { type: "string", enum: ["accepted_offer", "person_request", "refinement"] },
         quote: { type: "string", description: "Con person_request: las palabras de la persona que piden buscar, copiadas tal cual." },
       },
@@ -282,6 +283,7 @@ export const SearchProductsInput = z.object({
   color: z.string().trim().min(2).max(40).optional(),
   max_price_clp: z.number().int().min(1).max(100_000_000).optional(),
   size: z.string().trim().min(1).max(20).optional(),
+  audience: z.enum(["mujer", "hombre"]).optional(),
   authorization: z.enum(["accepted_offer", "person_request", "refinement"]),
   quote: z.string().trim().max(200).optional(),
 });

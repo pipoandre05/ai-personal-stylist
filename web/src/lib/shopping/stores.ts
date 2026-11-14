@@ -1,4 +1,5 @@
 import { isForbiddenHostname } from "./net-guard";
+import { directoryStores } from "./store-directory";
 import type { Store } from "./types";
 
 // Registro de tiendas. Se configura con `SHOP_STORES`: lista separada por comas; cada entrada es
@@ -8,7 +9,7 @@ import type { Store } from "./types";
 // Sin valor, o sin ninguna entrada válida, el lector queda apagado. Es la LISTA BLANCA de dominios: el lector no consulta
 // ningún otro host (ni sigue redirecciones hacia otro).
 
-export const MAX_STORES = 20;
+export const MAX_STORES = 60;
 
 const HOSTNAME = /^(?=.{4,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,24}$/;
 
@@ -23,6 +24,8 @@ function defaultName(domain: string): string {
 /** Interpreta `SHOP_STORES`. Descarta con silencio lo inválido (IP, localhost, rutas, duplicados) y respeta el tope. */
 export function parseStores(raw: string | undefined | null): Store[] {
   if (!raw) return [];
+  // `SHOP_STORES=directorio`: las tiendas verificadas de store-directory.ts, sin escribir la lista a mano.
+  if (raw.trim().toLowerCase() === "directorio") return directoryStores();
   const out: Store[] = [];
   const seen = new Set<string>();
   for (const entry of raw.split(",")) {
