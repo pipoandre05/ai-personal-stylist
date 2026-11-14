@@ -21,7 +21,7 @@ export type OutfitCardV2Props = {
   tag?: string;
   onSave?: (outfit: OutfitView) => void;
   onDiscard?: (outfit: OutfitView) => void;
-  /** Tocar un chip de refinamiento: `intent` viaja tal cual a `streamChat`; `label` es lo que la persona ve en el hilo. */
+  /** @deprecated Los ajustes de look ahora se consolidan sobre el compositor en suggested-replies (UI-20). */
   onRefine?: (intent: ChatIntent, label: string) => void;
   /** Enlace de cada prenda de la leyenda (p. ej. `/closet/[id]`). Sin él, los nombres van como texto. */
   closetHref?: (garmentId: string) => string;
@@ -29,7 +29,7 @@ export type OutfitCardV2Props = {
   busy?: boolean;
   /** Anima la caída de las prendas (look recién llegado). */
   animate?: boolean;
-  /** "Tus looks": sin chips de refinamiento ni acciones. */
+  /** "Tus looks": sin acciones de descarte. */
   compact?: boolean;
   className?: string;
 };
@@ -89,7 +89,8 @@ function EvidenceIcon({ kind }: { kind: OutfitEvidence["kind"] }) {
 
 /**
  * Tarjeta de look del contrato v2: composición con la pieza faltante adentro, variante dicha con palabras, el porqué
- * con evidencia (chips con dato), chips de refinamiento y acciones. Presentación pura: todo llega por props.
+ * con evidencia (chips con dato) y acciones ("Guardar look" y "No es para mí").
+ * Los botones de ajuste / refinamientos se extraen y consolidan sobre el compositor en UI-20 (Pieza A).
  */
 export function OutfitCardV2({
   outfit,
@@ -97,7 +98,6 @@ export function OutfitCardV2({
   tag,
   onSave,
   onDiscard,
-  onRefine,
   closetHref,
   busy = false,
   animate = false,
@@ -112,7 +112,6 @@ export function OutfitCardV2({
   const titleId = `outfit-v2-${outfit.id}-title`;
   const pieces = buildPieces(outfit);
   const evidence = outfit.evidence ?? [];
-  const refinements = compact || discarded ? [] : (outfit.refinements ?? []);
   const sel = outfit.selected_option ?? null;
 
   return (
@@ -213,31 +212,6 @@ export function OutfitCardV2({
               ))}
             </ul>
           ) : null}
-        </div>
-      ) : null}
-
-      {refinements.length > 0 ? (
-        <div
-          role="group"
-          aria-label="Ajustar el look"
-          className={cn(
-            "-mx-[18px] mt-2.5 flex gap-2 overflow-x-auto px-[18px] py-1 [scrollbar-width:none]",
-            refinements.length > 2 && "[mask-image:linear-gradient(to_right,#000_85%,transparent)]",
-          )}
-        >
-          {refinements.map((r) => (
-            <Button
-              key={r.id}
-              variant="contorno"
-              size="mediano"
-              onInverse={onInverse}
-              disabled={busy || !onRefine}
-              onClick={() => onRefine?.(r.intent, r.label)}
-              className="shrink-0 whitespace-nowrap"
-            >
-              {r.label}
-            </Button>
-          ))}
         </div>
       ) : null}
 

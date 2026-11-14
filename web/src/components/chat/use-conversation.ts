@@ -10,6 +10,7 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  useMemo,
   useSyncExternalStore,
 } from "react";
 import { selectShoppingOption } from "@/lib/actions/shopping";
@@ -30,6 +31,7 @@ import type {
   OutfitStatus,
   OutfitView,
   QuickReplies,
+  Refinement,
   ShoppingOptionsBlock,
 } from "@/lib/domain/types";
 import type { ComposerHandle } from "./composer";
@@ -39,6 +41,7 @@ import { toItems, type AdvisorItem, type PersonItem, type ThreadItem } from "./t
 export type UseConversationInput = {
   conversationId: string | null;
   initialMessages: ChatMessageView[];
+  autoStart?: boolean;
 };
 
 type Turn = { text: string; imagePath?: string; start?: boolean; intent?: ChatIntent; clientMessageId?: string };
@@ -141,7 +144,7 @@ function announcementFor(acc: Acc): string {
   return bits.filter(Boolean).join(" ");
 }
 
-export function useConversation({ conversationId, initialMessages }: UseConversationInput) {
+export function useConversation({ conversationId, initialMessages, autoStart = false }: UseConversationInput) {
   const router = useRouter();
   const { toast } = useToast();
   const [items, setItems] = useState<ThreadItem[]>(() => toItems(initialMessages));
@@ -310,6 +313,9 @@ export function useConversation({ conversationId, initialMessages }: UseConversa
       switch (e.type) {
         case "conversation":
           convRef.current = e.id;
+          if (typeof window !== "undefined" && window.history?.replaceState) {
+            window.history.replaceState(null, "", `/asesor/${e.id}`);
+          }
           break;
         case "text_delta":
           setAwaiting(false);
@@ -550,17 +556,18 @@ export function useConversation({ conversationId, initialMessages }: UseConversa
 
   const editingSummary = [...items].reverse().find((i) => i.kind === "advisor" && i.event_summary);
 
-  // Saludo inicial: sin historial el asesor abre la conversación. El ref protege del doble disparo de StrictMode.
+  // Saludo inicial: solo si autoStart es true (needsOnboarding) el asesor abre la conversación.
+  // El ref protege del doble disparo de StrictMode.
   // No se cancela al desmontar (StrictMode desmonta y vuelve a montar): el servidor termina y persiste el turno igual.
   const greet = useEffectEvent(() => {
     void runTurn({ text: "", start: true });
   });
   useEffect(() => {
-    if (initialMessages.length > 0 || startedRef.current) return;
+    if (!autoStart || initialMessages.length > 0 || startedRef.current) return;
     startedRef.current = true;
     greet();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- solo al montar
-  }, []);
+  }, [autoStart]);
 
   const jumpToEnd = useCallback(() => {
     stick.current = true;
@@ -572,6 +579,20 @@ export function useConversation({ conversationId, initialMessages }: UseConversa
   const disabled = limit || !online;
   const basePlaceholder = computePlaceholder({ limit, online, replies, busy, items });
   const tail = items.at(-1);
+
+  // Consolidación de refinamientos en la zona única de respuestas rápidas (UI-20, Pieza A).
+  const activeRefinements: Refinement[] = useMemo(() => {
+    if (busy || awaiting || !tail || tail.kind !== "advisor") return [];
+    const lastShop = tail.shopping_blocks?.at(-1);
+    if (lastShop?.refinements?.length) {
+      return lastShop.refinements;
+    }
+    const proposed = [...(tail.outfits ?? [])].reverse().find((o) => o.status === "proposed");
+    if (proposed?.refinements?.length) {
+      return proposed.refinements;
+    }
+    return [];
+  }, [busy, awaiting, tail]);
   const placeholder =
     tail?.kind === "advisor" && tail.shopping_blocks?.length && !busy && !limit && online && !(replies && replies.options.length)
       ? "Pregunta por una opción…"
@@ -591,6 +612,7 @@ export function useConversation({ conversationId, initialMessages }: UseConversa
   const state = {
     items,
     replies,
+    activeRefinements,
     busy,
     awaiting,
     tool,

@@ -5,20 +5,27 @@ import { ThreadSkeleton } from "@/components/chat/thread-skeleton";
 import type { SpaceSummary } from "@/components/ui";
 import {
   getActiveColorAnalysis,
-  getLatestConversation,
   getProfile,
+  listConversations,
   listGarments,
   listMemoryFacts,
   listOutfits,
+  needsOnboarding,
 } from "@/lib/data/queries";
 import { COLOR_SEASON_LABELS } from "@/lib/domain/types";
 
 export const metadata: Metadata = { title: "Tu asesor — Estilo" };
 
-/** El hilo con el asesor: pantalla principal. Las lecturas de sesión van dentro de Suspense (Cache Components). */
+/**
+ * Sesión nueva con el asesor (/asesor) (UI-20):
+ * - Pantalla de inicio de cero con saludo contextual y sugerencias.
+ * - No lee getLatestConversation ni llama al asesor de entrada (salvo onboarding pendiente).
+ * - Carga sesiones para el panel lateral de navegación.
+ */
 async function AsesorContent() {
-  const [conversation, garments, outfits, memoryFacts, palette, profile] = await Promise.all([
-    getLatestConversation(),
+  const [onboarding, conversations, garments, outfits, memoryFacts, palette, profile] = await Promise.all([
+    needsOnboarding(),
+    listConversations(),
     listGarments(),
     listOutfits({ status: "saved" }),
     listMemoryFacts(),
@@ -44,8 +51,10 @@ async function AsesorContent() {
 
   return (
     <Conversation
-      conversationId={conversation?.id ?? null}
-      initialMessages={conversation?.messages ?? []}
+      conversationId={null}
+      initialMessages={[]}
+      autoStart={onboarding}
+      conversations={conversations}
       closetCount={garments.length}
       displayName={profile?.display_name ?? null}
       spaceSummary={spaceSummary}
