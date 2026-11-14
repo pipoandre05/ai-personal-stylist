@@ -54,7 +54,9 @@ export function SessionsSheet({
       onClick={(e) => {
         if (e.target === ref.current) onClose();
       }}
-      className="m-0 fixed inset-y-0 left-0 z-50 flex h-full max-h-dvh w-[85%] max-w-[340px] flex-col overflow-hidden bg-superficie p-5 text-tinta shadow-flotante backdrop:bg-tinta/40 open:animate-aparecer"
+      // `open:flex` y no `flex`: una clase de display fija le gana a `dialog:not([open]) { display: none }` del navegador
+      // y deja el panel visible aunque esté cerrado.
+      className="m-0 fixed inset-y-0 left-0 z-50 open:flex h-full max-h-dvh w-[85%] max-w-[340px] flex-col overflow-hidden bg-superficie p-5 text-tinta shadow-flotante backdrop:bg-tinta/40 open:animate-aparecer"
     >
       {/* Cabecera */}
       <div className="flex shrink-0 items-center justify-between">
