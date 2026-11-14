@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useImperativeHandle, useRef, useState, type KeyboardEvent, type Ref } from "react";
-import { IconCamera, IconClose, IconSend } from "@/components/ui";
+import { IconCamera, IconClose, IconSend, cn } from "@/components/ui";
 
 export type ComposerHandle = {
   /** Abre el selector de foto; con `selfie` pide la cámara frontal. */
@@ -18,13 +18,15 @@ type ComposerProps = {
   onSend: (text: string, file: File | null) => void;
   onStop: () => void;
   onFocusField?: () => void;
+  /** Clases extra para el contenedor (la pantalla de inicio lo muestra sin borde en pantallas anchas). */
+  className?: string;
   ref?: Ref<ComposerHandle>;
 };
 
 const MAX_FIELD_PX = 128; // 5 líneas
 
 /** Compositor: foto + campo blanco con borde de tinta + enviar/detener. */
-export function Composer({ busy, disabled, placeholder, onSend, onStop, onFocusField, ref }: ComposerProps) {
+export function Composer({ busy, disabled, placeholder, onSend, onStop, onFocusField, className, ref }: ComposerProps) {
   const [text, setText] = useState("");
   const [staged, setStaged] = useState<{ file: File; url: string } | null>(null);
   const stagedRef = useRef(staged);
@@ -86,7 +88,7 @@ export function Composer({ busy, disabled, placeholder, onSend, onStop, onFocusF
   }
 
   return (
-    <div className="flex flex-col border-t border-linea bg-superficie px-4 pt-2.5 pb-seguro">
+    <div className={cn("flex flex-col border-t border-linea bg-superficie px-4 pt-2.5 pb-seguro", className)}>
       {staged ? (
         <div className="relative mb-2 w-20">
           {/* Vista previa local (URL de objeto): next/image no aplica. */}

@@ -62,7 +62,9 @@ describe("UI-20: Sesiones, inicio de cero y respuestas rápidas", () => {
           onSelectSuggestion: vi.fn(),
         }),
       );
-      expect(out).toContain("Felipe");
+      // El saludo se calcula en el navegador (depende de su hora): en el HTML del servidor no viaja, para que
+      // servidor y navegador no se contradigan. El nombre lo cubre el test de getContextualGreeting.
+      expect(out).not.toContain("Felipe");
       expect(out).toContain('role="group"');
       expect(out).toContain('aria-label="Sugerencias para empezar"');
       expect(out).toContain("Quiero armar un look");
