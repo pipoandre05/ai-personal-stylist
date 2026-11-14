@@ -1,4 +1,13 @@
-import type { ChatMessageView, ColorAnalysis, GarmentView, OutfitView } from "@/lib/domain/types";
+import type {
+  ChatMessageView,
+  ColorAnalysis,
+  EventSummary,
+  GarmentView,
+  OutfitView,
+  SearchOffer,
+  ShoppingOptionsBlock,
+  ToolStep,
+} from "@/lib/domain/types";
 
 export type PersonItem = {
   kind: "person";
@@ -29,7 +38,23 @@ export type AdvisorItem = {
   memories: string[];
   streaming: boolean;
   error: string | null;
+  /** Contrato v2. Ausentes en mensajes anteriores: el turno se pinta con las tarjetas de antes. */
+  tool_steps?: ToolStep[];
+  event_summary?: EventSummary | null;
+  shopping_blocks?: ShoppingOptionsBlock[];
+  search_offer?: SearchOffer | null;
 };
+
+/** ¿El turno trae datos del contrato v2? Si no, se pinta con las tarjetas anteriores (compatibilidad). */
+export function isV2Turn(item: Pick<AdvisorItem, "outfits" | "tool_steps" | "event_summary" | "shopping_blocks" | "search_offer">): boolean {
+  return Boolean(
+    item.tool_steps?.length ||
+      item.event_summary ||
+      item.shopping_blocks?.length ||
+      item.search_offer ||
+      item.outfits.some((o) => o.evidence || o.refinements || o.variant || o.pair_id),
+  );
+}
 
 export type ThreadItem = PersonItem | AdvisorItem;
 
@@ -62,6 +87,10 @@ export function toItems(messages: ChatMessageView[]): ThreadItem[] {
       memories: [],
       streaming: false,
       error: null,
+      tool_steps: m.tool_steps ?? [],
+      event_summary: m.event_summary ?? null,
+      shopping_blocks: m.shopping_blocks ?? [],
+      search_offer: m.search_offer ?? null,
     };
   });
 }
