@@ -44,4 +44,7 @@ export function words(s: string): string[] {
 export const STOPWORDS = new Set([
   "del", "con", "sin", "para", "por", "una", "uno", "unos", "unas", "los", "las", "color", "tono", "tipo", "estilo",
   "hasta", "como", "que", "muy", "mas", "menos", "pieza", "algo", "cerca", "talla", "precio",
+  // Relleno de una petición hablada ("quiero unos zapatos nuevos"): no describe la prenda y no debe exigirse en la ficha.
+  "nuevo", "nueva", "nuevos", "nuevas", "lindo", "linda", "lindos", "lindas", "bonito", "bonita", "bonitos", "bonitas",
+  "buen", "bueno", "buena", "buenos", "buenas", "quiero", "busco", "buscame", "necesito", "comprar", "otro", "otra", "otros", "otras",
 ]);
