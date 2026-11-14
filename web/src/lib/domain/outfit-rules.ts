@@ -65,3 +65,36 @@ export function validateOutfitComposition(garments: Candidate[]): OutfitValidati
   }
   return { ok: true };
 }
+
+// --- Dos looks para elegir (D-04): uno seguro y uno más atrevido ---
+
+/** Mínimo de prendas en que deben diferir los dos looks de un par. */
+export const MIN_PAIR_DIFFERENCE = 2;
+
+/**
+ * Cuántas prendas del look `b` no están en `a`, o al revés: el mayor de los dos conteos. Cambiar una sola prenda da 1
+ * (no es una elección); cambiar arriba y abajo, o un vestido por arriba + abajo, da 2.
+ */
+export function lookDifference(a: string[], b: string[]): number {
+  const A = new Set(a);
+  const B = new Set(b);
+  const onlyA = [...A].filter((id) => !B.has(id)).length;
+  const onlyB = [...B].filter((id) => !A.has(id)).length;
+  return Math.max(onlyA, onlyB);
+}
+
+type PairLook = { variant: "seguro" | "atrevido"; garmentIds: string[] };
+
+/**
+ * Valida que `variant` sea un uso coherente del par: máximo dos looks, cada variante una sola vez, y que difieran en
+ * al menos dos prendas. La composición de cada look se valida aparte con `validateOutfitComposition`.
+ */
+export function checkPairVariant(existing: PairLook[], variant: "seguro" | "atrevido", garmentIds: string[]): OutfitValidation {
+  if (existing.length >= 2) return { ok: false, reason: "Ya propusiste los dos looks del par: no hay un tercero." };
+  if (existing.some((l) => l.variant === variant)) return { ok: false, reason: `Ya propusiste el look ${variant} en este turno.` };
+  const clash = existing.find((l) => lookDifference(l.garmentIds, garmentIds) < MIN_PAIR_DIFFERENCE);
+  if (clash) {
+    return { ok: false, reason: `El look ${variant} debe diferir del ${clash.variant} en al menos ${MIN_PAIR_DIFFERENCE} prendas; si el clóset no da, propón uno solo, sin variant.` };
+  }
+  return { ok: true };
+}

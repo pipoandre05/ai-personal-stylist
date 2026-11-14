@@ -7,6 +7,7 @@ import {
   STYLE_OPTIONS,
 } from "@/lib/domain/types";
 import type { ProfileField } from "@/lib/domain/profile-completeness";
+import type { ChatIntent, EventSummary, GarmentCategory } from "@/lib/domain/types";
 
 // Guion del asesor simulado (AI_MODE=mock). Todo lo de este archivo es puro y determinista.
 
@@ -15,6 +16,10 @@ export type MockInput = {
   hasImage: boolean;
   start: boolean;
   missing: ProfileField[];
+  /** Botón que tocó la persona (ya verificado). */
+  intent?: ChatIntent | null;
+  /** Lo último que se entendió del evento, si hay. */
+  event?: EventSummary | null;
 };
 
 export type MockPlan =
@@ -24,7 +29,15 @@ export type MockPlan =
   | { kind: "missing" }
   | { kind: "remember"; fact: string; memoryKind: "preference" | "dislike" }
   | { kind: "profile_answer"; field: ProfileField }
-  | { kind: "chat" };
+  | { kind: "chat" }
+  /** La persona tocó un botón de refinamiento u oferta. */
+  | { kind: "intent"; intent: ChatIntent }
+  /** Cuenta un evento ("tengo un matrimonio el sábado"). */
+  | { kind: "event" }
+  /** Responde la pregunta pendiente sobre el evento. */
+  | { kind: "event_answer" }
+  /** "Quiero un look nuevo": camino inverso, parte por la compra (D-13). `piece` es lo que quiere, si lo dijo. */
+  | { kind: "new_look"; piece: GarmentCategory | null };
 
 const PALETTE_WORDS = /\b(selfie|paleta|cara|rostro|color(es)?)\b/i;
 const LOOK_WORDS = /(qu[eé] me pongo|\blook\b|outfit|[aá]rmame|conjunto|tenida|qu[eé] uso)/i;
@@ -32,10 +45,36 @@ const MISSING_WORDS = /(\bfalta\b|me faltan?|vers[aá]til)/i;
 const DISLIKE_WORDS = /\b(no me gusta(n)?|no uso|odio|evito)\b/i;
 const PREFER_WORDS = /\b(recuerda que|anota que|siempre uso|me encanta(n)?|prefiero)\b/i;
 
+const EVENT_WORDS = /\b(matrimonio|boda|cumplea[nñ]os|bautizo|graduaci[oó]n|cena|evento|fiesta|c[oó]ctel|entrevista)\b/i;
+const NEW_LOOK_WORDS =
+  /\b(look|outfit|tenida|conjunto|algo|cosa)s? nuev[oa]s?\b|\b(quiero|necesito|busco|me gustar[ií]a)\b[^.?!]*\b(nuev[oa]s?|comprar)\b|\bquiero comprar\b/i;
+
+const PIECES: [RegExp, GarmentCategory][] = [
+  [/\b(zapatos?|zapatillas?|sandalias?|botas?|botines?|calzado|mules?|alpargatas?)\b/i, "shoes"],
+  [/\b(blazer|chaquetas?|abrigos?|chalecos?|parka)\b/i, "outerwear"],
+  [/\b(vestidos?|enteritos?)\b/i, "dress"],
+  [/\b(pantal[oó]n|pantalones|faldas?|jeans)\b/i, "bottom"],
+  [/\b(poleras?|camisas?|blusas?|su[eé]ters?|sweaters?)\b/i, "top"],
+  [/\b(bolsos?|carteras?|mochilas?)\b/i, "bag"],
+];
+
+/** Qué prenda nombra la persona al pedir algo nuevo, si alguna. */
+export function pieceFromText(text: string): GarmentCategory | null {
+  return PIECES.find(([re]) => re.test(text))?.[1] ?? null;
+}
+
 /** Decide qué hace el asesor simulado con el mensaje de la persona. */
 export function planMockTurn(input: MockInput): MockPlan {
   if (input.start) return { kind: "greet" };
+  if (input.intent) return { kind: "intent", intent: input.intent };
   if (input.hasImage) return { kind: "photo", tool: PALETTE_WORDS.test(input.text) ? "analyze_palette" : "add_garment" };
+  // Durante el onboarding "eventos y matrimonios" es la respuesta a una pregunta del perfil, no un evento.
+  const free = input.missing.length === 0 || LOOK_WORDS.test(input.text);
+  if (free && EVENT_WORDS.test(input.text)) return { kind: "event" };
+  if (free && NEW_LOOK_WORDS.test(input.text)) return { kind: "new_look", piece: pieceFromText(input.text) };
+  if (input.event && input.event.missing.length > 0 && input.missing.length === 0 && input.text.trim() && !LOOK_WORDS.test(input.text)) {
+    return { kind: "event_answer" };
+  }
   if (LOOK_WORDS.test(input.text)) return { kind: "look" };
   if (MISSING_WORDS.test(input.text)) return { kind: "missing" };
   // Preferencias dichas al pasar: el asesor las anota (herramienta `remember`).
