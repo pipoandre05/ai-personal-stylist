@@ -68,3 +68,35 @@ Revisión de código completada sin hallazgos:
 7. Hallazgos: 0 bloquea, 0 importante, 0 menor.
 
 VEREDICTO: Revisor aprobado sha=82679f43ecf44e086c519af3875f2a9fadc9895f
+
+### 2026-11-14 15:45 · Diseño · nota · vuelta 0
+
+Revisión visual sobre commit 82679f43ecf44e086c519af3875f2a9fadc9895f contra las maquetas aprobadas:
+- docs/superpowers/mockups/2026-11-14-ui-3-encabezado.html
+- docs/superpowers/mockups/2026-11-14-ui-4-voces.html
+- docs/superpowers/mockups/2026-11-14-ui-5-compositor.html
+Inspeccionado en navegador a 390x844 y 360 px de ancho (puerto 3220, AI_MODE=mock):
+
+1. UI-3 Encabezado (components/ui/app-header.tsx):
+- Altura computada: 56 px (h-14), sticky top-0, pl-6 y pr-4.
+- Wordmark "Estilo" en Bricolage Grotesque (font-display text-titulo font-extrabold tracking-[-0.03em]).
+- Botón "Tu espacio": botón contorno mediano (h-11, píldora rounded-full, border-[1.5px] border-linea-fuerte) con ícono de cuadrícula size-5, aria-haspopup="dialog" y aria-expanded={open}. Sin lima.
+
+2. UI-4 Voces del Asesor y Persona (advisor-message.tsx, person-message.tsx):
+- Asesor: sin burbuja ni avatar, ancho completo en text-destacado (Manrope 600 16/24), espaciado [&_p+p]:mt-3.
+- Firma "Estilo": text-sobretitulo mayúsculas en text-tinta-suave (mb-1), presente únicamente en el primer bloque del turno.
+- Énfasis: strong con font-extrabold sin cursiva ni color.
+- Cursor streaming: 2x16 px en bg-tinta con animate-respirar (desactivable con prefers-reduced-motion).
+- Error en respuesta del asesor: border-l-[3px] border-error pl-3 text-destacado text-tinta con botón interactivo "Reintentar" (h-11 subrayado).
+- Persona: bloque alineado a la derecha (self-end), max-w-[82%], contenedor bg-hundido rounded-campo px-4 py-3 text-cuerpo text-tinta font-medium.
+- Estado enviando en opacity-70; error con text-meta text-error "No se envió." y acción "Reintentar".
+
+3. UI-5 Compositor (composer.tsx, placeholder.ts):
+- Barra inferior fija en bg-superficie con border-t border-linea px-4 pt-2.5 pb-seguro.
+- Botón foto: contorno circular size-11 (44 px, border-[1.5px] border-linea-fuerte).
+- Campo de texto: BLANCO (bg-superficie) con borde de tinta 1.5 px (border-[1.5px] border-linea-fuerte), radio rounded-campo (20 px), px-4 py-2.5 text-base font-medium text-tinta placeholder:text-tinta-suave, foco anillo azul 3 px (focus-visible:ring-3 focus-visible:ring-foco). Cumple la decisión de Felipe y mantiene contraste 18.5:1.
+- Botón Enviar / Detener: circular size-11 (44 px), variante inversa bg-inverso text-sobre-inverso; durante streaming muestra cuadrado size-3 bg-sobre-inverso ("Detener respuesta").
+- Placeholders contextuales implementados y verificados ("O dímelo con tus palabras", "Pregúntame por la foto…", "¿Qué le cambiarías?", "Escríbele a tu asesor…").
+- Adaptabilidad a 360 px: con min-w-0 flex-1 el campo reduce su ancho (222 px) sin desbordar el botón Enviar ni generar scroll horizontal (scrollWidth <= 360 px).
+
+Veredicto visual: Conforme sin observaciones. Cero hallazgos abiertos.
