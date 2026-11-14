@@ -1,4 +1,5 @@
 import "server-only";
+import { titleFromEvent } from "@/lib/domain/conversation-title";
 import { track } from "@/lib/analytics";
 import { logError } from "@/lib/server/log";
 import { describeGarment, analyzeColor } from "@/lib/ai/vision";
@@ -590,6 +591,17 @@ async function execSetEventSummary(input: unknown, t: ToolContext): Promise<Tool
   }
   t.state.event = summary;
   t.emit({ type: "event_summary", ...summary });
+
+  // El evento le da nombre a la sesión en el panel de sesiones ("Matrimonio en Casablanca"). Si falla, queda el título anterior.
+  const sessionTitle = titleFromEvent(summary);
+  if (sessionTitle) {
+    const { error: titleError } = await t.ctx.supabase
+      .from("conversations")
+      .update({ title: sessionTitle })
+      .eq("id", t.conversationId)
+      .eq("user_id", t.ctx.userId);
+    if (titleError) logError("tools.set_event_summary.title", titleError);
+  }
 
   const where = summary.place ?? t.city;
   const detail = [summary.date ? shortDateLabel(summary.date) : null, where].filter(Boolean).join(" · ");
