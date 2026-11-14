@@ -60,3 +60,11 @@ Mensaje a Felipe (es para la sesión integradora): `PEDIDO A LA INTEGRADORA · <
 **Modelos y consumo.** Sonnet 5.5 por defecto. Nadie despacha subagentes salvo que su rol lo diga, y nunca Opus fuera de donde su rol lo indica. Lee el informe de otro bot en vez de rehacer su análisis.
 
 **Cómo escribes.** Acción primero, pasos numerados, un solo próximo paso, sin preámbulo. Separa hecho, hipótesis y recomendación. Sin dato: "no disponible". Memoria: decisiones con fecha y gotchas técnicos; nunca llaves, tokens ni datos personales.
+
+## Paralelizar siempre (regla de Felipe, 2026-11-14)
+
+Paraleliza lo más posible. Antes de encargar, identifica qué puede avanzar a la vez y encárgalo junto, no en fila:
+maqueta de Diseño de la historia siguiente mientras se construye la actual; Revisor, QA y revisión de Diseño en
+paralelo sobre el mismo commit; criterios de humo escritos por QA mientras se construye. Solo va en serie lo que
+depende de un resultado anterior o toca los mismos archivos. Si el cuello de botella es la única línea de
+construcción, dilo en el resumen con el dato de cuánto tiempo estuvo ocupada.

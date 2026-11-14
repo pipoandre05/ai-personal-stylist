@@ -1,0 +1,861 @@
+<!doctype html>
+<html lang="es-CL" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estilo · conversación v4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root, [data-theme="light"] {
+  color-scheme: light;
+  --fondo:#F2F2EE; --superficie:#FFFFFF; --hundido:#E8E9E4; --linea:#D6D8D2; --linea-fuerte:#121412;
+  --tinta:#121412; --tinta-suave:#5E625D;
+  --inverso:#121412; --sobre-inverso:#FFFFFF; --sobre-inverso-suave:#B9BDB7;
+  --accion:#C9F24D; --memoria:#C9B8FF; --falta:#FF8A57; --sobre-color:#121412;
+  --exito:#0B7285; --error:#C2341F; --sobre-estado:#FFFFFF; --foco:#2B4BFF;
+  --sombra-flotante:0 8px 24px rgb(18 20 18 / .18);
+  --drop-shadow-prenda:drop-shadow(0 1px 1px rgb(40 34 24 / .2)) drop-shadow(0 7px 9px rgb(40 34 24 / .15));
+}
+[data-theme="dark"] {
+  color-scheme: dark;
+  --fondo:#0F1110; --superficie:#1B1E1C; --hundido:#161917; --linea:#2C302D; --linea-fuerte:#F4F5F0;
+  --tinta:#F4F5F0; --tinta-suave:#A3A8A2;
+  --inverso:#F4F5F0; --sobre-inverso:#0F1110; --sobre-inverso-suave:#4A504B;
+  --memoria:#B9A6FF; --exito:#5CC8DB; --error:#FF7A66; --sobre-estado:#0F1110; --foco:#9DB0FF;
+  --sombra-flotante:0 8px 24px rgb(0 0 0 / .5);
+}
+:root {
+  --font-display:"Bricolage Grotesque", system-ui, sans-serif; --font-body:Manrope, system-ui, sans-serif;
+  --text-titular:800 40px/1.05 var(--font-display); --text-titulo:800 26px/1.1 var(--font-display); --text-titulo-s:800 18px/1.2 var(--font-display);
+  --text-destacado:600 16px/24px var(--font-body); --text-cuerpo:500 15px/22px var(--font-body); --text-nombre:800 14px/20px var(--font-body);
+  --text-control:700 14px/18px var(--font-body); --text-meta:500 12px/16px var(--font-body); --text-sobretitulo:700 12px/16px var(--font-body);
+  --rounded-insignia:12px; --rounded-campo:20px; --rounded-foto:24px; --rounded-tarjeta:28px;
+  --ease-salida:cubic-bezier(.23,1,.32,1); --ease-viaje:cubic-bezier(.45,0,.1,1);
+}
+
+.pantalla { position:relative; display:flex; flex-direction:column; height:844px; width:100%; overflow:hidden; background:var(--fondo); color:var(--tinta);
+  font-family:var(--font-body); -webkit-font-smoothing:antialiased; }
+.pantalla button, .pantalla a { font:inherit; color:inherit; }
+.pantalla button { background:none; border:0; padding:0; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.pantalla p { margin:0; }
+.pantalla :focus-visible { outline:3px solid var(--foco); outline-offset:2px; }
+.ic { width:20px; height:20px; flex:none; }
+.sobretitulo, .firma, .over, .rotulo, .dia, .ficha-tienda, .op-tienda { font:var(--text-sobretitulo); letter-spacing:.12em; text-transform:uppercase; }
+
+.ios { position:relative; height:54px; flex:none; display:flex; align-items:center; justify-content:space-between; padding:6px 30px 0 34px;
+  font:600 16px/1 -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif; letter-spacing:-.01em; color:var(--tinta); }
+.ios-isla { position:absolute; left:50%; top:11px; width:124px; height:36px; margin-left:-62px; border-radius:20px; background:#050505; }
+.ios-der { display:flex; gap:6px; align-items:center; } .ios-der svg { fill:currentColor; }
+.home { position:absolute; left:0; right:0; bottom:0; height:22px; z-index:50; pointer-events:none; }
+.home::after { content:""; position:absolute; left:50%; bottom:8px; width:134px; height:5px; margin-left:-67px; border-radius:3px; background:var(--tinta); }
+
+/* Botones (DESIGN.MD §4): píldora 52 / 44, borde 1.5 */
+.btn { display:inline-flex !important; align-items:center; justify-content:center; gap:8px; height:52px; padding:0 24px !important; box-sizing:border-box;
+  border-radius:999px; border:1.5px solid transparent !important; font:800 16px/1 var(--font-body) !important; text-decoration:none; white-space:nowrap;
+  transition:transform 150ms var(--ease-salida); }
+.btn:active { transform:scale(.97); }
+.btn--m { height:44px; padding:0 18px !important; font-size:14px !important; }
+.btn .ic { width:18px; height:18px; }
+.btn--accion { background:var(--accion) !important; color:var(--sobre-color) !important; }
+.btn--inverso { background:var(--inverso) !important; color:var(--sobre-inverso) !important; }
+.btn--contorno { border-color:var(--linea-fuerte) !important; color:var(--tinta) !important; }
+.btn-texto { display:inline-flex !important; align-items:center; gap:6px; height:44px; padding:0 8px !important; font:800 14px/1 var(--font-body) !important;
+  text-decoration:underline; text-underline-offset:4px; text-decoration-thickness:1.5px; }
+.btn-texto .ic { width:16px; height:16px; }
+
+/* Encabezado */
+.cab { flex:none; height:56px; display:flex; align-items:center; justify-content:space-between; padding:0 16px 0 24px; position:relative; z-index:3; }
+.marca { font:var(--text-titulo); letter-spacing:-.03em; }
+.espacio .ic { width:20px; height:20px; }
+
+/* Hilo */
+.hilo { position:relative; flex:1; min-height:0; overflow:hidden; display:flex; flex-direction:column; justify-content:flex-end;
+  -webkit-mask-image:linear-gradient(to bottom, transparent 0, #000 28px); mask-image:linear-gradient(to bottom, transparent 0, #000 28px); }
+.hilo-in { flex:none; display:flex; flex-direction:column; gap:24px; padding:8px 24px 16px; box-sizing:border-box; }
+.turno { display:flex; flex-direction:column; gap:14px; }
+.dia { display:flex; align-items:center; gap:12px; color:var(--tinta-suave); }
+.dia::before, .dia::after { content:""; height:1px; flex:1; background:var(--linea); }
+
+/* Dos voces: persona en bloque hundido a la derecha; asesor sin contenedor, con más peso */
+.yo { align-self:flex-end; max-width:82%; background:var(--hundido); color:var(--tinta); padding:12px 16px; border-radius:var(--rounded-campo); font:var(--text-cuerpo); }
+.asesor { font:var(--text-destacado); color:var(--tinta); }
+.asesor strong { font-weight:800; }
+.firma { display:block; margin-bottom:4px; color:var(--tinta-suave); }
+
+.entendi { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.dato { display:flex !important; gap:10px; align-items:flex-start; text-align:left; min-height:58px; padding:12px !important;
+  background:var(--superficie) !important; border-radius:var(--rounded-campo); }
+.dato .ic { color:var(--tinta-suave); }
+.dato b { display:block; font:var(--text-nombre); } .dato i { display:block; font:var(--text-meta); font-style:normal; color:var(--tinta-suave); margin-top:2px; }
+
+.sugerencias { flex:none; display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; padding:2px 24px 12px; }
+
+/* Compositor: barra superficie. Ajuste respecto del documento: el campo lleva borde 1.5 linea-fuerte (hundido sobre
+   superficie daba 1.22:1 y no se veía como campo). */
+.compositor { flex:none; display:flex; align-items:center; gap:8px; padding:10px 16px 28px; background:var(--superficie); border-top:1px solid var(--linea); }
+.foto-btn, .enviar { width:44px; height:44px; flex:none; display:grid !important; place-items:center; border-radius:999px; }
+.foto-btn { border:1.5px solid var(--linea-fuerte) !important; }
+.campo { flex:1; min-width:0; min-height:44px; display:flex; align-items:center; padding:0 16px; border-radius:var(--rounded-campo);
+  background:var(--superficie); border:1.5px solid var(--linea-fuerte); box-sizing:border-box; }
+.ph { font:500 16px/1.2 var(--font-body); color:var(--tinta-suave); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.enviar { background:var(--inverso) !important; color:var(--sobre-inverso) !important; }
+.enviar[disabled] { opacity:.45; }
+.enviar .cuadro { width:12px; height:12px; border-radius:2px; background:var(--sobre-inverso); }
+
+/* Rastro */
+.rastro { list-style:none; margin:0 0 0 10px; padding:2px 0 2px 22px; border-left:1.5px solid var(--linea); display:flex; flex-direction:column; gap:14px; }
+.paso { position:relative; }
+.paso-ic { position:absolute; left:-34px; top:-1px; width:22px; height:22px; display:grid; place-items:center; border-radius:50%; background:var(--fondo);
+  color:var(--tinta-suave); box-shadow:inset 0 0 0 1.5px var(--linea); }
+.paso-ic .ic { width:14px; height:14px; }
+.paso.hecho .paso-ic { color:var(--exito); }
+.paso b { display:block; font:var(--text-control); }
+.paso > i { display:block; font:var(--text-meta); font-style:normal; color:var(--tinta-suave); margin-top:2px; }
+.paso.en-curso b { color:var(--tinta-suave); }
+.paso.en-curso .paso-ic { color:var(--tinta); box-shadow:inset 0 0 0 1.5px var(--linea-fuerte); }
+.puntos { display:inline-flex; gap:3px; margin-left:6px; vertical-align:middle; }
+.puntos i { display:block; width:4px; height:4px; border-radius:50%; background:var(--tinta); animation:respirar 1.2s var(--ease-viaje) infinite; }
+.puntos i:nth-child(2) { animation-delay:.15s; } .puntos i:nth-child(3) { animation-delay:.3s; }
+@keyframes respirar { 0%,100% { opacity:.25; } 50% { opacity:1; } }
+.thumbs { display:flex; gap:6px; margin-top:8px; }
+.th { width:34px; height:34px; display:grid; place-items:center; border-radius:var(--rounded-insignia); background:var(--hundido); opacity:.5; }
+.th svg { width:76%; height:76%; filter:drop-shadow(0 2px 2px rgb(40 34 24 / .2)); }
+.th.elegida { opacity:1; box-shadow:inset 0 0 0 1.5px var(--linea-fuerte); }
+.rastro-res { align-self:flex-start; display:inline-flex !important; align-items:center; gap:8px; min-height:44px; margin:-10px 0;
+  font:700 12px/16px var(--font-body) !important; color:var(--tinta-suave) !important; }
+.rastro-res .ic { width:16px; height:16px; } .rastro-res .ic:first-child { color:var(--exito); }
+
+/* Look: piel papel (superficie) y piel recién propuesto (inverso) */
+.look { position:relative; background:var(--superficie); color:var(--tinta); border-radius:var(--rounded-tarjeta); padding:18px;
+  --l-suave:var(--tinta-suave); --l-tinta:var(--tinta); --l-div:var(--linea); --l-ev:var(--hundido); --l-borde:var(--linea-fuerte); }
+.look--nuevo { background:var(--inverso); color:var(--sobre-inverso);
+  --l-suave:var(--sobre-inverso-suave); --l-tinta:var(--sobre-inverso); --l-div:color-mix(in srgb, var(--sobre-inverso) 20%, transparent);
+  --l-ev:color-mix(in srgb, var(--sobre-inverso) 10%, transparent); --l-borde:var(--sobre-inverso); }
+.over { display:block; color:var(--l-suave); }
+.look-t { margin:4px 0 0; font:var(--text-titulo); letter-spacing:-.02em; color:var(--l-tinta); }
+.mesa { position:relative; aspect-ratio:3 / 2; margin:12px -4px 0; border-radius:var(--rounded-foto); background:var(--hundido); overflow:hidden; }
+.pz { position:absolute; height:auto; transform:rotate(var(--r)); filter:var(--drop-shadow-prenda); overflow:visible; }
+.pz.es-falta { filter:none; }
+[data-theme="dark"] .pz.es-falta use { filter:invert(1); }
+.idx { position:absolute; z-index:2; font:800 13px/1 var(--font-display); color:var(--tinta-suave); }
+.idx-falta { width:20px; height:20px; display:grid; place-items:center; border-radius:50%; background:var(--falta); color:var(--sobre-color); font-size:11px; }
+.falta-ins { position:absolute; z-index:2; padding:4px 10px; border-radius:var(--rounded-insignia); background:var(--falta); color:var(--sobre-color);
+  font:800 11px/1.3 var(--font-body); letter-spacing:.12em; text-transform:uppercase; }
+.leyenda { display:flex; flex-wrap:wrap; gap:4px 12px; margin-top:10px !important; font:var(--text-meta); color:var(--l-suave); }
+.leyenda b { font:800 12px/16px var(--font-display); color:var(--l-tinta); margin-right:2px; }
+.leyenda .falta { display:inline-flex; align-items:center; gap:5px; }
+.punto { display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--falta); }
+.porque { margin-top:12px; padding-top:12px; border-top:1px solid var(--l-div); }
+.rotulo { display:block; color:var(--l-suave); }
+.porque p { margin-top:6px; font:var(--text-cuerpo); color:var(--l-tinta); }
+.evidencia { list-style:none; margin:10px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:4px; }
+.evidencia li { display:inline-flex; align-items:center; gap:6px; height:26px; padding:0 7px; border-radius:var(--rounded-insignia); background:var(--l-ev);
+  font:700 12px/16px var(--font-body); color:var(--l-tinta); }
+.evidencia .ic { width:14px; height:14px; }
+.muestras { display:inline-flex; } .muestras i { width:12px; height:12px; border-radius:50%; margin-right:-4px; box-shadow:0 0 0 1.5px var(--inverso); } .muestras i:last-child { margin-right:2px; }
+.look:not(.look--nuevo) .muestras i { box-shadow:0 0 0 1.5px var(--hundido); }
+.refinar { display:flex; gap:8px; margin:14px -18px 0; padding:0 18px; overflow-x:auto; scrollbar-width:none;
+  -webkit-mask-image:linear-gradient(to right, #000 85%, transparent); mask-image:linear-gradient(to right, #000 85%, transparent); }
+.refinar .btn { flex:none; }
+.look .btn--contorno { border-color:var(--l-borde) !important; color:var(--l-tinta) !important; }
+.acciones { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
+.acciones .btn { padding:0 12px !important; min-width:0; }
+
+/* Esqueleto (piel recién propuesto) */
+.esqueleto .sk { border-radius:999px; background:color-mix(in srgb, var(--sobre-inverso) 12%, transparent); animation:respirar 1.6s var(--ease-viaje) infinite; }
+.sk-over { width:46%; height:10px; } .sk-tit { width:72%; height:26px; margin-top:10px; }
+.mesa-sk { aspect-ratio:16 / 9; }
+.fantasma { position:absolute; border-radius:var(--rounded-campo); background:rgb(18 20 18 / .06); animation:respirar 1.6s var(--ease-viaje) infinite; }
+.f1 { left:4%; top:6%; width:32%; height:58%; } .f2 { left:38%; top:4%; width:26%; height:44%; animation-delay:.12s; }
+.f3 { left:67%; top:10%; width:28%; height:56%; animation-delay:.24s; } .f4 { left:12%; top:70%; width:22%; height:24%; animation-delay:.36s; }
+
+/* Compra */
+.compra { background:var(--superficie); border-radius:var(--rounded-tarjeta); padding:18px; }
+.tira { display:grid; grid-template-columns:repeat(5, 1fr); gap:4px; padding:6px; border-radius:var(--rounded-foto); background:var(--hundido); }
+.tira-c { aspect-ratio:1; display:grid; place-items:center; border-radius:var(--rounded-insignia); }
+.tira-c svg { width:80%; height:80%; filter:var(--drop-shadow-prenda); }
+.tira-c.nueva { background:var(--falta); }
+.tira-nota { grid-column:1 / -1; text-align:right; padding:4px 4px 0; font:700 12px/16px var(--font-body); color:var(--tinta); }
+.ops { list-style:none; margin:12px 0 0; padding:0; display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; }
+.op { width:100%; display:flex !important; flex-direction:column; align-items:stretch; text-align:left; }
+.op-foto { position:relative; aspect-ratio:1; display:grid; place-items:center; border-radius:var(--rounded-foto); background:var(--hundido); }
+.op-foto svg { width:88%; filter:var(--drop-shadow-prenda); }
+.op.sel .op-foto { box-shadow:inset 0 0 0 2px var(--linea-fuerte); }
+.op-check { position:absolute; top:8px; right:8px; width:24px; height:24px; display:grid; place-items:center; border-radius:50%; background:var(--inverso); color:var(--sobre-inverso); }
+.op-check .ic { width:14px; height:14px; }
+.op-tienda { margin-top:8px; font-size:11px; font-weight:800; color:var(--tinta-suave); }
+.op-nombre { font:var(--text-meta); color:var(--tinta); }
+.op-precio { font:var(--text-nombre); font-variant-numeric:tabular-nums; }
+.ficha { margin-top:16px; padding-top:12px; border-top:1px solid var(--linea); }
+.ficha-cab { display:flex; min-height:28px; justify-content:space-between; align-items:center; gap:8px; }
+.comision { padding:2px 8px; border-radius:var(--rounded-insignia); border:1.5px solid var(--linea); font:700 12px/16px var(--font-body); color:var(--tinta-suave); }
+.ficha-nombre { display:flex; justify-content:space-between; gap:12px; margin-top:6px !important; font:var(--text-nombre); }
+.ficha-precio { font-variant-numeric:tabular-nums; white-space:nowrap; }
+.ficha-porque { margin-top:4px !important; font:var(--text-cuerpo); }
+.ficha-meta { margin-top:6px !important; font:var(--text-meta); color:var(--tinta-suave); }
+.ficha-acc { display:flex; flex-direction:column; gap:10px; margin-top:12px; }
+.ficha-acc .refinar { margin:0 -18px; }
+.ficha .btn .ic { width:16px; height:16px; }
+
+/* Foto con insignias */
+.foto-msg { align-self:flex-end; width:72%; display:flex; flex-direction:column; align-items:flex-end; gap:6px; }
+.foto { position:relative; width:100%; aspect-ratio:4 / 5; border-radius:var(--rounded-foto); overflow:hidden; background:var(--hundido); }
+.foto-svg { position:absolute; inset:0; width:100%; height:100%; }
+.etq { position:absolute; display:inline-flex !important; align-items:center; gap:6px; min-height:40px; padding:4px 10px !important; border-radius:var(--rounded-insignia);
+  background:var(--superficie) !important; text-align:left; white-space:nowrap; }
+.etq::after { content:""; position:absolute; inset:-2px; }
+.etq b { display:block; font:800 12px/1.25 var(--font-body); color:var(--tinta); } .etq i { display:block; font:var(--text-meta); font-style:normal; color:var(--tinta-suave); }
+.etq--nueva { background:var(--inverso) !important; } .etq--nueva b { color:var(--sobre-inverso); } .etq--nueva i { color:var(--sobre-inverso-suave); }
+.etq-ic { width:16px; height:16px; color:var(--sobre-inverso); }
+.recorte { display:grid; grid-template-columns:52px 16px 52px 1fr; align-items:center; gap:8px; padding:12px; background:var(--superficie); border-radius:var(--rounded-tarjeta); }
+.recorte-antes, .recorte-despues { aspect-ratio:4 / 5; border-radius:var(--rounded-insignia); overflow:hidden; display:grid; place-items:center; }
+.recorte-antes svg { width:100%; height:100%; } .recorte-despues { background:var(--hundido); } .recorte-despues svg { width:74%; height:auto; filter:var(--drop-shadow-prenda); }
+.recorte-flecha { width:16px; height:16px; color:var(--tinta-suave); }
+.recorte-txt b { display:block; font:var(--text-nombre); } .recorte-txt i { display:block; font:var(--text-meta); font-style:normal; color:var(--tinta-suave); }
+
+/* Memoria */
+.guardado { display:inline-flex; align-items:center; gap:8px; font:700 14px/18px var(--font-body); color:var(--exito); } .guardado .ic { width:16px; height:16px; }
+.memoria { display:grid; grid-template-columns:28px 1fr; column-gap:10px; align-items:start; }
+.mem-ic { width:28px; height:28px; display:grid; place-items:center; border-radius:50%; background:var(--memoria); color:var(--sobre-color); }
+.mem-ic .ic { width:16px; height:16px; }
+.memoria p { font:var(--text-cuerpo); color:var(--tinta-suave); padding-top:3px; }
+.mem-t { font-weight:800; color:var(--tinta); }
+.mem-acc { grid-column:2; display:flex; gap:16px; margin-left:-8px; }
+
+/* Hoja Tu espacio (flota: única sombra) */
+.velo { position:absolute; inset:0; z-index:30; background:rgb(18 20 18 / .4); }
+.hoja { position:absolute; left:0; right:0; bottom:0; z-index:31; height:54%; box-sizing:border-box; padding:8px 24px 30px; background:var(--superficie);
+  border-radius:var(--rounded-tarjeta) var(--rounded-tarjeta) 0 0; box-shadow:var(--sombra-flotante); display:flex; flex-direction:column; }
+.asa { display:block; width:36px; height:5px; margin:0 auto; border-radius:3px; background:var(--linea); }
+.hoja-cab { display:flex; align-items:center; justify-content:space-between; margin-top:8px; }
+.hoja-cab h3 { margin:0; font:var(--text-titulo); letter-spacing:-.02em; }
+.cerrar { width:44px; height:44px; display:grid !important; place-items:center; margin-right:-10px; border-radius:50%; }
+.hoja-lista { list-style:none; margin:6px 0 0; padding:0; }
+.hoja-lista li + li { border-top:1px solid var(--linea); }
+.hoja-lista a { display:grid; grid-template-columns:1fr auto; align-items:center; column-gap:12px; padding:13px 0; text-decoration:none; }
+.h-t { font:var(--text-titulo-s); letter-spacing:-.01em; }
+.h-t sup { margin-left:4px; font:700 12px/1 var(--font-body); color:var(--tinta-suave); vertical-align:super; }
+.h-b { grid-column:1; margin-top:4px; font:var(--text-meta); color:var(--tinta-suave); display:flex; align-items:center; gap:6px; }
+.marca-h { padding:2px 6px; border-radius:var(--rounded-insignia); font:800 11px/1.3 var(--font-body); }
+.marca-h--nuevo { background:var(--inverso); color:var(--sobre-inverso); } .marca-h--memoria { background:var(--memoria); color:var(--sobre-color); }
+.h-mini, .h-sw { grid-column:2; grid-row:1 / 3; display:flex; gap:4px; }
+.h-mini svg { width:34px; height:40px; padding:3px; box-sizing:border-box; border-radius:var(--rounded-insignia); background:var(--hundido); }
+.h-sw i { width:14px; height:14px; border-radius:50%; margin-left:-5px; box-shadow:0 0 0 2px var(--superficie); }
+.salir { align-self:flex-start; margin-top:auto !important; margin-left:-8px !important; }
+#m6 .hilo-in { padding-bottom:392px; }
+
+@media (prefers-reduced-motion: reduce) { .puntos i, .esqueleto .sk, .fantasma { animation:none; opacity:.6; } }
+
+* { box-sizing:border-box; }
+body { margin:0; background:var(--fondo); color:var(--tinta); font:var(--text-cuerpo); -webkit-font-smoothing:antialiased; }
+.pagina { max-width:1360px; margin:0 auto; padding:0 32px 96px; }
+.intro { padding:72px 0 48px; display:grid; grid-template-columns:minmax(0, 1.25fr) minmax(0, 1fr); gap:56px; align-items:end; }
+.sobre { margin:0 0 16px; font:var(--text-sobretitulo); letter-spacing:.12em; text-transform:uppercase; color:var(--tinta-suave); }
+h1 { margin:0; font:800 clamp(40px, 5.2vw, 64px)/.95 var(--font-display); letter-spacing:-.04em; }
+.intro-txt p { margin:0; font:var(--text-destacado); color:var(--tinta-suave); max-width:46ch; }
+.intro-txt b { color:var(--tinta); font-weight:800; }
+.momentos { display:grid; grid-template-columns:repeat(auto-fill, minmax(min(100%, 404px), 1fr)); gap:56px 36px; }
+.momento { margin:0; display:flex; flex-direction:column; align-items:center; gap:18px; }
+.momento figcaption { width:min(404px, 100%); min-height:64px; display:grid; grid-template-columns:auto 1fr; column-gap:14px; row-gap:2px; align-content:start; }
+.m-num { grid-row:1 / 3; font:800 34px/1 var(--font-display); letter-spacing:-.03em; }
+.m-tit { font:var(--text-titulo-s); } .m-baj { font:var(--text-cuerpo); font-size:14px; line-height:20px; color:var(--tinta-suave); }
+.telefono { width:min(404px, 100%); padding:7px; border-radius:62px; background:#141312;
+  box-shadow:0 0 0 1.5px #3A3835, 0 0 0 3px #1C1B19, 0 40px 70px -30px rgb(18 20 18 / .45), 0 18px 30px -18px rgb(18 20 18 / .35); }
+.pantalla { border-radius:55px; }
+.noche { margin-top:88px; display:grid; grid-template-columns:minmax(0, 1fr) 404px; gap:56px; align-items:center; background:var(--fondo); color:var(--tinta); border-radius:28px; padding:56px; }
+.noche .telefono { box-shadow:0 0 0 1.5px #4A4845, 0 0 0 3px #2A2927; }
+.noche h2, .notas h2 { margin:0; font:var(--text-titular); letter-spacing:-.03em; }
+.noche-txt p { color:var(--tinta-suave); max-width:46ch; margin:14px 0 0; font:var(--text-destacado); font-weight:500; }
+.noche-txt ul { margin:24px 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px; }
+.noche-txt li { display:flex; align-items:center; gap:12px; font:var(--text-cuerpo); }
+.noche-txt li i { width:28px; height:28px; border-radius:50%; flex:none; box-shadow:inset 0 0 0 1.5px var(--linea); }
+.noche .momento figcaption { display:none; } .noche .momento { width:100%; }
+.notas { margin-top:88px; }
+.notas > p { max-width:70ch; color:var(--tinta-suave); margin:12px 0 0; font:var(--text-destacado); font-weight:500; }
+.choques { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:16px; margin-top:32px; }
+.choque { background:var(--superficie); border-radius:28px; padding:24px; }
+.choque h3 { margin:0 0 8px; font:var(--text-titulo-s); }
+.choque p { margin:0; } .choque p + p { margin-top:10px; }
+.k { display:inline-block; margin-bottom:12px; padding:4px 10px; border-radius:12px; font:800 11px/1.3 var(--font-body); background:var(--inverso); color:var(--sobre-inverso); }
+.roles { margin-top:16px; background:var(--superficie); border-radius:28px; padding:8px 24px; overflow-x:auto; }
+.roles table { width:100%; border-collapse:collapse; min-width:640px; }
+.roles th, .roles td { text-align:left; padding:14px 12px 14px 0; border-bottom:1px solid var(--linea); vertical-align:middle; }
+.roles tr:last-child td { border-bottom:0; }
+.roles th { font:var(--text-sobretitulo); letter-spacing:.12em; text-transform:uppercase; color:var(--tinta-suave); }
+.roles td b { font-weight:800; }
+.sw { display:inline-block; width:28px; height:28px; border-radius:50%; vertical-align:middle; margin-right:10px; box-shadow:inset 0 0 0 1.5px rgb(18 20 18 / .12); }
+.fuera { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px; }
+.fuera div { background:var(--superficie); border-radius:28px; padding:24px; }
+.fuera h3 { margin:0 0 10px; font:var(--text-titulo-s); }
+.fuera ul { margin:0; padding-left:18px; } .fuera li { margin:6px 0; }
+@media (max-width: 1000px) {
+  .intro { grid-template-columns:1fr; gap:24px; padding-top:48px; }
+  .choques, .fuera { grid-template-columns:1fr; }
+  .noche { grid-template-columns:1fr; padding:32px 24px; justify-items:center; } .noche-txt { justify-self:stretch; }
+}
+@media (max-width: 560px) {
+  .pagina { padding:0 16px 64px; }
+  .telefono { padding:5px; border-radius:50px; } .pantalla { border-radius:45px; }
+  .noche { padding:28px 16px; margin-top:56px; } .noche h2, .notas h2 { font-size:32px; }
+  .choque, .fuera div { padding:20px; }
+}
+</style>
+</head>
+<body>
+<svg class="sprite" aria-hidden="true" focusable="false" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden">
+<defs>
+  <filter id="f-tela" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="7" result="r"/>
+    <feColorMatrix in="r" type="saturate" values="0" result="g"/>
+    <feComponentTransfer in="g" result="s"><feFuncR type="linear" slope="0.24" intercept="0.86"/><feFuncG type="linear" slope="0.24" intercept="0.86"/><feFuncB type="linear" slope="0.24" intercept="0.86"/></feComponentTransfer>
+    <feBlend in="SourceGraphic" in2="s" mode="multiply" result="m"/>
+    <feComposite in="m" in2="SourceGraphic" operator="in"/>
+  </filter>
+  <filter id="f-lino" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency="0.05 1.25" numOctaves="2" seed="3" result="r"/>
+    <feColorMatrix in="r" type="saturate" values="0" result="g"/>
+    <feComponentTransfer in="g" result="s"><feFuncR type="linear" slope="0.32" intercept="0.8"/><feFuncG type="linear" slope="0.32" intercept="0.8"/><feFuncB type="linear" slope="0.32" intercept="0.8"/></feComponentTransfer>
+    <feBlend in="SourceGraphic" in2="s" mode="multiply" result="m"/>
+    <feComposite in="m" in2="SourceGraphic" operator="in"/>
+  </filter>
+  <filter id="f-difuso" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="5"/></filter>
+  <filter id="f-difuso-s" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="1.6"/></filter>
+  <filter id="f-sabana" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency="0.0045 0.009" numOctaves="2" seed="21" result="t"/>
+    <feDiffuseLighting in="t" surfaceScale="4.5" diffuseConstant="1.18" lighting-color="#FFF8EE" result="luz"><feDistantLight azimuth="230" elevation="58"/></feDiffuseLighting>
+    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" seed="5" result="fino"/>
+    <feColorMatrix in="fino" type="saturate" values="0" result="finog"/>
+    <feComponentTransfer in="finog" result="finos"><feFuncR type="linear" slope="0.12" intercept="0.93"/><feFuncG type="linear" slope="0.12" intercept="0.93"/><feFuncB type="linear" slope="0.12" intercept="0.93"/></feComponentTransfer>
+    <feComposite in="luz" in2="SourceGraphic" operator="arithmetic" k1="1" k2="0" k3="0" k4="0" result="base"/>
+    <feBlend in="base" in2="finos" mode="multiply"/>
+  </filter>
+
+  <!-- Patrones -->
+  <pattern id="pt-mimbre" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="scale(.62) rotate(2)">
+    <rect width="16" height="16" fill="#8F6638"/>
+    <rect x=".6" y="1" width="6.8" height="2.9" rx="1.4" fill="#D6B27A"/><rect x=".6" y="4.6" width="6.8" height="2.9" rx="1.4" fill="#CCA56C"/>
+    <rect x="9" y=".6" width="2.9" height="6.8" rx="1.4" fill="#C59D63"/><rect x="12.6" y=".6" width="2.9" height="6.8" rx="1.4" fill="#D3AE76"/>
+    <rect x="1" y="8.6" width="2.9" height="6.8" rx="1.4" fill="#C9A169"/><rect x="4.6" y="8.6" width="2.9" height="6.8" rx="1.4" fill="#D6B27A"/>
+    <rect x="8.6" y="9" width="6.8" height="2.9" rx="1.4" fill="#D3AE76"/><rect x="8.6" y="12.6" width="6.8" height="2.9" rx="1.4" fill="#C59D63"/>
+  </pattern>
+  <pattern id="pt-yute" width="8" height="5" patternUnits="userSpaceOnUse">
+    <rect width="8" height="5" fill="#C2A06D"/>
+    <path d="M0 2.5Q2 0 4 2.5T8 2.5" stroke="#9C7A48" stroke-width="1.1" fill="none"/>
+    <path d="M0 4.6Q2 2.4 4 4.6T8 4.6" stroke="#D9BE8E" stroke-width=".7" fill="none"/>
+  </pattern>
+  <pattern id="pt-flores" width="22" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(-8)">
+    <rect width="22" height="22" fill="#B05E3D"/>
+    <g fill="#F1DFC6"><circle cx="5" cy="3.6" r="1.5"/><circle cx="5" cy="6.4" r="1.5"/><circle cx="3.6" cy="5" r="1.5"/><circle cx="6.4" cy="5" r="1.5"/></g>
+    <circle cx="5" cy="5" r="1" fill="#C98A3A"/>
+    <g fill="#E9CBA8"><circle cx="16" cy="14.6" r="1.2"/><circle cx="16" cy="17.4" r="1.2"/><circle cx="14.6" cy="16" r="1.2"/><circle cx="17.4" cy="16" r="1.2"/></g>
+    <circle cx="16" cy="16" r=".8" fill="#6E3A26"/>
+    <circle cx="14" cy="5" r=".7" fill="#E9CBA8"/><circle cx="6" cy="16" r=".7" fill="#E9CBA8"/>
+  </pattern>
+
+  <!-- Degradados de luz (luz cenital desde arriba a la izquierda) -->
+  <linearGradient id="g-seda" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F6EFE2"/><stop offset=".42" stop-color="#ECE2CE"/><stop offset=".58" stop-color="#F5EEE0"/><stop offset="1" stop-color="#D9CBB0"/></linearGradient>
+  <linearGradient id="g-lino" x1="0" y1="0" x2=".8" y2="1"><stop offset="0" stop-color="#D8C7A6"/><stop offset=".55" stop-color="#CBB894"/><stop offset="1" stop-color="#B9A47F"/></linearGradient>
+  <linearGradient id="g-falda-luz" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#1d2416" stop-opacity=".22"/></linearGradient>
+  <linearGradient id="g-camel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C08850"/><stop offset="1" stop-color="#94602F"/></linearGradient>
+  <linearGradient id="g-terracota" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C46E48"/><stop offset="1" stop-color="#8C4126"/></linearGradient>
+  <linearGradient id="g-crudo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F2EBDD"/><stop offset="1" stop-color="#D8CDB8"/></linearGradient>
+  <linearGradient id="g-taco" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6E4524"/><stop offset=".5" stop-color="#8A5A30"/><stop offset="1" stop-color="#5E3A1D"/></linearGradient>
+  <linearGradient id="g-blanco" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#E7E3DC"/></linearGradient>
+  <radialGradient id="g-bolso-sombra" cx=".45" cy=".3" r=".8"><stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#2a1a08" stop-opacity=".38"/></radialGradient>
+  <linearGradient id="g-vestido-luz" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#2a0f05" stop-opacity=".28"/></linearGradient>
+
+  <radialGradient id="g-foto-luz" cx=".42" cy=".35" r=".85"><stop offset="0" stop-color="#FFE7C2" stop-opacity=".16"/><stop offset=".55" stop-color="#FFE7C2" stop-opacity="0"/><stop offset="1" stop-color="#2E1C0C" stop-opacity=".42"/></radialGradient>
+
+  <!-- Formas base (sin relleno: lo pone quien las usa) -->
+  <path id="p-blusa" d="M78 28L50 40Q28 70 12 108L36 120Q50 104 58 92Q54 160 56 226Q110 234 166 226Q168 160 162 92Q170 104 184 120L208 108Q192 70 170 40L142 28Q126 40 110 70Q94 40 78 28Z"/>
+  <clipPath id="c-blusa"><use href="#p-blusa"/></clipPath>
+  <path id="p-blazer" d="M98 20L62 30Q44 36 38 62L16 236Q28 246 44 242L62 118L60 264Q120 271 180 264L178 118L196 242Q212 246 224 236L202 62Q196 36 178 30L142 20Q120 26 98 20Z"/>
+  <clipPath id="c-blazer"><use href="#p-blazer"/></clipPath>
+  <path id="p-bolso" d="M26 88L174 88Q170 150 156 178Q100 190 44 178Q30 150 26 88Z"/>
+  <clipPath id="c-bolso"><use href="#p-bolso"/></clipPath>
+  <path id="p-vestido" d="M84 18Q110 32 136 18L156 26L180 60L164 72L152 62L150 112L152 124Q172 200 198 286Q110 298 22 286Q48 200 68 124L70 112L68 62L56 72L40 60L64 26Z"/>
+  <clipPath id="c-vestido"><use href="#p-vestido"/></clipPath>
+  <path id="p-suela" d="M12 128Q12 119 26 118L106 113Q134 109 154 97Q168 87 182 83L206 81L206 89L186 91Q168 97 152 111Q132 125 104 129L28 135Q12 136 12 128Z"/>
+  <path id="p-taco" d="M183 89L206 87L204 137L186 137Q183 113 183 89Z"/>
+
+  <!-- Un zapato de taco ancho (base común) -->
+  <g id="z-base">
+    <use href="#p-taco" fill="url(#g-taco)"/>
+    <path d="M185 100L205 98M185 112L205 110M185 124L204 122" stroke="#4A2E16" stroke-width=".8" opacity=".55"/>
+    <use href="#p-suela" fill="#5B3A1E"/>
+    <path d="M18 121Q60 118 106 114Q134 110 154 98Q168 88 184 84L204 82" stroke="#E2C59C" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+  </g>
+</defs>
+
+<!-- 1 · Blusa de seda cruda -->
+<symbol id="blusa" viewBox="0 0 220 240">
+  <g filter="url(#f-tela)">
+    <use href="#p-blusa" fill="url(#g-seda)"/>
+    <g clip-path="url(#c-blusa)">
+      <g filter="url(#f-difuso)" fill="none" stroke-linecap="round">
+        <path d="M74 112Q96 168 86 232" stroke="#A8936B" stroke-width="11" opacity=".32"/>
+        <path d="M142 104Q130 170 142 234" stroke="#fff" stroke-width="16" opacity=".55"/>
+        <path d="M116 86Q110 150 118 232" stroke="#A8936B" stroke-width="6" opacity=".22"/>
+        <path d="M18 104Q34 86 52 52" stroke="#A8936B" stroke-width="8" opacity=".25"/>
+        <path d="M202 104Q186 86 168 52" stroke="#fff" stroke-width="8" opacity=".5"/>
+      </g>
+    </g>
+  </g>
+  <path d="M78 28Q110 22 142 28Q126 38 110 64Q94 38 78 28Z" fill="#D6C7A9"/>
+  <path d="M78 28Q94 40 110 70Q126 40 142 28" stroke="#E9DFCB" stroke-width="3.2" fill="none"/>
+  <path d="M50 40Q62 66 58 92M170 40Q158 66 162 92" stroke="#8E7A55" stroke-width="1" opacity=".35" fill="none"/>
+  <path d="M60 220Q110 228 162 220M18 110L38 118M202 110L182 118" stroke="#8E7A55" stroke-width=".9" stroke-dasharray="2.2 2.4" opacity=".45" fill="none"/>
+</symbol>
+
+<!-- 2 · Falda midi plisada salvia -->
+<symbol id="falda" viewBox="0 0 220 262">
+  <g filter="url(#f-tela)">
+    <path d="M76.0 30.0L79.1 30.0L26.5 247.5L18.0 242.0Z" fill="#A3AE93"/><path d="M79.1 30.0L81.2 30.0L32.2 246.0L26.5 247.5Z" fill="#7D896E"/><path d="M79.1 30.0L26.5 247.5" stroke="#C3CCB4" stroke-width="0.9" opacity=".7"/><path d="M81.2 30.0L84.4 30.0L40.6 251.0L32.2 246.0Z" fill="#A3AE93"/><path d="M84.4 30.0L86.5 30.0L46.3 249.3L40.6 251.0Z" fill="#7D896E"/><path d="M84.4 30.0L40.6 251.0" stroke="#C3CCB4" stroke-width="0.9" opacity=".7"/><path d="M86.5 30.0L89.6 30.0L54.8 254.0L46.3 249.3Z" fill="#A3AE93"/><path d="M89.6 30.0L91.7 30.0L60.5 251.9L54.8 254.0Z" fill="#7D896E"/><path d="M89.6 30.0L54.8 254.0" stroke="#C3CCB4" stroke-width="0.9" opacity=".7"/><path d="M91.7 30.0L94.8 30.0L69.0 256.2L60.5 251.9Z" fill="#A3AE93"/><path d="M94.8 30.0L96.9 30.0L74.6 253.9L69.0 256.2Z" fill="#7D896E"/><path d="M94.8 30.0L69.0 256.2" stroke="#C3CCB4" stroke-width="0.9" opacity=".7"/><path d="M96.9 30.0L100.1 30.0L83.1 257.8L74.6 253.9Z" fill="#A3AE93"/><path d="M100.1 30.0L102.2 30.0L88.8 255.3L83.1 257.8Z" fill="#7D896E"/><path d="M100.1 30.0L83.1 257.8" stroke="#C3CCB4" stroke-width="0.9" opacity=".7"/><path d="M102.2 30.0L105.3 30.0L97.3 258.7L88.8 255.3Z" fill="#A3AE93"/><path d="M105.3 30.0L107.4 30.0L102.9 255.9L97.3 258.7Z" fill="#7D896E"/><path d="M105.3 30.0L97.3 258.7" stroke="#C3CCB4" stroke-width="0.9" opacity=".7"/><path d="M107.4 30.0L110.5 30.0L111.4 259.0L102.9 255.9Z" fill="#A3AE93"/><path d="M110.5 30.0L112.6 30.0L117.1 255.9L111.4 259.0Z" fill="#7D896E"/><path d="M110.5 30.0L111.4 259.0" stroke="#C3CCB4" stroke-width="0.9" opacity=".7"/><path d="M112.6 30.0L115.8 30.0L125.6 258.6L117.1 255.9Z" fill="#A3AE93"/><path d="M115.8 30.0L117.8 30.0L131.2 255.3L125.6 258.6Z" fill="#7D896E"/><path d="M115.8 30.0L125.6 258.6" stroke="#C3CCB4" stroke-width="0.9" opacity=".7"/><path d="M117.8 30.0L121.0 30.0L139.7 257.5L131.2 255.3Z" fill="#A3AE93"/><path d="M121.0 30.0L123.1 30.0L145.4 253.9L139.7 257.5Z" fill="#7D896E"/><path d="M121.0 30.0L139.7 257.5" stroke="#C3CCB4" stroke-width="0.9" opacity=".7"/><path d="M123.1 30.0L126.2 30.0L153.9 255.8L145.4 253.9Z" fill="#A3AE93"/><path d="M126.2 30.0L128.3 30.0L159.5 251.9L153.9 255.8Z" fill="#7D896E"/><path d="M126.2 30.0L153.9 255.8" stroke="#C3CCB4" stroke-width="0.9" opacity=".7"/><path d="M128.3 30.0L131.4 30.0L168.0 253.4L159.5 251.9Z" fill="#A3AE93"/><path d="M131.4 30.0L133.5 30.0L173.7 249.3L168.0 253.4Z" fill="#7D896E"/><path d="M131.4 30.0L168.0 253.4" stroke="#C3CCB4" stroke-width="0.9" opacity=".7"/><path d="M133.5 30.0L136.7 30.0L182.2 250.4L173.7 249.3Z" fill="#A3AE93"/><path d="M136.7 30.0L138.8 30.0L187.8 246.0L182.2 250.4Z" fill="#7D896E"/><path d="M136.7 30.0L182.2 250.4" stroke="#C3CCB4" stroke-width="0.9" opacity=".7"/><path d="M138.8 30.0L141.9 30.0L196.3 246.7L187.8 246.0Z" fill="#A3AE93"/><path d="M141.9 30.0L144.0 30.0L202.0 242.0L196.3 246.7Z" fill="#7D896E"/><path d="M141.9 30.0L196.3 246.7" stroke="#C3CCB4" stroke-width="0.9" opacity=".7"/>
+    <path d="M76 30L144 30L202 242Q110 270 18 242Z" fill="url(#g-falda-luz)"/>
+  </g>
+  <path d="M74 14L146 14L146 31L74 31Z" fill="#7E8A70"/>
+  <path d="M74 14L146 14L146 18L74 18Z" fill="#94A085"/>
+  <path d="M76 28.5L144 28.5" stroke="#5F6A52" stroke-width=".8" stroke-dasharray="2 2" opacity=".7"/>
+  <circle cx="139" cy="22.5" r="3" fill="#E8E1D2"/><circle cx="139" cy="22.5" r="3" fill="none" stroke="#5F6A52" stroke-width=".6"/>
+</symbol>
+
+<!-- 3 · Blazer de lino arena -->
+<symbol id="blazer" viewBox="0 0 240 280">
+  <g filter="url(#f-lino)">
+    <use href="#p-blazer" fill="url(#g-lino)"/>
+    <g clip-path="url(#c-blazer)">
+      <path d="M38 62L16 236Q28 246 44 242L62 118L64 32Z" fill="#7A6440" opacity=".14"/>
+      <path d="M202 62L224 236Q212 246 196 242L178 118L176 32Z" fill="#7A6440" opacity=".2"/>
+      <g filter="url(#f-difuso)" fill="none" stroke-linecap="round">
+        <path d="M80 150Q90 210 84 262" stroke="#fff" stroke-width="12" opacity=".35"/>
+        <path d="M156 130Q150 200 160 262" stroke="#6E5836" stroke-width="10" opacity=".22"/>
+        <path d="M36 120Q30 180 28 236" stroke="#fff" stroke-width="7" opacity=".3"/>
+      </g>
+    </g>
+  </g>
+  <path d="M64 32Q72 74 64 116M176 32Q168 74 176 116" stroke="#6E5836" stroke-width="1" opacity=".45" fill="none"/>
+  <path d="M98 20Q120 26 142 20L138 30Q120 35 102 30Z" fill="#AD9773"/>
+  <path d="M102 30Q120 35 138 30L122 150L118 150Z" fill="#9B8460"/>
+  <path d="M98 20L80 46L92 52L84 62L118 150L102 30Z" fill="#D7C6A4"/>
+  <path d="M142 20L160 46L148 52L156 62L122 150L138 30Z" fill="#CDBB97"/>
+  <path d="M80 46L92 52L84 62L118 150M160 46L148 52L156 62L122 150" stroke="#6E5836" stroke-width="1" opacity=".5" fill="none"/>
+  <path d="M120 150Q121 210 122 266" stroke="#6E5836" stroke-width="1.1" opacity=".45" fill="none"/>
+  <path d="M74 200L106 198L106 207L74 209Z" fill="#BEA983" stroke="#6E5836" stroke-width=".7" stroke-opacity=".5"/>
+  <path d="M134 198L166 200L166 209L134 207Z" fill="#B7A27D" stroke="#6E5836" stroke-width=".7" stroke-opacity=".5"/>
+  <path d="M140 98L162 96L162 101L140 103Z" fill="#BCA781" stroke="#6E5836" stroke-width=".6" stroke-opacity=".5"/>
+  <g fill="#4E3B28"><circle cx="121" cy="172" r="4.6"/><circle cx="121.5" cy="206" r="4.6"/></g>
+  <g fill="#7A6146"><circle cx="120" cy="171" r="1.6"/><circle cx="120.5" cy="205" r="1.6"/></g>
+  <g fill="#4E3B28"><circle cx="30" cy="226" r="2.2"/><circle cx="33" cy="219" r="2.2"/><circle cx="210" cy="226" r="2.2"/><circle cx="207" cy="219" r="2.2"/></g>
+</symbol>
+
+<!-- 4 · Cartera de mimbre -->
+<symbol id="bolso" viewBox="0 0 200 196">
+  <path d="M60 92Q62 20 100 20Q138 20 140 92" stroke="#6E441F" stroke-width="7.5" fill="none" stroke-linecap="round"/>
+  <path d="M60 92Q62 20 100 20Q138 20 140 92" stroke="#A06A38" stroke-width="3" fill="none" stroke-linecap="round" opacity=".7"/>
+  <use href="#p-bolso" fill="url(#pt-mimbre)"/>
+  <use href="#p-bolso" fill="url(#g-bolso-sombra)"/>
+  <path d="M24 82L176 82L175 97L25 97Z" fill="#8A5A2C"/>
+  <path d="M26 86L174 86" stroke="#D9B07E" stroke-width=".8" stroke-dasharray="2 2"/>
+  <path d="M54 82h14v24h-14zM132 82h14v24h-14z" fill="#7A4D24"/>
+  <circle cx="61" cy="100" r="1.8" fill="#C9A06A"/><circle cx="139" cy="100" r="1.8" fill="#C9A06A"/>
+</symbol>
+
+<!-- 5a · Sandalia de cuero camel, taco cuadrado (Tienda A) -->
+<symbol id="zapato-a" viewBox="0 0 220 150">
+  <use href="#z-base"/>
+  <path d="M170 86Q166 62 178 54Q192 50 202 60L206 81L198 82Q196 66 186 64Q176 64 178 85Z" fill="url(#g-camel)"/>
+  <path d="M150 97Q150 68 176 54" stroke="#9A6534" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <rect x="168" y="52" width="9" height="7" rx="1.5" fill="none" stroke="#D8C08F" stroke-width="1.6" transform="rotate(-28 172 55)"/>
+  <path d="M30 118Q46 90 74 92Q92 95 98 113L88 114Q82 103 72 102Q52 101 41 118Z" fill="url(#g-camel)"/>
+  <path d="M38 114Q52 97 72 97Q86 99 92 112" stroke="#E2BF8E" stroke-width=".8" stroke-dasharray="2 2" fill="none"/>
+</symbol>
+<symbol id="par-a" viewBox="0 0 240 170"><use href="#zapato-a" x="18" y="0" width="220" height="150" opacity=".92"/><use href="#zapato-a" x="0" y="20" width="220" height="150"/></symbol>
+
+<!-- 5b · Mule terracota, taco bloque (Tienda B) -->
+<symbol id="zapato-b" viewBox="0 0 220 150">
+  <use href="#z-base"/>
+  <path d="M26 118Q38 78 84 80Q116 82 126 110L112 111Q104 94 86 93Q56 92 42 118Z" fill="url(#g-terracota)"/>
+  <path d="M40 112Q56 88 86 88Q108 89 118 108" stroke="#E7A07C" stroke-width=".8" opacity=".7" fill="none"/>
+</symbol>
+<symbol id="par-b" viewBox="0 0 240 170"><use href="#zapato-b" x="18" y="0" width="220" height="150" opacity=".92"/><use href="#zapato-b" x="0" y="20" width="220" height="150"/></symbol>
+
+<!-- 5c · Alpargata de plataforma en yute (Tienda C) -->
+<symbol id="zapato-c" viewBox="0 0 220 150">
+  <path d="M12 120Q14 112 28 111L106 104Q140 98 168 84Q186 76 206 72L206 137L20 137Q10 134 12 120Z" fill="url(#pt-yute)"/>
+  <path d="M14 133L206 133L206 138L20 138Q14 137 14 133Z" fill="#4B3B2B"/>
+  <path d="M24 112Q36 82 80 80Q114 80 128 100L110 103Q98 92 82 92Q52 92 40 112Z" fill="url(#g-crudo)"/>
+  <path d="M168 84Q166 64 182 58Q196 56 204 66L206 74Z" fill="url(#g-crudo)"/>
+  <path d="M184 58Q172 28 148 22M188 58Q198 30 216 26" stroke="#E8DECB" stroke-width="3" fill="none" stroke-linecap="round"/>
+</symbol>
+<symbol id="par-c" viewBox="0 0 240 170"><use href="#zapato-c" x="18" y="0" width="220" height="150" opacity=".92"/><use href="#zapato-c" x="0" y="20" width="220" height="150"/></symbol>
+
+<!-- Zapato faltante: silueta punteada -->
+<symbol id="par-falta" viewBox="0 0 240 170">
+  <g fill="none" stroke="#8F8478" stroke-width="1.6" stroke-dasharray="4 4">
+    <use href="#p-suela" y="20"/><use href="#p-taco" y="20"/>
+    <path d="M30 138Q46 110 74 112Q92 115 98 133" />
+  </g>
+</symbol>
+
+<!-- Vestido midi estampado (llega en la foto) -->
+<symbol id="vestido" viewBox="0 0 220 300">
+  <g filter="url(#f-tela)">
+    <use href="#p-vestido" fill="url(#pt-flores)"/>
+    <use href="#p-vestido" fill="url(#g-vestido-luz)"/>
+    <g clip-path="url(#c-vestido)" filter="url(#f-difuso)" fill="none">
+      <path d="M92 130Q80 210 70 290" stroke="#2a0f05" stroke-width="10" opacity=".22"/>
+      <path d="M130 130Q142 210 156 290" stroke="#fff" stroke-width="12" opacity=".14"/>
+    </g>
+  </g>
+  <path d="M84 18Q110 32 136 18Q122 26 110 30Q98 26 84 18Z" fill="#7A3A23"/>
+  <path d="M69 112L151 112L152 124L68 124Z" fill="#8E4329"/>
+  <path d="M108 124Q100 150 92 170M114 124Q122 152 126 168" stroke="#8E4329" stroke-width="5" fill="none" stroke-linecap="round"/>
+</symbol>
+
+<!-- Zapatillas blancas -->
+<symbol id="zapatillas" viewBox="0 0 230 130">
+  <g transform="translate(16 0)" opacity=".94">
+    <path d="M10 92Q10 104 24 106L196 106Q210 104 210 92L210 84L10 84Z" fill="#E4E0D8"/>
+    <path d="M14 84Q12 64 40 58L92 44Q110 40 124 50L158 40Q184 36 200 50Q210 62 208 84Z" fill="url(#g-blanco)"/>
+  </g>
+  <g transform="translate(0 18)">
+    <path d="M10 92Q10 104 24 106L196 106Q210 104 210 92L210 84L10 84Z" fill="#ECE8E1"/>
+    <path d="M10 92L210 92" stroke="#CFC9BF" stroke-width="1"/>
+    <path d="M14 84Q12 64 40 58L92 44Q110 40 124 50L158 40Q184 36 200 50Q210 62 208 84Z" fill="url(#g-blanco)"/>
+    <path d="M96 50L120 66M104 47L128 62M112 45L136 58M120 44L142 54" stroke="#C9C2B6" stroke-width="1.6" stroke-linecap="round"/>
+    <path d="M40 60Q36 74 46 84M186 44L196 84" stroke="#D6D0C5" stroke-width="1" fill="none"/>
+    <path d="M196 46Q206 54 208 70L200 70Z" fill="#B9B2A6"/>
+  </g>
+</symbol>
+
+<!-- Botines café -->
+<symbol id="botines" viewBox="0 0 200 130">
+  <path d="M20 112Q20 96 40 92L100 86Q118 84 128 70L132 24L176 24L178 96L186 100L186 118L150 118L146 108Q90 116 30 120Q20 120 20 112Z" fill="#3E2C21"/>
+  <path d="M132 24L176 24L176 30L132 30Z" fill="#5A4233"/>
+  <path d="M28 114Q90 108 146 104" stroke="#6B5141" stroke-width="1" fill="none"/>
+  <path d="M150 104L186 104L186 118L150 118Z" fill="#241913"/>
+</symbol>
+
+<!-- Pantalón azul marino -->
+<symbol id="pantalon" viewBox="0 0 220 260">
+  <g filter="url(#f-tela)">
+    <path d="M58 10L162 10L176 250L130 252L112 72L108 72L90 252L44 250Z" fill="#2F3647"/>
+    <path d="M58 10L162 10L163 24L57 24Z" fill="#262C3B"/>
+    <path d="M110 24L110 70M72 24Q74 50 90 60M148 24Q146 50 130 60" stroke="#4A5266" stroke-width="1" fill="none"/>
+  </g>
+</symbol>
+
+<!-- Polera blanca -->
+<symbol id="polera" viewBox="0 0 220 230">
+  <g filter="url(#f-tela)">
+    <path d="M78 20Q110 36 142 20L196 44L180 82L158 72L160 220L60 220L62 72L40 82L24 44Z" fill="url(#g-blanco)"/>
+    <path d="M78 20Q110 36 142 20" stroke="#D2CCC1" stroke-width="4" fill="none"/>
+  </g>
+</symbol>
+</svg>
+<svg aria-hidden="true" focusable="false" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden">
+<symbol id="i-grid" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></g></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-chev-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-chev-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7M12 19V5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-camera" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></g></symbol>
+<symbol id="i-external" viewBox="0 0 24 24"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-bookmark" viewBox="0 0 24 24"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-cloud-sun" viewBox="0 0 24 24"><path d="M12 2v2M4.93 4.93l1.41 1.41M20 12h2M19.07 4.93l-1.41 1.41M15.947 12.65a4 4 0 0 0-5.925-4.128M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-shirt" viewBox="0 0 24 24"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></g></symbol>
+<symbol id="i-thermo" viewBox="0 0 24 24"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-sprout" viewBox="0 0 24 24"><path d="M7 20h10M10 20c5.5-2.5.8-6.4 3-10M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8zM14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-calendar" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></g></symbol>
+<symbol id="i-pin" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></g></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-pencil" viewBox="0 0 24 24"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-scissors" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12"/></g></symbol>
+<symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5 5.5 5.5 0 0 1-5.5 5.5H11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-store" viewBox="0 0 24 24"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4M2 7h20M22 7v3a2 2 0 0 1-2 2 2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5z" fill="currentColor"/></symbol>
+<symbol id="i-pause" viewBox="0 0 24 24"><g fill="currentColor"><rect x="6" y="4.5" width="4" height="15" rx="1"/><rect x="14" y="4.5" width="4" height="15" rx="1"/></g></symbol>
+</svg>
+<main class="pagina">
+  <header class="intro">
+    <div><p class="sobre">Maqueta v4 · 2026-11-14 · DP-23 · alineada a DESIGN.MD y UX_UI_SPEC v0.3</p>
+      <h1>El fin de semana, resuelto en una conversación.</h1></div>
+    <div class="intro-txt"><p>El recorrido y los patrones de v3, con la identidad de Prendie: <b>Bricolage Grotesque y Manrope, un solo lima por pantalla, el look recién propuesto en inverso, tarjetas blancas sin sombra, todo lo tocable en píldora.</b> La voz es la de Estilo. Catalina, matrimonio de día en una viña de Casablanca, sábado 21.</p></div>
+  </header>
+
+  <div class="momentos"><figure class="momento" id="m1">
+  <figcaption><span class="m-num">01</span><span class="m-tit">Cuenta el evento</span><span class="m-baj">Entiende lo que ya dijiste y pregunta solo lo que falta</span></figcaption>
+  <div class="telefono"><div class="pantalla" data-theme="light">
+    <div class="ios" aria-hidden="true"><span class="ios-hora">9:41</span><span class="ios-isla"></span><span class="ios-der"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx=".8"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8"/><rect x="10" y="3" width="3" height="9" rx=".8"/><rect x="15" y="0" width="3" height="12" rx=".8"/></svg><svg viewBox="0 0 16 12" width="16" height="12"><path d="M8 2.2c2.4 0 4.6.9 6.2 2.5l1.2-1.2A10.4 10.4 0 0 0 8 .5 10.4 10.4 0 0 0 .6 3.5l1.2 1.2A8.7 8.7 0 0 1 8 2.2Zm0 3.4c1.5 0 2.9.6 3.9 1.6l1.2-1.2A7.2 7.2 0 0 0 8 3.9 7.2 7.2 0 0 0 2.9 6l1.2 1.2c1-1 2.4-1.6 3.9-1.6Zm0 3.4c.7 0 1.3.3 1.7.7L8 11.5 6.3 9.7c.4-.4 1-.7 1.7-.7Z"/></svg><svg viewBox="0 0 27 13" width="27" height="13"><rect x=".5" y=".5" width="23" height="12" rx="3.5" fill="none" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="20" height="9" rx="2"/><path d="M25 4.5v4c.8-.3 1.3-1.1 1.3-2s-.5-1.7-1.3-2Z" opacity=".45"/></svg></span></div><header class="cab"><span class="marca">Estilo</span>
+      <button class="btn btn--m btn--contorno espacio" type="button" aria-haspopup="dialog"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg><span>Tu espacio</span></button></header>
+    <section class="hilo" aria-label="Conversación con tu asesor"><div class="hilo-in">
+  <div class="dia"><span>Hoy</span></div>
+  <div class="yo">Este sábado tengo un matrimonio en Casablanca, de día, en una viña. ¿Qué me pongo? Si no tengo nada, búscame opciones.</div>
+  <div class="turno">
+    <div class="asesor"><span class="firma">Estilo</span><p><strong>Qué buen panorama.</strong> Esto es lo que entendí; toca cualquier dato si me equivoqué.</p></div>
+    <div class="entendi" role="group" aria-label="Lo que entendí del evento">
+      <button type="button" class="dato"><svg class="ic" aria-hidden="true"><use href="#i-calendar"/></svg><span><b>Sábado 21 nov</b><i>Matrimonio</i></span></button>
+      <button type="button" class="dato"><svg class="ic" aria-hidden="true"><use href="#i-pin"/></svg><span><b>Casablanca</b><i>En una viña</i></span></button>
+      <button type="button" class="dato"><svg class="ic" aria-hidden="true"><use href="#i-cloud-sun"/></svg><span><b>11° a 27°</b><i>Viento en la tarde</i></span></button>
+      <button type="button" class="dato"><svg class="ic" aria-hidden="true"><use href="#i-sprout"/></svg><span><b>De día</b><i>Al aire libre</i></span></button>
+    </div>
+    <div class="asesor"><p>Me falta una cosa para acertar: <strong>¿qué dice la invitación sobre la vestimenta?</strong> Con eso decido entre algo relajado de viña o algo más de fiesta.</p></div>
+  </div></div></section>
+    <div class="sugerencias" role="group" aria-label="Respuestas sugeridas"><button type="button" class="btn btn--m btn--contorno">Dice «formal de día»</button><button type="button" class="btn btn--m btn--contorno">No dice nada</button><button type="button" class="btn btn--m btn--contorno"><svg class="ic" aria-hidden="true"><use href="#i-camera"/></svg>Te mando la invitación</button></div><footer class="compositor"><button class="foto-btn" type="button" aria-label="Mandar una foto"><svg class="ic" aria-hidden="true"><use href="#i-camera"/></svg></button>
+      <div class="campo"><span class="ph">O dímelo con tus palabras</span></div><button class="enviar" type="button" aria-label="Enviar" disabled><svg class="ic" aria-hidden="true"><use href="#i-arrow-up"/></svg></button></footer><div class="home" aria-hidden="true"></div>
+  </div></div>
+</figure>
+<figure class="momento" id="m2">
+  <figcaption><span class="m-num">02</span><span class="m-tit">Se ve su trabajo</span><span class="m-baj">Cada paso queda escrito en el hilo, en pasado y con su dato</span></figcaption>
+  <div class="telefono"><div class="pantalla" data-theme="light">
+    <div class="ios" aria-hidden="true"><span class="ios-hora">9:41</span><span class="ios-isla"></span><span class="ios-der"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx=".8"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8"/><rect x="10" y="3" width="3" height="9" rx=".8"/><rect x="15" y="0" width="3" height="12" rx=".8"/></svg><svg viewBox="0 0 16 12" width="16" height="12"><path d="M8 2.2c2.4 0 4.6.9 6.2 2.5l1.2-1.2A10.4 10.4 0 0 0 8 .5 10.4 10.4 0 0 0 .6 3.5l1.2 1.2A8.7 8.7 0 0 1 8 2.2Zm0 3.4c1.5 0 2.9.6 3.9 1.6l1.2-1.2A7.2 7.2 0 0 0 8 3.9 7.2 7.2 0 0 0 2.9 6l1.2 1.2c1-1 2.4-1.6 3.9-1.6Zm0 3.4c.7 0 1.3.3 1.7.7L8 11.5 6.3 9.7c.4-.4 1-.7 1.7-.7Z"/></svg><svg viewBox="0 0 27 13" width="27" height="13"><rect x=".5" y=".5" width="23" height="12" rx="3.5" fill="none" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="20" height="9" rx="2"/><path d="M25 4.5v4c.8-.3 1.3-1.1 1.3-2s-.5-1.7-1.3-2Z" opacity=".45"/></svg></span></div><header class="cab"><span class="marca">Estilo</span>
+      <button class="btn btn--m btn--contorno espacio" type="button" aria-haspopup="dialog"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg><span>Tu espacio</span></button></header>
+    <section class="hilo" aria-label="Conversación con tu asesor"><div class="hilo-in">
+  <div class="yo">Dice «formal de día».</div>
+  <div class="turno">
+    <div class="asesor"><span class="firma">Estilo</span><p><strong>Perfecto.</strong> Formal de día en una viña es elegante pero fresco: nada de brillos de noche. Déjame ver qué tienes.</p></div>
+    <ol class="rastro" aria-label="Lo que hice">
+      <li class="paso hecho"><span class="paso-ic"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></span><b>Miré el clima en Casablanca</b><i>11° a 27°, despejado · viento desde las 17:00</i></li>
+      <li class="paso hecho"><span class="paso-ic"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></span><b>Revisé tu clóset</b><i>32 prendas · 9 sirven para el día · elegí 4</i>
+        <span class="thumbs"><span class="th elegida"><svg viewBox="0 0 220 240" aria-hidden="true"><use href="#blusa"/></svg></span><span class="th elegida"><svg viewBox="0 0 220 262" aria-hidden="true"><use href="#falda"/></svg></span><span class="th elegida"><svg viewBox="0 0 240 280" aria-hidden="true"><use href="#blazer"/></svg></span><span class="th elegida"><svg viewBox="0 0 200 196" aria-hidden="true"><use href="#bolso"/></svg></span><span class="th "><svg viewBox="0 0 220 260" aria-hidden="true"><use href="#pantalon"/></svg></span><span class="th "><svg viewBox="0 0 220 230" aria-hidden="true"><use href="#polera"/></svg></span><span class="th "><svg viewBox="0 0 200 130" aria-hidden="true"><use href="#botines"/></svg></span><span class="th "><svg viewBox="0 0 230 130" aria-hidden="true"><use href="#zapatillas"/></svg></span></span></li>
+      <li class="paso en-curso" role="status"><span class="paso-ic"><svg class="ic" aria-hidden="true"><use href="#i-sprout"/></svg></span><b>Armando el look<span class="puntos"><i></i><i></i><i></i></span></b><i>Buscando con qué zapatos</i></li>
+    </ol>
+    <div class="look look--nuevo esqueleto" aria-hidden="true">
+      <div class="sk sk-over"></div><div class="sk sk-tit"></div>
+      <div class="mesa mesa-sk"><span class="fantasma f1"></span><span class="fantasma f2"></span><span class="fantasma f3"></span><span class="fantasma f4"></span></div>
+    </div>
+  </div></div></section>
+    <footer class="compositor"><button class="foto-btn" type="button" aria-label="Mandar una foto"><svg class="ic" aria-hidden="true"><use href="#i-camera"/></svg></button>
+      <div class="campo"><span class="ph">Escríbele a tu asesor…</span></div><button class="enviar" type="button" aria-label="Detener respuesta"><span class="cuadro"></span></button></footer><div class="home" aria-hidden="true"></div>
+  </div></div>
+</figure>
+<figure class="momento" id="m3">
+  <figcaption><span class="m-num">03</span><span class="m-tit">El look, con su porqué</span><span class="m-baj">El look recién propuesto en inverso; Guardar look es la única acción en lima</span></figcaption>
+  <div class="telefono"><div class="pantalla" data-theme="light">
+    <div class="ios" aria-hidden="true"><span class="ios-hora">9:41</span><span class="ios-isla"></span><span class="ios-der"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx=".8"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8"/><rect x="10" y="3" width="3" height="9" rx=".8"/><rect x="15" y="0" width="3" height="12" rx=".8"/></svg><svg viewBox="0 0 16 12" width="16" height="12"><path d="M8 2.2c2.4 0 4.6.9 6.2 2.5l1.2-1.2A10.4 10.4 0 0 0 8 .5 10.4 10.4 0 0 0 .6 3.5l1.2 1.2A8.7 8.7 0 0 1 8 2.2Zm0 3.4c1.5 0 2.9.6 3.9 1.6l1.2-1.2A7.2 7.2 0 0 0 8 3.9 7.2 7.2 0 0 0 2.9 6l1.2 1.2c1-1 2.4-1.6 3.9-1.6Zm0 3.4c.7 0 1.3.3 1.7.7L8 11.5 6.3 9.7c.4-.4 1-.7 1.7-.7Z"/></svg><svg viewBox="0 0 27 13" width="27" height="13"><rect x=".5" y=".5" width="23" height="12" rx="3.5" fill="none" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="20" height="9" rx="2"/><path d="M25 4.5v4c.8-.3 1.3-1.1 1.3-2s-.5-1.7-1.3-2Z" opacity=".45"/></svg></span></div><header class="cab"><span class="marca">Estilo</span>
+      <button class="btn btn--m btn--contorno espacio" type="button" aria-haspopup="dialog"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg><span>Tu espacio</span></button></header>
+    <section class="hilo" aria-label="Conversación con tu asesor"><div class="hilo-in">
+  <div class="turno">
+    <button type="button" class="rastro-res" aria-expanded="false"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Miré el clima · revisé 32 prendas · armé el look</span><svg class="ic" aria-hidden="true"><use href="#i-chev-down"/></svg></button>
+    <div class="asesor"><span class="firma">Estilo</span><p>Te armé esto con lo que ya tienes. <strong>Te falta una sola pieza.</strong></p></div>
+    
+    <article class="look look--nuevo" aria-labelledby="look-t">
+      <span class="over">Sábado 21 · Casablanca · 11° a 27°</span>
+      <h3 class="look-t" id="look-t">Lino y salvia de día</h3>
+      <div class="mesa">
+      <svg class="pz " viewBox="0 0 240 280" style="left:2%;top:3%;width:37%;--r:-6deg" role="img" aria-label="Blazer de lino arena"><use href="#blazer"/></svg>
+      <svg class="pz " viewBox="0 0 220 240" style="left:31%;top:1%;width:33%;--r:5deg" role="img" aria-label="Blusa de seda cruda"><use href="#blusa"/></svg>
+      <svg class="pz " viewBox="0 0 220 262" style="left:63%;top:8%;width:34%;--r:7deg" role="img" aria-label="Falda midi plisada salvia"><use href="#falda"/></svg>
+      <svg class="pz " viewBox="0 0 200 196" style="left:9%;top:57%;width:24%;--r:-5deg" role="img" aria-label="Cartera de mimbre"><use href="#bolso"/></svg>
+      <svg class="pz es-falta" viewBox="0 0 240 170" style="left:50%;top:58%;width:33%;--r:-3deg" aria-hidden="true"><use href="#par-falta"/></svg>
+      <span class="idx" style="left:5%;top:5%">1</span><span class="idx" style="left:38%;top:3%">2</span>
+      <span class="idx" style="left:90%;top:6%">3</span><span class="idx" style="left:5%;top:62%">4</span>
+      <span class="idx idx-falta" style="left:45%;top:73%">5</span>
+      <span class="falta-ins" style="left:60%;top:63%">Falta</span>
+    </div>
+      <p class="leyenda"><span><b>1</b> Blazer de lino</span><span><b>2</b> Blusa de seda</span><span><b>3</b> Falda plisada</span><span><b>4</b> Cartera</span><span class="falta"><i class="punto"></i><b>5</b> Zapatos: no tienes</span></p>
+      <div class="porque"><span class="rotulo">Por qué funciona</span>
+        <p>Salvia y crudo, de tu paleta: frescos de día. El blazer, para cuando entra el viento.</p>
+        <ul class="evidencia" aria-label="En qué me basé">
+          <li><span class="muestras" aria-hidden="true"><i style="background:#8E9A7E"></i><i style="background:#E9E0CC"></i><i style="background:#B07A45"></i></span>Tu paleta</li>
+          <li><svg class="ic" aria-hidden="true"><use href="#i-thermo"/></svg>27° y viento</li>
+          <li><svg class="ic" aria-hidden="true"><use href="#i-shirt"/></svg>4 de tu clóset</li>
+        </ul></div>
+      <div class="refinar" role="group" aria-label="Ajustar el look">
+        <button type="button" class="btn btn--m btn--contorno">Más formal</button><button type="button" class="btn btn--m btn--contorno">Otro color</button>
+        <button type="button" class="btn btn--m btn--contorno">Cambiar el blazer</button><button type="button" class="btn btn--m btn--contorno">Sin cartera</button></div>
+      <div class="acciones"><button type="button" class="btn btn--m btn--accion"><svg class="ic" aria-hidden="true"><use href="#i-bookmark"/></svg>Guardar look</button><button type="button" class="btn btn--m btn--contorno">No es para mí</button></div>
+    </article>
+  </div></div></section>
+    <footer class="compositor"><button class="foto-btn" type="button" aria-label="Mandar una foto"><svg class="ic" aria-hidden="true"><use href="#i-camera"/></svg></button>
+      <div class="campo"><span class="ph">¿Qué le cambiarías?</span></div><button class="enviar" type="button" aria-label="Enviar" disabled><svg class="ic" aria-hidden="true"><use href="#i-arrow-up"/></svg></button></footer><div class="home" aria-hidden="true"></div>
+  </div></div>
+</figure>
+<figure class="momento" id="m4">
+  <figcaption><span class="m-num">04</span><span class="m-tit">Lo que falta, dentro del look</span><span class="m-baj">Tienda, precio visto, fecha y comisión; la pieza elegida entra en la celda naranja</span></figcaption>
+  <div class="telefono"><div class="pantalla" data-theme="light">
+    <div class="ios" aria-hidden="true"><span class="ios-hora">9:41</span><span class="ios-isla"></span><span class="ios-der"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx=".8"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8"/><rect x="10" y="3" width="3" height="9" rx=".8"/><rect x="15" y="0" width="3" height="12" rx=".8"/></svg><svg viewBox="0 0 16 12" width="16" height="12"><path d="M8 2.2c2.4 0 4.6.9 6.2 2.5l1.2-1.2A10.4 10.4 0 0 0 8 .5 10.4 10.4 0 0 0 .6 3.5l1.2 1.2A8.7 8.7 0 0 1 8 2.2Zm0 3.4c1.5 0 2.9.6 3.9 1.6l1.2-1.2A7.2 7.2 0 0 0 8 3.9 7.2 7.2 0 0 0 2.9 6l1.2 1.2c1-1 2.4-1.6 3.9-1.6Zm0 3.4c.7 0 1.3.3 1.7.7L8 11.5 6.3 9.7c.4-.4 1-.7 1.7-.7Z"/></svg><svg viewBox="0 0 27 13" width="27" height="13"><rect x=".5" y=".5" width="23" height="12" rx="3.5" fill="none" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="20" height="9" rx="2"/><path d="M25 4.5v4c.8-.3 1.3-1.1 1.3-2s-.5-1.7-1.3-2Z" opacity=".45"/></svg></span></div><header class="cab"><span class="marca">Estilo</span>
+      <button class="btn btn--m btn--contorno espacio" type="button" aria-haspopup="dialog"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg><span>Tu espacio</span></button></header>
+    <section class="hilo" aria-label="Conversación con tu asesor"><div class="hilo-in">
+  <div class="turno">
+    <div class="asesor"><p>Tus botines son pesados para el día y en pasto un taco fino se entierra. Busqué <strong>taco ancho en tonos tierra</strong>:</p></div>
+    <button type="button" class="rastro-res" aria-expanded="false"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Busqué en 3 tiendas · 41 resultados · elegí 3</span><svg class="ic" aria-hidden="true"><use href="#i-chev-down"/></svg></button>
+    <section class="compra" aria-label="Opciones para completar el look">
+      <div class="tira" aria-label="Así queda tu look con la opción elegida"><span class="tira-c "><svg viewBox="0 0 240 280" aria-hidden="true"><use href="#blazer"/></svg></span><span class="tira-c "><svg viewBox="0 0 220 240" aria-hidden="true"><use href="#blusa"/></svg></span><span class="tira-c "><svg viewBox="0 0 220 262" aria-hidden="true"><use href="#falda"/></svg></span><span class="tira-c "><svg viewBox="0 0 200 196" aria-hidden="true"><use href="#bolso"/></svg></span><span class="tira-c nueva"><svg viewBox="0 0 240 170" aria-hidden="true"><use href="#par-a"/></svg></span><span class="tira-nota">Así queda con la 1</span></div>
+      <ol class="ops"><li><button type="button" class="op sel" aria-pressed="true">
+      <span class="op-foto"><svg viewBox="0 0 240 170" aria-hidden="true"><use href="#par-a"/></svg><span class="op-check"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg></span></span>
+      <span class="op-tienda">Tienda A</span><span class="op-nombre">Sandalia</span><span class="op-precio">$54.990</span></button></li><li><button type="button" class="op " aria-pressed="false">
+      <span class="op-foto"><svg viewBox="0 0 240 170" aria-hidden="true"><use href="#par-b"/></svg></span>
+      <span class="op-tienda">Tienda B</span><span class="op-nombre">Mule</span><span class="op-precio">$39.990</span></button></li><li><button type="button" class="op " aria-pressed="false">
+      <span class="op-foto"><svg viewBox="0 0 240 170" aria-hidden="true"><use href="#par-c"/></svg></span>
+      <span class="op-tienda">Tienda C</span><span class="op-nombre">Alpargata</span><span class="op-precio">$29.990</span></button></li></ol>
+      <div class="ficha">
+        <div class="ficha-cab"><span class="ficha-tienda">Tienda A</span><span class="comision">Enlace con comisión</span></div>
+        <p class="ficha-nombre">Sandalia de cuero camel, taco cuadrado de 5 cm <span class="ficha-precio">$54.990</span></p>
+        <p class="ficha-porque">Repite el camel de tu cartera y el taco ancho no se entierra.</p>
+        <p class="ficha-meta">Visto hoy, 14 nov, 10:40 · Precio y stock pueden cambiar</p>
+        <div class="ficha-acc"><a class="btn btn--m btn--contorno" href="#" onclick="return false">Ver en la tienda<svg class="ic" aria-hidden="true"><use href="#i-external"/></svg></a>
+          <div class="refinar" role="group" aria-label="Ajustar la búsqueda"><button type="button" class="btn btn--m btn--contorno">Más baratos</button><button type="button" class="btn btn--m btn--contorno">Taco más bajo</button><button type="button" class="btn btn--m btn--contorno">No me interesan</button></div></div>
+      </div>
+    </section>
+  </div></div></section>
+    <footer class="compositor"><button class="foto-btn" type="button" aria-label="Mandar una foto"><svg class="ic" aria-hidden="true"><use href="#i-camera"/></svg></button>
+      <div class="campo"><span class="ph">Pregunta por una opción…</span></div><button class="enviar" type="button" aria-label="Enviar" disabled><svg class="ic" aria-hidden="true"><use href="#i-arrow-up"/></svg></button></footer><div class="home" aria-hidden="true"></div>
+  </div></div>
+</figure>
+<figure class="momento" id="m5">
+  <figcaption><span class="m-num">05</span><span class="m-tit">Tu foto, leída</span><span class="m-baj">Una insignia sobre cada prenda; lo nuevo se guarda desde la misma insignia</span></figcaption>
+  <div class="telefono"><div class="pantalla" data-theme="light">
+    <div class="ios" aria-hidden="true"><span class="ios-hora">9:41</span><span class="ios-isla"></span><span class="ios-der"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx=".8"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8"/><rect x="10" y="3" width="3" height="9" rx=".8"/><rect x="15" y="0" width="3" height="12" rx=".8"/></svg><svg viewBox="0 0 16 12" width="16" height="12"><path d="M8 2.2c2.4 0 4.6.9 6.2 2.5l1.2-1.2A10.4 10.4 0 0 0 8 .5 10.4 10.4 0 0 0 .6 3.5l1.2 1.2A8.7 8.7 0 0 1 8 2.2Zm0 3.4c1.5 0 2.9.6 3.9 1.6l1.2-1.2A7.2 7.2 0 0 0 8 3.9 7.2 7.2 0 0 0 2.9 6l1.2 1.2c1-1 2.4-1.6 3.9-1.6Zm0 3.4c.7 0 1.3.3 1.7.7L8 11.5 6.3 9.7c.4-.4 1-.7 1.7-.7Z"/></svg><svg viewBox="0 0 27 13" width="27" height="13"><rect x=".5" y=".5" width="23" height="12" rx="3.5" fill="none" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="20" height="9" rx="2"/><path d="M25 4.5v4c.8-.3 1.3-1.1 1.3-2s-.5-1.7-1.3-2Z" opacity=".45"/></svg></span></div><header class="cab"><span class="marca">Estilo</span>
+      <button class="btn btn--m btn--contorno espacio" type="button" aria-haspopup="dialog"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg><span>Tu espacio</span></button></header>
+    <section class="hilo" aria-label="Conversación con tu asesor"><div class="hilo-in">
+  <div class="foto-msg">
+    <div class="foto"><svg class="foto-svg" viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  <rect width="400" height="500" fill="#E9E0D3" filter="url(#f-sabana)"/>
+  <g style="filter:drop-shadow(0 3px 4px rgb(50 35 20/.32)) drop-shadow(0 10px 18px rgb(50 35 20/.22))">
+    <use href="#vestido" x="88" y="40" width="200" height="273" transform="rotate(-9 188 176)"/>
+    <use href="#zapatillas" x="214" y="330" width="170" height="96" transform="rotate(14 299 378)"/>
+    <use href="#bolso" x="22" y="300" width="160" height="157" transform="rotate(-16 102 378)"/>
+  </g>
+  <rect width="400" height="500" fill="url(#g-foto-luz)"/>
+</svg>
+      <button type="button" class="etq etq--nueva" style="left:5%;top:28%"><svg class="ic etq-ic" aria-hidden="true"><use href="#i-plus"/></svg><span><b>Vestido midi estampado</b><i>Nuevo · guardar</i></span></button>
+      <button type="button" class="etq" style="left:5%;top:64%"><span><b>Cartera de mimbre</b><i>En tu clóset</i></span></button>
+      <button type="button" class="etq" style="left:28%;top:82%"><span><b>Zapatillas blancas</b><i>En tu clóset</i></span></button>
+    </div>
+    <div class="yo">¿Y si uso este vestido?</div>
+  </div>
+  <div class="turno">
+    <div class="asesor"><span class="firma">Estilo</span><p>El vestido es nuevo para mí y funciona para la viña, pero <strong>con sandalias, no con zapatillas</strong>: lo formal de día pide un zapato con algo de taco.</p></div>
+    <div class="recorte" aria-label="Así quedará en tu clóset">
+      <span class="recorte-antes"><svg viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="400" height="500" fill="#E9E0D3" filter="url(#f-sabana)"/><use href="#vestido" x="88" y="40" width="200" height="273" transform="rotate(-9 188 176)"/></svg></span>
+      <svg class="ic recorte-flecha" aria-hidden="true"><use href="#i-chev-right"/></svg>
+      <span class="recorte-despues"><svg viewBox="0 0 220 300" aria-hidden="true"><use href="#vestido"/></svg></span>
+      <span class="recorte-txt"><b>Así queda en tu clóset</b><i>Recortado y enderezado</i></span>
+    </div>
+  </div></div></section>
+    <div class="sugerencias" role="group" aria-label="Respuestas sugeridas"><button type="button" class="btn btn--m btn--contorno">Guárdalo</button><button type="button" class="btn btn--m btn--contorno">Arma un look con él</button></div><footer class="compositor"><button class="foto-btn" type="button" aria-label="Mandar una foto"><svg class="ic" aria-hidden="true"><use href="#i-camera"/></svg></button>
+      <div class="campo"><span class="ph">Pregúntame por la foto…</span></div><button class="enviar" type="button" aria-label="Enviar" disabled><svg class="ic" aria-hidden="true"><use href="#i-arrow-up"/></svg></button></footer><div class="home" aria-hidden="true"></div>
+  </div></div>
+</figure>
+<figure class="momento" id="m6">
+  <figcaption><span class="m-num">06</span><span class="m-tit">Lo que aprendió, y dónde queda</span><span class="m-baj">La nota en lavanda se deshace o se revisa; Tu espacio la muestra como «Recién»</span></figcaption>
+  <div class="telefono"><div class="pantalla" data-theme="light">
+    <div class="ios" aria-hidden="true"><span class="ios-hora">9:41</span><span class="ios-isla"></span><span class="ios-der"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx=".8"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8"/><rect x="10" y="3" width="3" height="9" rx=".8"/><rect x="15" y="0" width="3" height="12" rx=".8"/></svg><svg viewBox="0 0 16 12" width="16" height="12"><path d="M8 2.2c2.4 0 4.6.9 6.2 2.5l1.2-1.2A10.4 10.4 0 0 0 8 .5 10.4 10.4 0 0 0 .6 3.5l1.2 1.2A8.7 8.7 0 0 1 8 2.2Zm0 3.4c1.5 0 2.9.6 3.9 1.6l1.2-1.2A7.2 7.2 0 0 0 8 3.9 7.2 7.2 0 0 0 2.9 6l1.2 1.2c1-1 2.4-1.6 3.9-1.6Zm0 3.4c.7 0 1.3.3 1.7.7L8 11.5 6.3 9.7c.4-.4 1-.7 1.7-.7Z"/></svg><svg viewBox="0 0 27 13" width="27" height="13"><rect x=".5" y=".5" width="23" height="12" rx="3.5" fill="none" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="20" height="9" rx="2"/><path d="M25 4.5v4c.8-.3 1.3-1.1 1.3-2s-.5-1.7-1.3-2Z" opacity=".45"/></svg></span></div><header class="cab"><span class="marca">Estilo</span>
+      <button class="btn btn--m btn--contorno espacio" type="button" aria-haspopup="dialog"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg><span>Tu espacio</span></button></header>
+    <section class="hilo" aria-label="Conversación con tu asesor"><div class="hilo-in">
+  <div class="yo">Me quedo con las de Tienda A. Guárdame el look.</div>
+  <div class="turno">
+    <div class="asesor"><span class="firma">Estilo</span><p><strong>Buena elección:</strong> son las que más rinden con tu clóset. Cuando las tengas, mándame una foto y las sumo.</p></div>
+    <div class="guardado"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Guardado en Tus looks</span></div>
+    <div class="memoria"><span class="mem-ic"><svg class="ic" aria-hidden="true"><use href="#i-bookmark"/></svg></span><p><span class="mem-t">Anotado:</span> en eventos de día prefieres taco ancho y tonos tierra.</p>
+      <div class="mem-acc"><button type="button" class="btn-texto"><svg class="ic" aria-hidden="true"><use href="#i-undo"/></svg>Deshacer</button><button type="button" class="btn-texto">Lo que sé de ti</button></div></div>
+  </div></div></section>
+    <footer class="compositor"><button class="foto-btn" type="button" aria-label="Mandar una foto"><svg class="ic" aria-hidden="true"><use href="#i-camera"/></svg></button>
+      <div class="campo"><span class="ph">Escríbele a tu asesor…</span></div><button class="enviar" type="button" aria-label="Enviar" disabled><svg class="ic" aria-hidden="true"><use href="#i-arrow-up"/></svg></button></footer><div class="home" aria-hidden="true"></div><div class="velo" aria-hidden="true"></div>
+  <div class="hoja" role="dialog" aria-modal="true" aria-labelledby="hoja-t">
+    <span class="asa" aria-hidden="true"></span>
+    <div class="hoja-cab"><h3 id="hoja-t">Tu espacio</h3><button class="cerrar" type="button" aria-label="Cerrar"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+    <ul class="hoja-lista">
+      <li><a href="#" onclick="return false"><span class="h-t">Tu clóset<sup>32</sup></span><span class="h-b">Última: blazer de lino</span><span class="h-mini">
+        <svg viewBox="0 0 220 240"><use href="#blusa"/></svg><svg viewBox="0 0 220 262"><use href="#falda"/></svg><svg viewBox="0 0 240 280"><use href="#blazer"/></svg></span></a></li>
+      <li><a href="#" onclick="return false"><span class="h-t">Tus looks<sup>7</sup></span><span class="h-b"><span class="marca-h marca-h--nuevo">Nuevo</span>Lino y salvia de día</span><span class="h-mini">
+        <svg viewBox="0 0 220 262"><use href="#falda"/></svg><svg viewBox="0 0 240 170"><use href="#par-a"/></svg></span></a></li>
+      <li><a href="#" onclick="return false"><span class="h-t">Lo que sé de ti<sup>12</sup></span><span class="h-b"><span class="marca-h marca-h--memoria">Recién</span>Taco ancho en eventos de día</span></a></li>
+      <li><a href="#" onclick="return false"><span class="h-t">Tu paleta</span><span class="h-b">Otoño cálido · orientativa</span><span class="h-sw"><i style="background:#8E9A7E"></i><i style="background:#B07A45"></i><i style="background:#A9583A"></i><i style="background:#E9E0CC"></i><i style="background:#5A4632"></i></span></a></li>
+    </ul>
+    <button type="button" class="btn-texto salir">Cerrar sesión</button>
+  </div>
+  </div></div>
+</figure></div>
+
+  <section class="noche" data-theme="dark" aria-labelledby="noche-h">
+    <div class="noche-txt"><p class="sobre">Tema Noche · fuera del MVP</p><h2 id="noche-h">El look, de noche.</h2>
+      <p>Mismos nombres de token, valores de Noche. El inverso pasa a hueso: el look recién propuesto se vuelve la superficie clara de la pantalla y "Guardar look" sigue en lima. La mesa queda en hundido oscuro, así que las prendas claras se leen y las oscuras pierden la sombra: es lo primero a revisar si Noche entra.</p>
+      <ul><li><i style="background:#0F1110"></i>fondo #0F1110 · tinta #F4F5F0 (17,30)</li><li><i style="background:#F4F5F0"></i>inverso #F4F5F0 · sobre-inverso-suave #4A504B (7,54)</li><li><i style="background:#C9F24D"></i>accion #C9F24D · sobre-color #121412 (14,36)</li></ul></div>
+    <figure class="momento" id="m3-noche">
+  <figcaption><span class="m-num">03</span><span class="m-tit">El look, en tema Noche</span><span class="m-baj">Mismos tokens en Noche</span></figcaption>
+  <div class="telefono"><div class="pantalla" data-theme="dark">
+    <div class="ios" aria-hidden="true"><span class="ios-hora">9:41</span><span class="ios-isla"></span><span class="ios-der"><svg viewBox="0 0 18 12" width="18" height="12"><rect x="0" y="8" width="3" height="4" rx=".8"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8"/><rect x="10" y="3" width="3" height="9" rx=".8"/><rect x="15" y="0" width="3" height="12" rx=".8"/></svg><svg viewBox="0 0 16 12" width="16" height="12"><path d="M8 2.2c2.4 0 4.6.9 6.2 2.5l1.2-1.2A10.4 10.4 0 0 0 8 .5 10.4 10.4 0 0 0 .6 3.5l1.2 1.2A8.7 8.7 0 0 1 8 2.2Zm0 3.4c1.5 0 2.9.6 3.9 1.6l1.2-1.2A7.2 7.2 0 0 0 8 3.9 7.2 7.2 0 0 0 2.9 6l1.2 1.2c1-1 2.4-1.6 3.9-1.6Zm0 3.4c.7 0 1.3.3 1.7.7L8 11.5 6.3 9.7c.4-.4 1-.7 1.7-.7Z"/></svg><svg viewBox="0 0 27 13" width="27" height="13"><rect x=".5" y=".5" width="23" height="12" rx="3.5" fill="none" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="20" height="9" rx="2"/><path d="M25 4.5v4c.8-.3 1.3-1.1 1.3-2s-.5-1.7-1.3-2Z" opacity=".45"/></svg></span></div><header class="cab"><span class="marca">Estilo</span>
+      <button class="btn btn--m btn--contorno espacio" type="button" aria-haspopup="dialog"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg><span>Tu espacio</span></button></header>
+    <section class="hilo" aria-label="Conversación con tu asesor"><div class="hilo-in">
+  <div class="turno">
+    <button type="button" class="rastro-res" aria-expanded="false"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span>Miré el clima · revisé 32 prendas · armé el look</span><svg class="ic" aria-hidden="true"><use href="#i-chev-down"/></svg></button>
+    <div class="asesor"><span class="firma">Estilo</span><p>Te armé esto con lo que ya tienes. <strong>Te falta una sola pieza.</strong></p></div>
+    
+    <article class="look look--nuevo" aria-labelledby="look-t-n">
+      <span class="over">Sábado 21 · Casablanca · 11° a 27°</span>
+      <h3 class="look-t" id="look-t-n">Lino y salvia de día</h3>
+      <div class="mesa">
+      <svg class="pz " viewBox="0 0 240 280" style="left:2%;top:3%;width:37%;--r:-6deg" role="img" aria-label="Blazer de lino arena"><use href="#blazer"/></svg>
+      <svg class="pz " viewBox="0 0 220 240" style="left:31%;top:1%;width:33%;--r:5deg" role="img" aria-label="Blusa de seda cruda"><use href="#blusa"/></svg>
+      <svg class="pz " viewBox="0 0 220 262" style="left:63%;top:8%;width:34%;--r:7deg" role="img" aria-label="Falda midi plisada salvia"><use href="#falda"/></svg>
+      <svg class="pz " viewBox="0 0 200 196" style="left:9%;top:57%;width:24%;--r:-5deg" role="img" aria-label="Cartera de mimbre"><use href="#bolso"/></svg>
+      <svg class="pz es-falta" viewBox="0 0 240 170" style="left:50%;top:58%;width:33%;--r:-3deg" aria-hidden="true"><use href="#par-falta"/></svg>
+      <span class="idx" style="left:5%;top:5%">1</span><span class="idx" style="left:38%;top:3%">2</span>
+      <span class="idx" style="left:90%;top:6%">3</span><span class="idx" style="left:5%;top:62%">4</span>
+      <span class="idx idx-falta" style="left:45%;top:73%">5</span>
+      <span class="falta-ins" style="left:60%;top:63%">Falta</span>
+    </div>
+      <p class="leyenda"><span><b>1</b> Blazer de lino</span><span><b>2</b> Blusa de seda</span><span><b>3</b> Falda plisada</span><span><b>4</b> Cartera</span><span class="falta"><i class="punto"></i><b>5</b> Zapatos: no tienes</span></p>
+      <div class="porque"><span class="rotulo">Por qué funciona</span>
+        <p>Salvia y crudo, de tu paleta: frescos de día. El blazer, para cuando entra el viento.</p>
+        <ul class="evidencia" aria-label="En qué me basé">
+          <li><span class="muestras" aria-hidden="true"><i style="background:#8E9A7E"></i><i style="background:#E9E0CC"></i><i style="background:#B07A45"></i></span>Tu paleta</li>
+          <li><svg class="ic" aria-hidden="true"><use href="#i-thermo"/></svg>27° y viento</li>
+          <li><svg class="ic" aria-hidden="true"><use href="#i-shirt"/></svg>4 de tu clóset</li>
+        </ul></div>
+      <div class="refinar" role="group" aria-label="Ajustar el look">
+        <button type="button" class="btn btn--m btn--contorno">Más formal</button><button type="button" class="btn btn--m btn--contorno">Otro color</button>
+        <button type="button" class="btn btn--m btn--contorno">Cambiar el blazer</button><button type="button" class="btn btn--m btn--contorno">Sin cartera</button></div>
+      <div class="acciones"><button type="button" class="btn btn--m btn--accion"><svg class="ic" aria-hidden="true"><use href="#i-bookmark"/></svg>Guardar look</button><button type="button" class="btn btn--m btn--contorno">No es para mí</button></div>
+    </article>
+  </div></div></section>
+    <footer class="compositor"><button class="foto-btn" type="button" aria-label="Mandar una foto"><svg class="ic" aria-hidden="true"><use href="#i-camera"/></svg></button>
+      <div class="campo"><span class="ph">¿Qué le cambiarías?</span></div><button class="enviar" type="button" aria-label="Enviar" disabled><svg class="ic" aria-hidden="true"><use href="#i-arrow-up"/></svg></button></footer><div class="home" aria-hidden="true"></div>
+  </div></div>
+</figure>
+  </section>
+
+  <section class="notas" aria-labelledby="notas-h">
+    <h2 id="notas-h">Choques y cómo quedaron</h2>
+    <p>La identidad de Prendie está hecha para algo juvenil y cómplice entre amigas; Estilo es un asesor y tiene que transmitir criterio. La maqueta aplica las resoluciones de UX_UI_SPEC §1.1; donde una no funcionó en pantalla, lo digo.</p>
+    <div class="choques">
+      <article class="choque"><span class="k">1 · Voz</span><h3>Dos voces sin serif</h3>
+        <p><b>Asesor sin contenedor, a ancho completo, en Manrope 600 16/24</b>; su énfasis en 800, sin cursiva ni color. <b>Persona en bloque hundido a la derecha, Manrope 500 15/22.</b> Las distinguen el contenedor, la alineación y el peso; el asesor pesa más que la persona.</p>
+        <p>Firma "Estilo" en sobretítulo, solo en el primer bloque del turno.</p></article>
+      <article class="choque"><span class="k">2 · Color</span><h3>Un rol por acento, siempre de superficie</h3>
+        <p><b>Lima</b> = la acción principal, una por pantalla ("Guardar look"). <b>Inverso</b> = el objeto más importante (el look recién propuesto) y lo elegido. <b>Lavanda</b> = lo que el asesor sabe de ti. <b>Naranja</b> = lo que falta y lo que se podría comprar. Los tres de color son solo superficies con texto tinta: como texto sobre claro no llegan a 3:1.</p></article>
+      <article class="choque"><span class="k">3 · Tono</span><h3>Cómplice en la forma, serio en el fondo</h3>
+        <p>La energía la ponen Bricolage, el lima y las píldoras. El criterio, lo que no se negocia: el porqué con evidencia siempre a la vista, la ficha de compra honesta (tienda, precio visto, fecha, comisión dicha), "Ver en la tienda" nunca en lima y sin chilenismos de marca.</p>
+        <p>Sin etiqueta colgante: las prendas de la foto se nombran con insignias.</p></article>
+    </div>
+    <div class="roles"><table>
+      <thead><tr><th>Token</th><th>Rol en Estilo</th><th>Contraste</th></tr></thead>
+      <tbody>
+        <tr><td><span class="sw" style="background:#C9F24D"></span><b>accion</b></td><td>Guardar look del look recién propuesto. Nunca en chips ni en 'Ver en la tienda'.</td><td>sobre-color 14,36 · como texto sobre fondo 1,15 (prohibido)</td></tr>
+        <tr><td><span class="sw" style="background:#121412"></span><b>inverso</b></td><td>Look recién propuesto, opción elegida, enviar, insignia 'Nuevo' sobre la foto.</td><td>sobre-inverso 18,51 · sobre-inverso-suave 9,72</td></tr>
+        <tr><td><span class="sw" style="background:#C9B8FF"></span><b>memoria</b></td><td>Nota de memoria, 'Recién' en Tu espacio.</td><td>sobre-color 10,39</td></tr>
+        <tr><td><span class="sw" style="background:#FF8A57"></span><b>falta</b></td><td>Insignia 'Falta' en la mesa, celda de la pieza en la tira.</td><td>sobre-color 7,95 · como texto sobre superficie 2,33 (prohibido)</td></tr>
+        <tr><td><span class="sw" style="background:#0B7285"></span><b>exito</b></td><td>Check del rastro, 'Guardado en Tus looks'. Siempre con palabra.</td><td>sobre fondo 4,98 · sobre superficie 5,59</td></tr>
+        <tr><td><span class="sw" style="background:#E8E9E4"></span><b>hundido</b></td><td>Mensaje de la persona, mesa de prendas, miniaturas.</td><td>tinta 15,17 · tinta-suave 5,09</td></tr>
+      </tbody></table></div>
+    <div class="fuera">
+      <div><h3>Ajustes que pido al documento</h3><ul>
+        <li><b>Campo del compositor.</b> Hundido sobre la barra superficie da 1,22:1 y en pantalla no se lee como campo. Lo dejé en superficie con borde 1,5 px linea-fuerte (18,51:1), como el botón de foto a su lado.</li>
+        <li><b>Mesa en tema Noche:</b> si Noche entra, la mesa necesita un tono propio más claro que hundido.</li>
+      </ul></div>
+      <div><h3>De Prendie, lo que no calzó</h3><ul>
+        <li>Logotipo, etiqueta colgante, navegación flotante, círculos y "Busco": de Prendie, no de Estilo.</li>
+        <li>"No muestra precios": Estilo sí, con fecha y tienda (DP-10, DP-19).</li>
+        <li>Chips de 36 px para sugerir o refinar: aquí son botones de contorno de 44.</li>
+        <li>Lavanda y naranja cambian de significado (círculos y plazos en Prendie).</li>
+      </ul></div>
+    </div>
+  </section>
+</main>
+</body>
+</html>

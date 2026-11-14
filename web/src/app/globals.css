@@ -2,59 +2,102 @@
 
 /*
  * Estilo — tokens de diseño (fuente de verdad: DESIGN.MD en la raíz del repo).
- * Solo modo claro en el MVP: no hay variante oscura y no se responde a prefers-color-scheme.
+ * Identidad visual de Prendie con estructura propia (DP-23). Solo tema Día en el MVP: no hay
+ * variante oscura y no se responde a prefers-color-scheme.
  * La paleta por defecto de Tailwind se elimina: solo existen los colores de abajo.
- * Una clase como text-gray-500 o bg-white NO genera CSS (falla en silencio).
+ * Una clase como text-gray-500 o bg-white NO genera CSS (falla en silencio): lo detecta tests/tokens.test.ts.
  */
 @theme {
   --color-*: initial;
 
   /* Superficies */
-  --color-fondo: #f6f2ec;        /* papel hueso: fondo de toda la app */
-  --color-superficie: #fffdf9;   /* tarjetas, hojas, inputs, texto sobre acento o tinta */
-  --color-hundido: #ece6dc;      /* chips sin seleccionar, marcador de foto, fondo desktop */
+  --color-fondo: #f2f2ee;        /* fondo de la app */
+  --color-superficie: #ffffff;   /* tarjetas, hoja, chips sobre foto */
+  --color-hundido: #e8e9e4;      /* campo, mensaje de la persona, mesa de prendas, esqueletos */
 
   /* Texto */
-  --color-tinta: #1f1b17;        /* texto principal, botón primario */
-  --color-tinta-suave: #5c534a;  /* texto secundario, metadatos, íconos inactivos */
+  --color-tinta: #121412;        /* texto e íconos */
+  --color-tinta-suave: #5e625d;  /* metadatos */
 
   /* Líneas */
-  --color-linea: #ddd5c9;        /* divisores decorativos (no portan información) */
-  --color-linea-fuerte: #8f8478; /* borde de inputs y controles (>= 3:1) */
+  --color-linea: #d6d8d2;        /* divisores; nunca borde de control */
+  --color-linea-fuerte: #121412; /* borde de controles (1.5 px) */
 
-  /* Marca */
-  --color-acento: #7a2e2a;       /* granate: foco, selección, enlaces, detalle editorial */
-  --color-acento-suave: #f3e4df; /* fondo de chip seleccionado, mensaje de la persona */
+  /* Énfasis */
+  --color-inverso: #121412;              /* look recién propuesto, chip elegido, enviar */
+  --color-sobre-inverso: #ffffff;        /* texto sobre inverso */
+  --color-sobre-inverso-suave: #b9bdb7;  /* texto secundario sobre inverso */
 
-  /* Estado (siempre con texto o ícono, nunca solo color) */
-  --color-exito: #2e5e43;
-  --color-exito-suave: #e3eee6;
-  --color-alerta: #7f5300;
-  --color-alerta-suave: #f6ebd3;
-  --color-error: #a12f28;
-  --color-error-suave: #f7e1de;
+  /* Color de marca: solo superficies con texto sobre-color (como texto no llegan a 3:1) */
+  --color-accion: #c9f24d;       /* lima: una acción principal por pantalla */
+  --color-memoria: #c9b8ff;      /* lavanda: lo que el asesor sabe de ti */
+  --color-falta: #ff8a57;        /* naranja: lo que falta, lo que se compra, confianza baja */
+  --color-sobre-color: #121412;  /* texto sobre accion, memoria y falta */
 
-  /* Radios: editorial y casi recto. Chips y avatares usan rounded-full. */
-  --radius-xs: 2px;
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 14px;
+  /* Estado (siempre con palabra, nunca solo color) */
+  --color-exito: #0b7285;
+  --color-error: #c2341f;
+  --color-sobre-estado: #ffffff; /* texto sobre exito y error */
 
-  /* Sombra única para lo que flota (toasts, hojas inferiores). Nada más lleva sombra. */
-  --shadow-flotante: 0 18px 40px -18px rgb(31 27 23 / 0.35), 0 2px 6px -2px rgb(31 27 23 / 0.08);
+  /* Foco */
+  --color-foco: #2b4bff;
+
+  /* Radios por rol; rounded-full para botones, chips y avatares */
+  --radius-insignia: 12px;  /* etiquetas, evidencia, miniaturas */
+  --radius-campo: 20px;     /* campo, mensaje */
+  --radius-foto: 24px;      /* prenda, mesa */
+  --radius-tarjeta: 28px;   /* tarjetas, hoja */
+
+  /* Estilos de texto: tamaño / interlínea / peso / tracking */
+  --text-titular: 40px;
+  --text-titular--line-height: 1.05;
+  --text-titular--font-weight: 800;
+  --text-titular--letter-spacing: -0.03em;
+  --text-titulo: 26px;
+  --text-titulo--line-height: 1.1;
+  --text-titulo--font-weight: 800;
+  --text-titulo--letter-spacing: -0.02em;
+  --text-titulo-s: 18px;
+  --text-titulo-s--line-height: 1.2;
+  --text-titulo-s--font-weight: 800;
+  --text-titulo-s--letter-spacing: -0.01em;
+  --text-destacado: 16px;
+  --text-destacado--line-height: 24px;
+  --text-destacado--font-weight: 600;
+  --text-cuerpo: 15px;
+  --text-cuerpo--line-height: 22px;
+  --text-cuerpo--font-weight: 500;
+  --text-nombre: 14px;
+  --text-nombre--line-height: 20px;
+  --text-nombre--font-weight: 800;
+  --text-control: 14px;
+  --text-control--line-height: 18px;
+  --text-control--font-weight: 700;
+  --text-meta: 12px;
+  --text-meta--line-height: 16px;
+  --text-meta--font-weight: 500;
+  --text-sobretitulo: 12px;
+  --text-sobretitulo--line-height: 16px;
+  --text-sobretitulo--font-weight: 700;
+  --text-sobretitulo--letter-spacing: 0.12em;
+
+  /* Sombra única, solo para lo que flota (hoja, toast, "Ir al final") */
+  --shadow-flotante: 0 8px 24px rgb(18 20 18 / 0.18);
 
   /* Columna de la app en pantallas anchas: max-w-app */
   --container-app: 32.5rem;
 
-  /* Movimiento */
+  /* Movimiento. Solo transform, opacity y filter. */
   --ease-estilo: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --ease-salida: cubic-bezier(0.4, 0, 1, 1);
-  --animate-aparecer: aparecer 320ms var(--ease-estilo) both;
+  --ease-salida: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-viaje: cubic-bezier(0.45, 0, 0.1, 1);
+  --animate-aparecer: aparecer 260ms var(--ease-salida) both;
   --animate-subir: subir 280ms var(--ease-estilo) both;
-  --animate-respirar: respirar 1.4s ease-in-out infinite;
+  --animate-respirar: respirar 1.2s var(--ease-viaje) infinite;
+  --animate-esqueleto: respirar 1.6s var(--ease-viaje) infinite;
 
   @keyframes aparecer {
-    from { opacity: 0; transform: translateY(8px); }
+    from { opacity: 0; transform: translateY(6px); }
     to { opacity: 1; transform: translateY(0); }
   }
   @keyframes subir {
@@ -62,15 +105,33 @@
     to { opacity: 1; transform: translateY(0); }
   }
   @keyframes respirar {
-    0%, 100% { opacity: 0.35; transform: scale(0.85); }
-    50% { opacity: 1; transform: scale(1); }
+    0%, 100% { opacity: 0.25; }
+    50% { opacity: 1; }
   }
+}
+
+/*
+ * ALIAS TRANSITORIOS — los borra la historia ui-20.
+ * Existen solo para que la interfaz actual siga viéndose bien mientras se migra componente por componente.
+ * No usar en código nuevo (DESIGN.MD §8). Cada uno apunta al token nuevo equivalente.
+ */
+@theme inline {
+  --color-acento: var(--color-inverso);          /* era granate: foco, selección, enlaces */
+  --color-acento-suave: var(--color-hundido);    /* era rosa pálido: chip elegido, mensaje de la persona */
+  --color-exito-suave: var(--color-hundido);
+  --color-alerta: var(--color-tinta);
+  --color-alerta-suave: var(--color-falta);
+  --color-error-suave: var(--color-superficie);
+  --radius-xs: var(--radius-insignia);
+  --radius-sm: var(--radius-campo);
+  --radius-md: var(--radius-foto);
+  --radius-lg: var(--radius-tarjeta);
 }
 
 /* Fuentes: variables que inyecta next/font en <html> (layout.tsx). */
 @theme inline {
-  --font-display: var(--font-bodoni), "Bodoni Moda", Didot, "Times New Roman", serif;
-  --font-body: var(--font-hanken), "Hanken Grotesk", "Helvetica Neue", sans-serif;
+  --font-display: var(--font-bricolage), "Bricolage Grotesque", system-ui, sans-serif;
+  --font-body: var(--font-manrope), Manrope, system-ui, sans-serif;
 }
 
 /* Zonas seguras de iOS (viewportFit: "cover" en layout.tsx). */
@@ -80,13 +141,9 @@
 @utility pb-seguro {
   padding-bottom: max(env(safe-area-inset-bottom, 0px), 0.5rem);
 }
-/* Contenido con BottomNav fija (h-16 + zona segura) para que nada quede tapado. */
-@utility pb-con-barra {
-  padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px) + 1.5rem);
-}
-/* Compositor de chat sobre la BottomNav. */
-@utility bottom-sobre-barra {
-  bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
+/* Sombra de la prenda recortada: parte de la foto, no de la interfaz (PD-6). */
+@utility drop-shadow-prenda {
+  filter: drop-shadow(0 1px 1px rgb(58 40 22 / 0.2)) drop-shadow(0 7px 9px rgb(58 40 22 / 0.16));
 }
 
 @layer base {
@@ -101,6 +158,7 @@
     color: var(--color-tinta);
     font-family: var(--font-body);
     font-size: 1rem;
+    font-weight: 500;
     line-height: 1.55;
     font-feature-settings: "kern", "liga";
     text-rendering: optimizeLegibility;
@@ -117,9 +175,9 @@
   h1, h2, h3 {
     font-family: var(--font-display);
     font-optical-sizing: auto;
-    font-weight: 500;
+    font-weight: 800;
     line-height: 1.1;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
     text-wrap: balance;
   }
 
@@ -128,15 +186,14 @@
   }
 
   ::selection {
-    background-color: var(--color-acento-suave);
-    color: var(--color-tinta);
+    background-color: var(--color-inverso);
+    color: var(--color-sobre-inverso);
   }
 
   /* Foco visible, nunca se elimina. */
   :focus-visible {
-    outline: 2px solid var(--color-acento);
+    outline: 3px solid var(--color-foco);
     outline-offset: 2px;
-    border-radius: var(--radius-xs);
   }
 
   button, [role="button"], a, label, summary {
