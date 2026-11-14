@@ -137,6 +137,8 @@ export type Weather = {
   temp_min: number;
   temp_max: number;
   precipitation_probability: number | null;
+  /** Viento máximo del día en km/h (puede faltar en pronósticos guardados antes). */
+  wind_kmh?: number | null;
   summary: string;
 };
 
@@ -156,6 +158,117 @@ export type OutfitItemView = {
   photo_url: string | null;
 };
 
+// --- Contrato v2 (2026-11-14): pasos de trabajo, evento, evidencia, refinamientos y compra ---
+// Todo campo nuevo de los tipos existentes es OPCIONAL: los componentes anteriores siguen compilando.
+
+/** Estado de un paso de trabajo del asesor. */
+export type ToolStepStatus = "running" | "done" | "error";
+/** Prenda del clóset considerada en un paso; `chosen` = el asesor la usó en un look. */
+export type ToolStepItem = { garment_id: string; chosen: boolean };
+/** Paso de trabajo persistente (C-1). El evento y la parte `tool_step` tienen esta forma más `type`. */
+export type ToolStep = {
+  /** Único dentro del mensaje: un evento posterior con el mismo `id` reemplaza al anterior. */
+  id: string;
+  tool: AgentToolName;
+  status: ToolStepStatus;
+  label_running: string;
+  label_done: string;
+  detail?: string;
+  items?: ToolStepItem[];
+};
+
+export const EVENT_FIELDS = ["time_of_day", "dress_code", "kind", "date", "place", "venue"] as const;
+export type EventField = (typeof EVENT_FIELDS)[number];
+export type EventTimeOfDay = "day" | "night";
+export type EventVenue = "indoor" | "outdoor";
+/** Resumen del evento que entendió el asesor (C-8). */
+export type EventSummary = {
+  /** Tipo de evento tal como se muestra: "Matrimonio". */
+  kind: string | null;
+  /** YYYY-MM-DD en America/Santiago. */
+  date: string | null;
+  /** Ciudad o lugar para el clima: "Casablanca". */
+  place: string | null;
+  /** Detalle del lugar, tal como se muestra: "En una viña". */
+  place_note: string | null;
+  setting: { time_of_day: EventTimeOfDay | null; venue: EventVenue | null };
+  /** "formal de día", o "no especificado" si la invitación no dice nada. */
+  dress_code: string | null;
+  weather: { min: number; max: number; note: string } | null;
+  /** Lo que todavía no se sabe y cambia el look, en el orden en que conviene preguntarlo (subconjunto de EVENT_FIELDS). */
+  missing: EventField[];
+};
+
+export type OutfitEvidenceKind = "palette" | "weather" | "closet" | "occasion";
+/** "En qué me basé" (C-2). `swatches` son hex y solo van en `palette`. */
+export type OutfitEvidence = { kind: OutfitEvidenceKind; label: string; swatches?: string[] };
+
+/** Uno seguro y uno más atrevido (decisión D-04). */
+export type OutfitVariant = "seguro" | "atrevido";
+
+export const OUTFIT_CHANGES = ["more_formal", "less_formal", "other_color", "warmer", "lighter", "swap_garment", "drop_garment"] as const;
+export type OutfitChange = (typeof OUTFIT_CHANGES)[number];
+export const SEARCH_CHANGES = ["cheaper", "other_color", "other_style", "lower_heel", "dismiss"] as const;
+export type SearchChange = (typeof SEARCH_CHANGES)[number];
+
+/**
+ * Acción estructurada de la persona (C-3). Solo ids y enumeraciones: no hay texto libre que inyectar.
+ * El servidor verifica que cada id sea de la persona antes de dárselo al asesor como dato del sistema.
+ */
+export type ChatIntent =
+  | { kind: "refine_outfit"; outfit_id: string; change: OutfitChange; garment_id?: string }
+  | { kind: "refine_search"; block_id: string; change: SearchChange }
+  | { kind: "accept_search"; outfit_id: string; slot: GarmentCategory }
+  | { kind: "decline_search"; outfit_id: string; slot: GarmentCategory };
+
+/** Botón de refinamiento: `label` es lo que ve la persona y `intent` lo que viaja al tocarlo. */
+export type Refinement = { id: string; label: string; intent: ChatIntent };
+
+/** Oferta de buscar opciones de compra para la pieza faltante: la persona acepta o no con un intent. */
+export type SearchOffer = {
+  id: string;
+  outfit_id: string;
+  slot: GarmentCategory;
+  description: string;
+  actions: Refinement[];
+};
+
+/** Opción de compra (C-4). Siempre sale de un `ProductSearch`, nunca del modelo. */
+export type ProductOption = {
+  id: string;
+  store_name: string;
+  title: string;
+  /** Pesos chilenos enteros, > 0. */
+  price_clp: number;
+  /** Momento en que se vio el precio (ISO). */
+  seen_at: string;
+  /** Siempre https. La abre la persona: el asesor nunca compra. */
+  url: string;
+  image_cutout_url: string | null;
+  image_url: string | null;
+  affiliate: boolean;
+  reason: string;
+  in_stock?: boolean | null;
+};
+
+export type ShoppingTrigger = "offer_accepted" | "person_request" | "refinement";
+/** Bloque de opciones de compra (evento y parte `shopping_options`). */
+export type ShoppingOptionsBlock = {
+  id: string;
+  /** Look al que completa. `null` si la persona pidió buscar y todavía no hay look. */
+  for_outfit_id: string | null;
+  slot: GarmentCategory;
+  query: string;
+  searched: { stores: number; results: number };
+  /** Máximo 3, ordenadas sin pesar la afiliación (DP-10). */
+  options: ProductOption[];
+  refinements: Refinement[];
+  trigger: ShoppingTrigger;
+  budget_max_clp: number | null;
+  /** Opción que la persona eligió (C-5), si eligió. */
+  selected_option_id: string | null;
+};
+
 /** DTO de outfit: lo que viaja en el evento SSE `outfit` y lo que pinta la tarjeta de look. */
 export type OutfitView = {
   id: string;
@@ -168,16 +281,42 @@ export type OutfitView = {
   rating: OutfitRating | null;
   created_at: string;
   items: OutfitItemView[];
+  /** C-2. Ausente en looks anteriores a esta versión. */
+  evidence?: OutfitEvidence[];
+  /** C-3. Solo en el hilo; los looks de "Tus looks" no los traen. */
+  refinements?: Refinement[];
+  /** Dos looks para elegir: marca y par (mismo `pair_id`). */
+  variant?: OutfitVariant | null;
+  pair_id?: string | null;
+  /** C-5: opción de compra que la persona eligió para la pieza faltante. */
+  selected_option?: ProductOption | null;
 };
 
 export type ChatMessagePart =
-  | { type: "outfit"; outfit_id: string }
+  | {
+      type: "outfit";
+      outfit_id: string;
+      /** Datos del hilo que guardó el servidor al proponer el look (C-2, C-3, D-04). Mensajes antiguos no los traen. */
+      evidence?: OutfitEvidence[];
+      refinements?: Refinement[];
+      variant?: OutfitVariant | null;
+      pair_id?: string | null;
+    }
   | { type: "image"; path: string }
   | { type: "garment"; garment_id: string }
   | { type: "palette"; analysis_id: string }
   | { type: "quick_replies"; options: string[]; multiple: boolean }
   /** Nota que el asesor anotó en este mensaje. Mensajes antiguos pueden no traerla (se ignora). */
-  | { type: "memory"; memory_id: string; fact: string };
+  | { type: "memory"; memory_id: string; fact: string }
+  /** C-1: estado final de cada paso del turno. */
+  | ({ type: "tool_step" } & ToolStep)
+  /** C-8: lo último que entendió del evento (la Server Action `updateEventSummary` lo corrige aquí mismo). */
+  | ({ type: "event_summary" } & EventSummary)
+  /** C-4/C-5: opciones de compra; `selected_option_id` cambia al elegir. */
+  | ({ type: "shopping_options" } & ShoppingOptionsBlock)
+  | ({ type: "search_offer" } & SearchOffer)
+  /** Mensaje de la persona que nació de un botón (C-3). */
+  | { type: "intent"; intent: ChatIntent };
 
 /** Nota de memoria anotada durante un mensaje; `id` sirve para `deleteMemoryFact(id)` ("Deshacer"). */
 export type MemoryNote = { id: string; fact: string };
@@ -200,6 +339,14 @@ export type ChatMessageView = {
   /** Notas de memoria anotadas durante este mensaje, con `id` para ofrecer "Deshacer". */
   memory_notes: MemoryNote[];
   created_at: string;
+  /** C-1: rastro del trabajo del turno, en orden. Ausente en mensajes anteriores. */
+  tool_steps?: ToolStep[];
+  /** C-8: resumen del evento de este mensaje (con las correcciones de la persona). */
+  event_summary?: EventSummary | null;
+  /** C-4/C-5: opciones de compra mostradas en este mensaje. */
+  shopping_blocks?: ShoppingOptionsBlock[];
+  /** Oferta de buscar opciones, pendiente de respuesta. */
+  search_offer?: SearchOffer | null;
 };
 
 /** Eventos SSE de POST /api/chat. */
@@ -212,6 +359,11 @@ export type ChatEvent =
   | { type: "palette"; analysis: ColorAnalysis }
   | { type: "quick_replies"; options: string[]; multiple: boolean }
   | { type: "memory"; id: string; fact: string; kind: MemoryFactKind }
+  /** C-1. Se emite al empezar (`running`) y al terminar (`done` | `error`) cada paso; mismo `id` = reemplaza. */
+  | ({ type: "tool_step" } & ToolStep)
+  | ({ type: "event_summary" } & EventSummary)
+  | ({ type: "shopping_options" } & ShoppingOptionsBlock)
+  | ({ type: "search_offer" } & SearchOffer)
   | { type: "done"; message_id: string }
   | { type: "error"; message: string };
 
@@ -228,6 +380,10 @@ const CHAT_EVENT_TYPE_MAP: Record<ChatEvent["type"], true> = {
   palette: true,
   quick_replies: true,
   memory: true,
+  tool_step: true,
+  event_summary: true,
+  shopping_options: true,
+  search_offer: true,
   done: true,
   error: true,
 };
@@ -241,7 +397,10 @@ export type AgentToolName =
   | "update_profile"
   | "add_garment"
   | "analyze_palette"
-  | "suggest_replies";
+  | "suggest_replies"
+  | "set_event_summary"
+  | "offer_search"
+  | "search_products";
 
 /** Texto que ve la persona mientras el asesor usa una herramienta. */
 export const TOOL_STATUS_LABELS: Record<AgentToolName, string> = {
@@ -253,6 +412,9 @@ export const TOOL_STATUS_LABELS: Record<AgentToolName, string> = {
   add_garment: "Agregando la prenda a tu clóset…",
   analyze_palette: "Analizando tus colores…",
   suggest_replies: "", // no muestra estado: el servidor ni siquiera emite `tool` para ella
+  set_event_summary: "Entendiendo tu evento…",
+  offer_search: "", // silenciosa, como suggest_replies
+  search_products: "Buscando opciones…",
 };
 
 // --- Opciones del onboarding (chips). El valor guardado es el propio texto en minúsculas. ---
@@ -327,6 +489,9 @@ export const ONBOARDING_GARMENT_GOAL = 5;
 /** Resultado de toda Server Action. `error` es un mensaje en español listo para mostrar. */
 export type ActionResult = { ok: true } | { ok: false; error: string };
 
+/** Server Action que además devuelve un dato. */
+export type ActionDataResult<T> = { ok: true; data: T } | { ok: false; error: string };
+
 export type OutfitFeedbackRating = OutfitRating;
 
 /** Nombres de los eventos de producto (`analytics_events.name`, en inglés). */
@@ -348,7 +513,10 @@ export type AnalyticsEventName =
   | "outfit_discarded"
   | "color_palette_corrected"
   | "data_deleted"
-  | "pwa_installed";
+  | "pwa_installed"
+  | "shopping_search"
+  | "shopping_option_selected"
+  | "event_summary_corrected";
 
 export type PhotoKind = "garments" | "selfies" | "chat";
 

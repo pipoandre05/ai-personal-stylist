@@ -13,6 +13,7 @@ type Forecast = {
     temperature_2m_min?: (number | null)[];
     precipitation_probability_max?: (number | null)[];
     weather_code?: (number | null)[];
+    wind_speed_10m_max?: (number | null)[];
   };
 };
 
@@ -40,6 +41,8 @@ export function parseForecast(json: unknown, city: string, date: string): Weathe
   if (typeof tmax !== "number" || typeof tmin !== "number") return null;
   const rain = daily.precipitation_probability_max?.[idx];
   const precipitation_probability = typeof rain === "number" ? rain : null;
+  const wind = daily.wind_speed_10m_max?.[idx];
+  const wind_kmh = typeof wind === "number" ? Math.round(wind) : null;
   const sky = describeWeatherCode(daily.weather_code?.[idx]);
   const rainNote = precipitation_probability !== null && precipitation_probability >= 40
     ? `, ${precipitation_probability}% de probabilidad de lluvia`
@@ -50,6 +53,7 @@ export function parseForecast(json: unknown, city: string, date: string): Weathe
     temp_min: Math.round(tmin),
     temp_max: Math.round(tmax),
     precipitation_probability,
+    wind_kmh,
     summary: `${sky}, entre ${Math.round(tmin)} y ${Math.round(tmax)} °C${rainNote}`,
   };
 }
@@ -60,8 +64,11 @@ async function fetchJson(url: string): Promise<unknown> {
   return res.json();
 }
 
+/** El pronóstico llega hasta hoy + 7 días: pedir una fecha fuera de esa ventana no tiene sentido. */
+export const FORECAST_DAYS_AHEAD = 7;
+
 /**
- * Pronóstico diario de la ciudad (Open-Meteo, sin clave). Ante cualquier falla devuelve null
+ * Pronóstico diario de un lugar y una fecha (Open-Meteo, sin clave): la ciudad del perfil o el lugar del evento. Ante cualquier falla devuelve null
  * y el agente sigue sin clima. Cache en memoria de 30 minutos por ciudad y día.
  */
 export async function getWeather(city: string, date: string = todayInSantiago()): Promise<Weather | null> {
@@ -80,7 +87,7 @@ export async function getWeather(city: string, date: string = todayInSantiago())
 
     const forecast = await fetchJson(
       `https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}` +
-        `&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code` +
+        `&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code,wind_speed_10m_max` +
         `&timezone=America%2FSantiago&forecast_days=8`,
     );
     const value = parseForecast(forecast, name, date);
