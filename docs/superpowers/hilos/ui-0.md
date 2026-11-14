@@ -35,3 +35,13 @@ Tokens por elemento (solo globals.css):
 
 Criterios: 1 voz tuteo/sin emoji/sin jerga; 2 un CTA verbo+objeto a /asesor; 3 solo tokens; 4 sin scroll horizontal, 48 px táctil, un h1, contraste tinta-suave ~7:1; 5 no aplica a la maqueta.
 Sin cambios al contrato; factibilidad trivial (no se consultó al Constructor).
+
+### 2026-11-14 13:35 · Productor · decision · vuelta 0
+
+Maqueta aprobada (commit c69b727, docs/superpowers/mockups/2026-11-14-ui-0.html). Validada contra los 5 criterios del encargo y DP-17:
+1. Voz: tutea, sin emoji, sin "Error 404"; el asesor habla en primera persona. OK.
+2. CTA único "Volver al asesor" hacia /asesor (verbo + objeto, vuelve a la conversación). OK.
+3. Solo tokens de globals.css (fondo, tinta, tinta-suave, acento, superficie, font-display). OK; el Constructor debe confirmar que ButtonLink admite ancho completo y h-12 sin tocar components/ui fuera de la frontera (components/** es frontera permitida, pero no se cambia ButtonLink salvo que sea imprescindible; si no, usar className).
+4. Mobile 390 y 375, objetivo táctil 48 px, un solo h1, foco por outline global. OK.
+5. Verificación sin sesión: la declara QA.
+Decisión: texto exacto de la maqueta es el texto final. Validación Opus del protocolo omitida por decisión del Productor (ahorro de cuota; humo del equipo). Maqueta no vista en navegador por Diseño; QA y Diseño la contrastan con lo construido.
