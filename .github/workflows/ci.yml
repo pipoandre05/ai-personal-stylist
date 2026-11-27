@@ -4,7 +4,7 @@ on:
     paths: ['web/**', 'packages/**', 'package.json', 'package-lock.json', 'scripts/**', 'docs/**', 'agentes/**', '.claude/**', '.github/workflows/ci.yml']
   push:
     branches: [main]
-    paths: ['web/**', 'packages/**', 'package.json', 'package-lock.json']
+    paths: ['web/**', 'packages/**', 'package.json', 'package-lock.json', 'scripts/**']
 
 jobs:
   verify:

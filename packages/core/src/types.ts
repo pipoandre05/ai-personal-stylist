@@ -369,7 +369,7 @@ export type ChatEvent =
 
 /**
  * Única fuente de los tipos de evento SSE. `Record<ChatEvent["type"], true>` obliga (en compilación) a listar
- * todos los tipos de `ChatEvent`; el parser (`lib/chat/sse.ts`) valida contra esta lista, así que no puede desincronizarse.
+ * todos los tipos de `ChatEvent`; el parser (`./sse.ts`) valida contra esta lista, así que no puede desincronizarse.
  */
 const CHAT_EVENT_TYPE_MAP: Record<ChatEvent["type"], true> = {
   conversation: true,
