@@ -125,7 +125,7 @@ Gotchas del stack que aplican y cómo se respetan aquí:
   pide quitarlo). Las lecturas de sesión van dentro de `<Suspense>` o la página declara `export const instant = false`
   (precedente Prendie). Ver Observación O-T1.
 - Fechas `date` con `fmtDateOnly()` y `timestamptz` con `fmtDate()`, zona `America/Santiago`.
-- Antes de escribir código de Next: leer `web/node_modules/next/dist/docs/` (lo exige `web/AGENTS.md`).
+- Antes de escribir código de Next: leer `node_modules/next/dist/docs/` (lo exige `web/AGENTS.md`).
 
 ---
 

@@ -41,7 +41,7 @@ Vitest. Código en `web/`; operar git desde la raíz.
 
 ### Reglas invariantes
 
-- `src/proxy.ts` con `export function proxy()`. **Nunca** `middleware.ts`. Leer `web/node_modules/next/dist/docs/` antes de código nuevo.
+- `src/proxy.ts` con `export function proxy()`. **Nunca** `middleware.ts`. Leer `node_modules/next/dist/docs/` antes de código nuevo.
 - **Datos con la sesión de la persona y RLS; sin service role** (DT-02). Toda tabla de usuario lleva `user_id`.
 - IA solo en el servidor. Antes de tocar código de Claude: skill `claude-api` (nunca de memoria). `AI_MODE=mock` debe seguir funcionando: los tests no gastan inferencia.
 - Fotos: comprimir en cliente (≤ 1280 px, JPEG, sin EXIF), bucket privado `user-media/{user_id}/…`, solo URLs firmadas. El servidor valida que la ruta sea de la sesión.

@@ -12,7 +12,7 @@ Producto y decisiones: `docs/producto/` (maestro: `DTR_AI_PERSONAL_STYLIST.md`; 
 
 ## This is NOT the Next.js you know
 
-Breaking changes respecto al training data. Leer `web/node_modules/next/dist/docs/`
+Breaking changes respecto al training data. Leer `node_modules/next/dist/docs/`
 antes de escribir código. `src/proxy.ts`, NUNCA `middleware.ts`.
 
 ## Reglas mínimas innegociables

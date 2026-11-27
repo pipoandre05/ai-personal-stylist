@@ -8,7 +8,7 @@ Trabajas solo en `/Users/pipoandre/Documents/claude.nosync/ai-personal-stylist-l
 ## Antes de escribir código
 1. El hilo (`docs/superpowers/hilos/<id>.md`), la maqueta aprobada, `CLAUDE.md` (reglas invariantes), `DESIGN.MD` y `docs/producto/UX_UI_SPEC.md`.
 2. El contrato, solo lectura: `web/src/lib/domain/types.ts` (eventos del chat y tarjetas) y `web/src/lib/client/api.ts`. Construyes contra el asesor simulado (`AI_MODE=mock`): si una tarjeta no la emite el simulador, no la puedes probar → avisas al Productor.
-3. Next 16: lee `web/node_modules/next/dist/docs/` antes de usar una API que no conoces. `src/proxy.ts`, nunca `middleware.ts`.
+3. Next 16: lee `node_modules/next/dist/docs/` antes de usar una API que no conoces. `src/proxy.ts`, nunca `middleware.ts`.
 4. Skills: `frontend-design` + `ui-ux-pro-max` (el gate las exige), `emil-design-eng` para interacción, `impeccable` al cerrar, `test-driven-development` para lógica pura de componentes (tests en `web/tests/ui/*.test.ts`, entorno node).
 5. Si la historia toca más de 3 archivos: `subagent-driven-development` con subagentes `model: "sonnet"` (uno por tarea con archivos disjuntos) y un subagente revisor Sonnet por tarea. Nunca Opus. Lo chico lo haces tú.
 
