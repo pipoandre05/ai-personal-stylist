@@ -1,0 +1,13 @@
+{
+  "name": "ai-personal-stylist",
+  "private": true,
+  "workspaces": ["web", "packages/*"],
+  "engines": { "node": ">=24.3" },
+  "overrides": { "react": "19.3.0", "react-dom": "19.3.0" },
+  "scripts": {
+    "verify": "npm run check:react && npm run verify --workspaces --if-present",
+    "verify:web": "npm run verify -w web",
+    "test:core": "npm test -w @aps/core",
+    "check:react": "node scripts/check-single-react.mjs"
+  }
+}

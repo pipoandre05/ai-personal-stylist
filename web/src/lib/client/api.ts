@@ -1,4 +1,4 @@
-import { createSSEParser } from "@/lib/chat/sse";
+import { createSSEParser } from "@aps/core";
 import type { ChatEvent, ChatIntent, ColorAnalysis, GarmentView } from "@/lib/domain/types";
 
 const NETWORK_ERROR = "No pudimos conectarnos. Revisa tu conexión e intenta de nuevo.";
