@@ -7,7 +7,7 @@
 >
 > Estados: `tomada` · `tomada-reversible` · `requiere aprobación` · `abierta`.
 
-Versión 0.8 — 2026-11-14.
+Versión 0.9 — 2026-11-27.
 
 ## 1. Decisiones de producto
 
@@ -43,7 +43,7 @@ Versión 0.8 — 2026-11-14.
 |---|---|---|---|---|
 | DT-01 | Stack: **Next.js 16 (App Router) + Tailwind v4 + Supabase (Auth, Postgres con RLS, Storage) + Vercel + Vitest**, Node 24, TypeScript ^5. Código en `web/`, git en la raíz. | [STACK] | tomada | Stack default del toolkit; mismo de Prendie, que ya es PWA con visión de prendas. |
 | DT-02 | **Datos con la sesión del usuario y RLS**, no service role. Cada tabla de usuario tiene `user_id` y políticas `auth.uid() = user_id`. El service role no se usa en el MVP. | [STACK] precedente Prendie (desvío deliberado del default del toolkit) | tomada | Las fotos y el perfil son datos personales; RLS es la barrera real. Una route con service role sin guard queda abierta a internet. |
-| DT-03 | Autenticación del piloto: **email + contraseña** de Supabase Auth. Magic link / OTP con SMTP propio (Resend) → V1.1. | [PS] | tomada-reversible | El SMTP por defecto de Supabase está limitado a muy pocos correos por hora; el login anónimo se pierde al instalar la PWA en iOS (almacenamiento separado de Safari). |
+| DT-03 | Autenticación del piloto: **email + contraseña** de Supabase Auth. Magic link / OTP con SMTP propio (Resend) → V1.1. | [PS] | tomada-reversible; **reemplazada por DT-23** (2026-11-27) | El SMTP por defecto de Supabase está limitado a muy pocos correos por hora; el login anónimo se pierde al instalar la PWA en iOS (almacenamiento separado de Safari). |
 | DT-04 | Fotos en **bucket privado** `user-media`, ruta `{user_id}/{kind}/{uuid}.jpg`, acceso solo por URL firmada de corta duración. Compresión en cliente (≤ 1280 px, JPEG, sin EXIF) antes de subir. | [STACK] precedente Prendie | tomada | Privacidad de fotos corporales: riesgo crítico [INV] §14. |
 | DT-05 | IA: **Claude API** con el SDK oficial `@anthropic-ai/sdk`, solo desde el servidor. Modelo del agente estilista: `claude-opus-5-5`. Modelo de extracción visual (prendas, selfie): `claude-haiku-5-5`. Ambos por variable de entorno (`STYLIST_MODEL`, `VISION_MODEL`). | [STACK] precedente Prendie (`claude-haiku-5-5` con visión + structured outputs) | tomada-reversible | El agente es el núcleo del producto: se parte con el modelo más capaz y se baja solo con una evaluación que lo respalde. Cambiar de modelo es una variable de entorno. Costo: ver S-04. |
 | DT-06 | Arquitectura del agente: **un solo agente orquestador con herramientas**, no multiagente. Colorimetría y reconocimiento de prendas son **funciones de una llamada con salida estructurada** (no agentes). Detalle en `AGENT_ARCHITECTURE.md`. | [PS], [FELIPE] ("no agregues complejidad innecesaria") | tomada | Ningún dominio del MVP necesita contexto aislado ni paralelismo. Se separa en subagentes solo cuando una evaluación muestre que el prompt único degrada (candidato: Shopper en V2). |
@@ -62,6 +62,8 @@ Versión 0.8 — 2026-11-14.
 | DT-19 | **Excepción acotada a DT-02 para el estado de ejecución.** El estado del turno (checkpoints, aprobaciones pendientes) y las trazas pueden escribirse con un rol de servidor, en tablas propias que la persona no edita. Los datos de la persona siguen con su sesión y RLS, sin excepción. | [FELIPE] 2026-11-14 | tomada; diseño pendiente | Un turno que se pausa y se reanuda no puede depender de que el cliente no altere su estado. Requiere migración y manejo de una clave de servidor: se diseña antes de implementarla. |
 | DT-20 | **Las trazas viven en Supabase** (tablas propias del proyecto), no en un servicio externo. | [FELIPE] 2026-11-14 | tomada; diseño pendiente | Un solo lugar para datos y observación en el piloto; sin enviar conversaciones a terceros. Revisar volumen y retención al abrir a público. |
 | DT-21 | **Se puede reutilizar código del SDK `openair-webchat`** (OpenAir Technologies) en la interfaz conversacional, quitando todo lo de tenant, consola e incrustación. Autorización dada por Nico (OpenAir) a Felipe en persona el 2026-11-14. Nunca se porta configuración, claves ni integraciones de clientes de OpenAir. Cada pieza portada se anota con su origen en `docs/producto/research/sdk-openair-mapa-de-reutilizacion.md`. | [FELIPE] 2026-11-14 | tomada | Acelera con piezas probadas en producción. La autorización es verbal: conviene dejarla por escrito (un mensaje basta) antes de abrir el producto a terceros, porque el repo no tiene licencia. |
+| DT-22 | **App nativa iOS y Android con React Native + Expo (SDK 58) en un monorepo incremental:** `web/` se queda donde está; se suman `mobile/` y `packages/core` como workspaces npm. La API de Next.js es el único backend. Fuente: `docs/movil/01-arquitectura.md`. | [FELIPE] 2026-11-27 | tomada | Un solo backend y un contrato compartido (`packages/core`) evitan duplicar reglas entre web y app; no mover `web/` mantiene intacto el despliegue en Vercel (Root Directory `web`). Alternativa descartada: repo aparte para la app. |
+| DT-23 | **Entrada solo con magic link de Supabase, en web y app.** El mismo correo trae el link y un código de 6 dígitos de respaldo. Requiere SMTP propio (Resend u otro, con el dominio de la marca) antes de abrir la entrada a personas fuera del equipo. **Reemplaza DT-03** (email + contraseña). Fuente: AR-5 en `docs/movil/README.md`. | [FELIPE] 2026-11-27 | tomada | Sin contraseñas que guardar ni recuperar, y el mismo método sirve en web y app. Costo: el SMTP por defecto de Supabase solo envía al equipo y hasta 2 correos por hora, por eso el SMTP propio es condición para abrir a más personas (AR-5c). |
 
 ## 3. Supuestos que requieren validación
 
@@ -133,6 +135,7 @@ Cada observación levantada por los agentes de backlog/specs se resolvió así. 
 
 | Fecha | Cambio |
 |---|---|
+| 2026-11-27 | v0.9 — DT-22 app nativa en monorepo incremental (React Native + Expo); DT-23 entrada solo con magic link, reemplaza DT-03. |
 | 2026-11-14 | DP-25 — el asesor se llama Prendie y adopta la mascota; portada como recorrido de entrada. |
 | 2026-11-14 | v0.8 — DP-23 identidad visual de Prendie con estructura propia; reemplaza DP-22. |
 | 2026-11-14 | v0.7 — DT-21 reutilización del SDK de OpenAir autorizada; DP-22 diseño v3 tratamiento A con fondo de B. |
