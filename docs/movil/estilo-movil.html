@@ -1,0 +1,224 @@
+<title>Estilo Móvil</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Manrope:wght@500;600;700&display=swap">
+<style>
+/* Layout: una columna de lectura (68ch) con bandas por bloque; el roadmap es un carril doble A/B que se apila en teléfono. Tokens tomados de web/src/app/globals.css (DESIGN.MD). */
+:root{
+  --fondo:#f2f2ee; --superficie:#ffffff; --hundido:#e8e9e4; --tinta:#121412; --tinta-suave:#5e625d;
+  --linea:#d6d8d2; --accion:#c9f24d; --memoria:#c9b8ff; --falta:#ff8a57; --sobre-color:#121412;
+  --exito:#0b7285; --error:#c2341f; --foco:#2b4bff; --inverso:#121412; --sobre-inverso:#ffffff;
+  --display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --cuerpo:"Manrope", "Helvetica Neue", system-ui, sans-serif;
+  --radio:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --fondo:#121412; --superficie:#1b1e1b; --hundido:#242824; --tinta:#eef0ea; --tinta-suave:#a3a8a1;
+    --linea:#333832; --exito:#4fb3c2; --error:#ff7a66; --foco:#8fa2ff; --inverso:#eef0ea; --sobre-inverso:#121412;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --fondo:#121412; --superficie:#1b1e1b; --hundido:#242824; --tinta:#eef0ea; --tinta-suave:#a3a8a1;
+  --linea:#333832; --exito:#4fb3c2; --error:#ff7a66; --foco:#8fa2ff; --inverso:#eef0ea; --sobre-inverso:#121412;
+}
+*{box-sizing:border-box}
+body{background:var(--fondo);color:var(--tinta);font:500 16px/1.6 var(--cuerpo);
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:40px 64px}
+.wrap{max-width:980px;margin:0 auto;display:grid;gap:56px}
+h1,h2,h3{font-family:var(--display);font-weight:800;line-height:1.1;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.2rem,5vw,3.4rem);letter-spacing:-.02em}
+h2{font-size:1.6rem;letter-spacing:-.01em}
+h3{font-size:1.05rem}
+p{margin:0;max-width:68ch}
+.sobre{font:700 .75rem/1 var(--cuerpo);text-transform:uppercase;letter-spacing:.08em;color:var(--tinta-suave)}
+.meta{color:var(--tinta-suave);font-size:.9rem}
+header{display:grid;gap:16px}
+.tesis{font-size:1.15rem;max-width:62ch}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font:700 .72rem/1.4 var(--cuerpo);letter-spacing:.02em;white-space:nowrap}
+.c-acc{background:var(--accion);color:var(--sobre-color)}
+.c-mem{background:var(--memoria);color:var(--sobre-color)}
+.c-fal{background:var(--falta);color:var(--sobre-color)}
+.c-neu{background:var(--hundido);color:var(--tinta)}
+.c-inv{background:var(--inverso);color:var(--sobre-inverso)}
+section{display:grid;gap:20px}
+.leyenda{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+/* Cinco ideas */
+.ideas{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.idea{background:var(--superficie);border:1px solid var(--linea);border-radius:var(--radio);padding:18px;display:grid;gap:8px;align-content:start}
+.idea b{font-family:var(--display);font-size:1.05rem}
+.num{font:800 2rem/1 var(--display);font-variant-numeric:tabular-nums}
+/* Tablas */
+.tabla{overflow-x:auto;border:1px solid var(--linea);border-radius:var(--radio);background:var(--superficie)}
+table{border-collapse:collapse;width:100%;min-width:620px;font-size:.92rem}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--linea);vertical-align:top}
+th{font:700 .72rem/1.3 var(--cuerpo);text-transform:uppercase;letter-spacing:.06em;color:var(--tinta-suave);background:var(--hundido)}
+tr:last-child td{border-bottom:0}
+td.id{font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+.num-c{font-variant-numeric:tabular-nums;white-space:nowrap}
+/* Roadmap */
+.carriles{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.carril{display:grid;gap:8px;align-content:start}
+.carril h3{display:flex;gap:8px;align-items:center}
+.etapa{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:start;padding:10px 12px;border-radius:10px;background:var(--superficie);border:1px solid var(--linea)}
+.etapa .k{font:800 .9rem/1.4 var(--display);font-variant-numeric:tabular-nums}
+.etapa.cruce{outline:2px dashed var(--memoria);outline-offset:-2px}
+@media (max-width:720px){.carriles{grid-template-columns:1fr}}
+/* Costos */
+.costos{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.costo{padding:16px;border-radius:var(--radio);background:var(--hundido);display:grid;gap:4px}
+.nota{border-left:3px solid var(--falta);padding:4px 0 4px 14px;max-width:68ch}
+.docs{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px}
+.doc{padding:12px 14px;border:1px solid var(--linea);border-radius:10px;background:var(--superficie)}
+code{font:600 .85em/1 ui-monospace, "SF Mono", Menlo, monospace;background:var(--hundido);padding:2px 5px;border-radius:5px}
+footer{color:var(--tinta-suave);font-size:.85rem}
+</style>
+
+<div class="wrap">
+<header>
+  <span class="sobre">ai-personal-stylist · Prendie · 2026-11-26 · v0.1</span>
+  <h1>Estilo Móvil</h1>
+  <p class="tesis">Cómo pasar de la PWA a una app nativa para iOS y Android con React Native + Expo, sin rehacer el asesor ni reemplazar al equipo de bots. Todo lo que sigue es propuesta: no se instaló ni se cambió nada.</p>
+  <div class="leyenda">
+    <span class="chip c-inv">Confirmado</span>
+    <span class="chip c-acc">Recomendado, aprobar</span>
+    <span class="chip c-mem">Decide Felipe</span>
+    <span class="chip c-fal">Falta investigar</span>
+    <span class="chip c-neu">Hecho</span>
+  </div>
+</header>
+
+<section>
+  <span class="sobre">En una página</span>
+  <h2>Cinco conclusiones</h2>
+  <div class="ideas">
+    <div class="idea"><span class="num">~2.500</span><b>líneas de lógica se comparten tal cual</b><p class="meta">Contrato del asesor, reglas, parser SSE y view-models del hilo van a <code>packages/core</code>. La interfaz se rehace en nativo; el backend sigue siendo la API de Next.js con Bearer y RLS.</p></div>
+    <div class="idea"><span class="num">6 + 1</span><b>bots: se conservan y se suma uno</b><p class="meta">Constructor Móvil en una línea 2. El bloque común y cinco SOUL se amplían por secciones. Orden obligatorio: la CI móvil antes de abrir la frontera a <code>mobile/</code>.</p></div>
+    <div class="idea"><span class="num">4–5</span><b>vueltas por look, pagadas casi sin caché</b><p class="meta">El asesor corre en Opus 5.5. Poner caché en la cola del bucle y correr las herramientas en paralelo baja costo y latencia sin tocar la calidad. Cambiar de modelo, solo con eval.</p></div>
+    <div class="idea"><span class="num">US$124</span><b>costo mínimo del año 1</b><p class="meta">Apple US$99 + Google US$25, y ninguno hace falta para empezar: se construye con el simulador iOS y Android. En Google Play: 12 testers durante 14 días antes de producción.</p></div>
+    <div class="idea"><span class="num">0</span><b>insignias decorativas o rachas que se rompen</b><p class="meta">Gamificación al servicio del clóset: "me lo puse", lo que puedo armarte, versatilidad por prenda. Nada que premie comprar.</p></div>
+  </div>
+</section>
+
+<section>
+  <span class="sobre">Lo que necesito de ti</span>
+  <h2>Decisiones pendientes</h2>
+  <div class="tabla"><table>
+    <thead><tr><th>ID</th><th>Decisión</th><th>Recomendación</th><th>Estado</th></tr></thead>
+    <tbody>
+      <tr><td class="id">AR-1</td><td>Estructura del repo</td><td>Monorepo incremental: <code>web/</code> no se mueve; se agregan <code>mobile/</code> y <code>packages/*</code></td><td><span class="chip c-acc">Aprobar</span></td></tr>
+      <tr><td class="id">AR-2</td><td>Registrar la app nativa (DT-22) y revisar DT-10 (push y offline)</td><td>Antes de escribir código</td><td><span class="chip c-acc">Aprobar</span></td></tr>
+      <tr><td class="id">AR-3</td><td>API para la app</td><td>Bearer + <code>api/v1/*</code> que reusa los servicios de las Server Actions</td><td><span class="chip c-acc">Aprobar</span></td></tr>
+      <tr><td class="id">AR-4</td><td>Estilos</td><td><code>StyleSheet</code> + paquete de tokens; reevaluar tras 2 pantallas</td><td><span class="chip c-acc">Aprobar</span></td></tr>
+      <tr><td class="id">AR-5</td><td>Entrada con magic link, en web y app</td><td>Correo con link y código de 6 dígitos; SMTP propio antes de abrir a personas fuera del equipo</td><td><span class="chip c-inv">Decidido</span></td></tr>
+      <tr><td class="id">AR-5b</td><td>Acceso para el revisor de Apple</td><td>Cuenta demo con bandeja compartida, sin código fijo</td><td><span class="chip c-acc">Aprobar</span></td></tr>
+      <tr><td class="id">AR-6</td><td>Supabase de staging</td><td>Costo contra el riesgo de probar escrituras en producción</td><td><span class="chip c-mem">Tú decides</span></td></tr>
+      <tr><td class="id">EQ-1</td><td>Constructor Móvil + SOUL por secciones</td><td>Clon del Constructor en línea 2</td><td><span class="chip c-acc">Aprobar</span></td></tr>
+      <tr><td class="id">EQ-2</td><td>Skills de Expo y Callstack</td><td>Subconjunto, tras <code>skill-auditor</code></td><td><span class="chip c-acc">Aprobar</span></td></tr>
+      <tr><td class="id">IA-1</td><td>Línea base del asesor</td><td>Compartir una semana de <code>ai_usage</code> y los valores de <code>STYLIST_MODEL</code> y <code>STYLIST_EFFORT</code></td><td><span class="chip c-mem">Tú decides</span></td></tr>
+      <tr><td class="id">IA-2</td><td>Caché de cola, herramientas en paralelo y otros cambios gratis</td><td>Bajan costo y latencia sin tocar la calidad</td><td><span class="chip c-acc">Aprobar</span></td></tr>
+      <tr><td class="id">IA-3</td><td>Presupuesto del eval del asesor</td><td>≈ US$35–85, 30 casos reales</td><td><span class="chip c-acc">Aprobar</span></td></tr>
+      <tr><td class="id">PR-2</td><td>Nombre público de la app y alcance legal</td><td>Lo exigen las tiendas; el bundle ID casi no se cambia</td><td><span class="chip c-mem">Tú decides</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <span class="sobre">Dos líneas en paralelo</span>
+  <h2>Roadmap</h2>
+  <p class="meta">Los bordes punteados marcan dónde se cruzan las líneas: el backlog necesita el costo técnico (A2 ↔ B6) y la primera feature sale del backlog (B8 → A9).</p>
+  <div class="carriles">
+    <div class="carril">
+      <h3><span class="chip c-inv">A</span> Tecnología</h3>
+      <div class="etapa"><span class="k">A1</span><span>Diagnóstico de arquitectura</span><span class="chip c-neu">Hecho</span></div>
+      <div class="etapa cruce"><span class="k">A2</span><span>Aprobar la arquitectura y registrar decisiones</span><span class="chip c-acc">Ya</span></div>
+      <div class="etapa"><span class="k">A3</span><span>Expo, entorno local y SMTP · Apple y Google se pagan en A11</span><span class="chip c-mem">Ya</span></div>
+      <div class="etapa"><span class="k">A4</span><span>Auditar e integrar skills</span><span class="chip c-acc">Ya</span></div>
+      <div class="etapa"><span class="k">A6</span><span>Esqueleto del monorepo + CI móvil</span><span class="chip c-neu">Tras A2</span></div>
+      <div class="etapa"><span class="k">A7</span><span>API para la app (Bearer, <code>v1</code>, avisos)</span><span class="chip c-neu">Tras A2</span></div>
+      <div class="etapa"><span class="k">A5</span><span>Equipo: plomería, SOUL y humo de línea 2</span><span class="chip c-neu">Tras A6</span></div>
+      <div class="etapa"><span class="k">A8</span><span>Costo y latencia del asesor: caché, paralelo, eval</span><span class="chip c-mem">Tras IA-1</span></div>
+      <div class="etapa cruce"><span class="k">A9</span><span>Primera feature: entrar + conversación (paridad)</span><span class="chip c-neu">Tras A5–A7</span></div>
+      <div class="etapa"><span class="k">A10</span><span>Tests: jest-expo, Maestro, dispositivos</span><span class="chip c-neu">Con A9</span></div>
+      <div class="etapa"><span class="k">A11</span><span>Builds internos · 12 testers × 14 días</span><span class="chip c-mem">Reclutar ya</span></div>
+      <div class="etapa"><span class="k">A12</span><span>Publicación en App Store y Google Play</span><span class="chip c-mem">Felipe</span></div>
+    </div>
+    <div class="carril">
+      <h3><span class="chip c-mem">B</span> Producto</h3>
+      <div class="etapa"><span class="k">B1</span><span>17 oportunidades nativas con ICE</span><span class="chip c-neu">Borrador</span></div>
+      <div class="etapa"><span class="k">B2</span><span>Sesión de discovery de 2 h 40 min</span><span class="chip c-neu">Lista</span></div>
+      <div class="etapa"><span class="k">B3</span><span>Instrumentar la PWA (sesión integradora)</span><span class="chip c-acc">Ya</span></div>
+      <div class="etapa"><span class="k">B4</span><span>Gamificación: 5 reglas, DP-26</span><span class="chip c-acc">Ya</span></div>
+      <div class="etapa"><span class="k">B5</span><span>Contrato de avisos DP-27 y textos</span><span class="chip c-acc">Ya</span></div>
+      <div class="etapa cruce"><span class="k">B6</span><span>6 épicas · 26 historias · 11 tareas</span><span class="chip c-neu">Borrador</span></div>
+      <div class="etapa"><span class="k">B7</span><span>Sesión con Felipe: priorizar y cortar el MVP</span><span class="chip c-mem">Tras 2 sem. de B3</span></div>
+      <div class="etapa cruce"><span class="k">B8</span><span>Backlog inicial priorizado</span><span class="chip c-neu">Tras B7</span></div>
+      <div class="etapa"><span class="k">B9</span><span>Roadmap funcional Now / Next / Later</span><span class="chip c-neu">Tras B8</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sobre">El asesor que arma los looks</span>
+  <h2>Modelos, costo y latencia</h2>
+  <p class="meta">Hoy corre en Opus 5.5 con effort low. Un look hace 4 o 5 vueltas, con las herramientas en serie, y la caché cubre solo el system prompt.</p>
+  <div class="tabla"><table>
+    <thead><tr><th>Orden</th><th>Cambio</th><th>Efecto</th><th>¿Toca calidad?</th></tr></thead>
+    <tbody>
+      <tr><td class="id">1</td><td>Registrar costo y latencia por turno en <code>ai_usage</code></td><td>Línea base real</td><td><span class="chip c-neu">No</span></td></tr>
+      <tr><td class="id">2</td><td>Caché en la cola del bucle</td><td>El mayor ahorro (la guía oficial mide Opus 3,3× más caro sin caché)</td><td><span class="chip c-neu">No</span></td></tr>
+      <tr><td class="id">3</td><td>Herramientas de lectura en paralelo</td><td>La palanca principal contra los ~33 s de un look</td><td><span class="chip c-neu">No</span></td></tr>
+      <tr><td class="id">4</td><td>Eval de 30 casos reales (≈ US$35–85)</td><td>Habilita cualquier cambio de modelo; sirve para BF-11</td><td><span class="chip c-neu">Mide</span></td></tr>
+      <tr><td class="id">5</td><td>Ruteo por turno: simples en Sonnet o Haiku; looks, eventos y compras en Opus</td><td>Ahorro grande y turnos simples más rápidos</td><td><span class="chip c-fal">Según el eval</span></td></tr>
+    </tbody>
+  </table></div>
+  <p class="nota">DeepSeek queda descartado para el asesor: no es más barato que Haiku 5.5, ignora la caché, guarda los datos en China y el asesor ve fotos y selfies de personas. La Ley 21.719 exige garantías para esa transferencia (vigente desde 2027-10-15).</p>
+</section>
+
+<section>
+  <span class="sobre">Año 1, en dólares</span>
+  <h2>Costos</h2>
+  <div class="costos">
+    <div class="costo"><span class="meta">Apple Developer</span><span class="num">99</span><span class="meta">anual · recién al distribuir</span></div>
+    <div class="costo"><span class="meta">Google Play</span><span class="num">25</span><span class="meta">pago único</span></div>
+    <div class="costo"><span class="meta">EAS (Expo)</span><span class="num">0–228</span><span class="meta">Free; Starter si se necesita</span></div>
+    <div class="costo"><span class="meta">Eval del asesor</span><span class="num">35–85</span><span class="meta">una vez, con tu aprobación</span></div>
+  </div>
+</section>
+
+<section>
+  <span class="sobre">Riesgos que más pesan</span>
+  <h2>Qué puede salir mal</h2>
+  <div class="tabla"><table>
+    <thead><tr><th>Riesgo</th><th>Mitigación</th><th>Dueño</th></tr></thead>
+    <tbody>
+      <tr><td>Abrir la frontera a <code>mobile/</code> antes de tener la CI móvil: un PR se mergearía sin verify ni revert</td><td>Primero <code>verify-mobile</code> y la CI de <code>main</code>, después la frontera</td><td>DevOps</td></tr>
+      <tr><td>El freno de <code>eas</code> también bloquea a Felipe</td><td>Regla solo en contexto de bot, con tests de los dos lados</td><td>Integradora</td></tr>
+      <tr><td>Vercel no construye <code>web/</code> dentro de workspaces</td><td>PR solo de plomería, con Preview verde antes de mergear</td><td>DevOps</td></tr>
+      <tr><td>La latencia del asesor (20–50 s) se siente peor en nativo</td><td>Aviso "tu look está listo"; la causa sigue abierta</td><td>Felipe</td></tr>
+      <tr><td>Rechazo de Apple (consentimiento de IA, borrar cuenta, revisor sin acceso por el magic link)</td><td>Tareas P0 MOB-T-10 y T-11, y lista de requisitos antes del primer envío</td><td>Felipe</td></tr>
+      <tr><td>EXIF que no se borra en el teléfono</td><td>Test obligatorio antes de la cámara de prendas</td><td>QA</td></tr>
+      <tr><td>Avisos que se sienten como una app de compras</td><td>DP-27: opt-in, máximo 1 al día, nada personal en la pantalla bloqueada</td><td>Productor</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <span class="sobre">Fuente de verdad</span>
+  <h2>El detalle vive en el repo</h2>
+  <div class="docs">
+    <div class="doc"><b>README.md</b><p class="meta">Índice, estados y rúbrica</p></div>
+    <div class="doc"><b>01-arquitectura.md</b><p class="meta">Diagnóstico, alternativas, stack y ambientes</p></div>
+    <div class="doc"><b>02-guia-entorno-expo.md</b><p class="meta">Local, nube, cuentas, costos y publicación</p></div>
+    <div class="doc"><b>03-skills-y-equipo.md</b><p class="meta">Skills, SOUL y plomería de bots</p></div>
+    <div class="doc"><b>04-modelos-ia-costos.md</b><p class="meta">Matriz, enrutamiento y A/B</p></div>
+    <div class="doc"><b>05-producto-discovery-backlog.md</b><p class="meta">Oportunidades, gamificación, sesión y backlog</p></div>
+    <div class="doc"><b>06-roadmap-riesgos.md</b><p class="meta">Dos líneas, dependencias y riesgos</p></div>
+  </div>
+  <p class="meta">Carpeta <code>docs/movil/</code>. Los anexos con fuentes están en <code>investigacion/</code>.</p>
+</section>
+
+<footer>Análisis sobre <code>origin/main</code> @ 39916d4 (#33). Precios de modelos y requisitos de tiendas consultados el 2026-11-26.</footer>
+</div>
