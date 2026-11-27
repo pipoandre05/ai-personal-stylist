@@ -2,7 +2,7 @@
 # Barrera de disciplina, no de seguridad (se esquiva con --no-verify).
 # Politica: push a main solo docs-only (*.md, docs/); todo lo demas via rama+PR.
 # Instalado por project-inception: git config core.hooksPath .githooks
-# Layout: repo en la raiz, codigo en web/. Si el codigo vive en la raiz, quitar el `cd web`.
+# Layout: monorepo npm workspaces (web/, packages/*, mobile/). `npm run verify` corre en la raiz y cubre todos los workspaces.
 set -e
 root=$(git rev-parse --show-toplevel)
 branch=$(git rev-parse --abbrev-ref HEAD)
@@ -15,4 +15,4 @@ if [ "$branch" = "main" ]; then
   fi
   exit 0
 fi
-cd "$root/web" && npm run verify
+cd "$root" && npm run verify
