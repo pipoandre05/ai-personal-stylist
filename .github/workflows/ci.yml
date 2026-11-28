@@ -1,10 +1,10 @@
 name: ci
 on:
   pull_request:
-    paths: ['web/**', 'packages/**', 'package.json', 'package-lock.json', 'scripts/**', 'docs/**', 'agentes/**', '.claude/**', '.github/workflows/ci.yml']
+    paths: ['web/**', 'packages/**', 'package.json', 'package-lock.json', 'scripts/**', 'docs/**', 'agentes/**', '.claude/**', '.github/workflows/ci.yml', 'mobile/**']
   push:
     branches: [main]
-    paths: ['web/**', 'packages/**', 'package.json', 'package-lock.json', 'scripts/**']
+    paths: ['web/**', 'packages/**', 'package.json', 'package-lock.json', 'scripts/**', 'mobile/**']
 
 jobs:
   verify:
@@ -17,7 +17,25 @@ jobs:
           cache: npm
           cache-dependency-path: package-lock.json
       - run: npm ci
-      - run: npm run verify
+      - run: npm run check:react
+      - run: npm run verify:web
+      - run: npm run verify -w @aps/core
+
+  # La app movil (Expo) tiene su propio job: typecheck, lint, jest y versiones de Expo alineadas.
+  verify-mobile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      - run: npm run check:react
+      - run: npm run verify -w mobile
+      - run: npx expo install --check
+        working-directory: mobile
 
   # Tercer control de la frontera del equipo de bots (ademas del freno al editar y de
   # condiciones-merge.sh antes del merge): un PR de una rama equipo/* no puede tocar rutas prohibidas.
