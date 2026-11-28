@@ -51,7 +51,7 @@
 | 3 | Estructura de proyectos y repositorios | `01` §2 | Propuesta (AR-1) |
 | 4 | Stack React Native + Expo | `01` §4–5 | Propuesta |
 | 5 | Guía de instalación y configuración | `02-guia-entorno-expo.md` | Lista, sin ejecutar |
-| 6 | Skills recomendadas y plan de integración | `03-skills-y-equipo.md` §1 | Propuesta; faltan las skills de Felipe |
+| 6 | Skills recomendadas y plan de integración | `03-skills-y-equipo.md` §1 + `audit/README.md` | Auditadas (6 SEGURA, 5 a adaptar); la integración va en A5 |
 | 7 | Evaluación del equipo multiagente | `03` §2 + `investigacion/equipo-bots.md` | Listo |
 | 8 | Cambios propuestos en los SOUL | `03` §2–3 | Propuesta, por secciones |
 | 9 | Evaluación de proveedores y modelos (asesor) | `04-modelos-ia-costos.md` §1–3 + `investigacion/asesor-runtime.md` + `investigacion/modelos-ia-bots.md` | Lista (pruebas pendientes) |

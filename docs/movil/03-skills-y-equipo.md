@@ -12,6 +12,11 @@
 - Por eso instalar el plugin de Expo en tu Claude Code **no** se lo da a los bots: hay que copiar la skill y
   registrarla en `configuracion-bots.json`.
 
+> **Auditoría hecha (2026-11-27, `audit/README.md`):** 6 SEGURA y 5 SOSPECHOSA, ninguna OFENSIVA. Las sospechosas
+> (`expo-native-ui`, `expo-dev-client`, `expo-upgrade`, `expo-web-to-native` y `react-native-best-practices`) mandan a
+> ejecutar paquetes `@latest` sin confirmación, y se instalan **solo como copia adaptada** con versiones fijas.
+> `expo-web-to-native` instala herramientas globales y se relanza sola, así que **nunca va a un bot**.
+
 **Protocolo para cada skill externa:**
 1. `skill-auditor` (veredicto SEGURA).
 2. Copiarla, fijada a un commit, a `agentes/skills-externas/<origen>/<skill>@<sha>`.
@@ -20,7 +25,7 @@
 
 | Skill | Origen | Qué aporta | Veredicto | Para quién |
 |---|---|---|---|---|
-| `expo-web-to-native` | Expo oficial | Migración de Next.js a nativo, el caso exacto de este proyecto | **Instalar** | Sesión integradora (Opus) para el plan; Constructor Móvil |
+| `expo-web-to-native` | Expo oficial | Migración de Next.js a nativo, el caso exacto de este proyecto | **Adaptar** (auditoría: SOSPECHOSA) | Solo la sesión integradora, como guía; nunca un bot |
 | `expo-project-structure`, `expo-router`, `expo-dev-client` | Expo | Estructura, rutas y development build | **Instalar** | Constructor Móvil, Revisor |
 | `expo-data-fetching` | Expo | TanStack Query, streaming y fetch | **Instalar** | Constructor Móvil |
 | `expo-native-ui`, `expo-design-system` | Expo | Patrones de interfaz nativa y sistema de diseño | **Instalar** | Diseño, Constructor Móvil |
