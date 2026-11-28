@@ -54,6 +54,18 @@ un development build. Igual conviene tener el simulador local, porque el humo de
 4. `npm i -g eas-cli` → `eas login` (Felipe inicia sesión en el navegador).
 5. Maestro con Homebrew y versión fijada (`brew install` del tap oficial de mobile.dev), en vez de `curl | bash`.
 6. **Verificación:** `npx expo-doctor` en verde, simulador iOS y emulador Android abren.
+7. **Compilar fuera de `~/Documents` (comprobado el 2026-11-28).** En este Mac, `~/Documents` está sincronizado
+   con iCloud. iCloud (File Provider) agrega atributos (`com.apple.FinderInfo`, `com.apple.fileprovider.fpfs#P`) a los
+   archivos que Expo genera dentro de `node_modules` al compilar. Entonces `codesign` rechaza el framework
+   `ExpoModulesJSI` (`resource fork, Finder information, or similar detritus not allowed`) y la compilación iOS falla.
+   - El sufijo `.nosync` **no** lo evita. No es un error del código: el mismo commit compiló limpio en `/private/tmp`.
+   - **Solución:** un clon aparte solo para compilar la app nativa, fuera de `~/Documents`, por ejemplo
+     `~/Developer/ai-personal-stylist`. Ahí se corren `npx expo run:ios` y `expo prebuild`. El repo de siempre sigue
+     siendo donde trabajan las sesiones y los bots. Antes del primer uso, `xattr -l` sobre la carpeta no debe mostrar
+     `com.apple.fileprovider`.
+   - **No se recomienda** `xattr -cr` antes de cada compilación: no se probó, e iCloud puede volver a poner los atributos.
+   - **Alternativa:** desactivar "Escritorio y Documentos" en iCloud. Afecta a todo el Mac y lo decide Felipe.
+   - **No afecta** a los builds en la nube (EAS) ni a la CI, porque no corren en este Mac.
 
 ### Paso 3 · Esqueleto del monorepo (agente, en rama `feat/monorepo-movil`, ≤ 400 líneas)
 1. `package.json` en la raíz con `workspaces: ["web", "mobile", "packages/*"]` y `overrides` de react/react-dom 19.3.0.
@@ -148,9 +160,9 @@ probar avisos reales en un iPhone.
 ## 6. Criterios de "entorno listo" (verificables)
 
 1. `npx expo-doctor` sin errores en `mobile/`.
-2. `npm ci` en la raíz, `cd web && npm run verify` y `verify-mobile` verdes en la CI.
+2. `npm ci` y `npm run verify` en la raíz, y `verify-mobile`, verdes en la CI.
 3. El build de Vercel Preview del PR del monorepo queda verde.
-4. El development build corre en el simulador iOS y en Android (emulador y teléfono). En el iPhone físico, cuando haya
+4. El development build corre, desde el clon de compilación fuera de `~/Documents` (paso 2.7), en el simulador iOS y en Android (emulador y teléfono). En el iPhone físico, cuando haya
    cuenta de Apple o con Personal Team.
 5. La app lee `EXPO_PUBLIC_API_URL` según la variante y llega a la API con `AI_MODE=mock`.
 6. `eas build --profile preview` produce un binario instalable por enlace o QR.
