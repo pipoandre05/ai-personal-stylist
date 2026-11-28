@@ -19,7 +19,7 @@ jobs:
       - run: npm ci
       - run: npm run check:react
       - run: npm run verify:web
-      - run: npm run verify -w @aps/core
+      - run: npm run verify -w packages --if-present
 
   # La app movil (Expo) tiene su propio job: typecheck, lint, jest y versiones de Expo alineadas.
   verify-mobile:
