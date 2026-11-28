@@ -1,7 +1,7 @@
 {
   "name": "ai-personal-stylist",
   "private": true,
-  "workspaces": ["web", "packages/*"],
+  "workspaces": ["web", "packages/*", "mobile"],
   "engines": { "node": ">=24.3" },
   "overrides": { "react": "19.3.0", "react-dom": "19.3.0" },
   "scripts": {
