@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { createSSEParser, encodeSSE } from "@/lib/chat/sse";
-import { CHAT_EVENT_TYPES, type ChatEvent, type ColorAnalysis, type GarmentView, type OutfitView } from "@/lib/domain/types";
+import { createSSEParser, encodeSSE } from "../src/sse";
+import { CHAT_EVENT_TYPES, type ChatEvent, type ColorAnalysis, type GarmentView, type OutfitView } from "../src/types";
 
 function collect(chunks: string[]): ChatEvent[] {
   const out: ChatEvent[] = [];

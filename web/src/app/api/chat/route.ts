@@ -6,7 +6,7 @@ import { downloadImage } from "@/lib/ai/image";
 import { resolveIntent } from "@/lib/agent/intent";
 import { runStylistTurn, type AgentRunInput } from "@/lib/agent/run";
 import { createTurnCollector } from "@/lib/chat/collector";
-import { encodeSSE } from "@/lib/chat/sse";
+import { encodeSSE } from "@aps/core";
 import { ChatIntentSchema } from "@/lib/domain/intents";
 import { logError } from "@/lib/server/log";
 import { isOwnPhotoPath } from "@/lib/domain/photo-path";

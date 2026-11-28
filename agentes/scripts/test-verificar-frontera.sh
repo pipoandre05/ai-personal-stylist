@@ -26,7 +26,8 @@ for r in web/src/lib/agent/run.ts web/src/lib/ai/claude.ts web/src/lib/domain/ty
          web/evals/casos.json docs/producto/DTR.md .claude/settings.json .githooks/pre-push \
          .github/workflows/ci.yml agentes/bots/qa/SOUL.md CLAUDE.md DESIGN.MD \
          web/package.json web/src/lib/format.ts web/src/proxy.ts web/tests/sse.test.ts \
-         web/.env.local web/.env.local.example .env ../fuera.txt /etc/passwd README.md; do
+         web/.env.local web/.env.local.example .env ../fuera.txt /etc/passwd README.md \
+         packages/core/src/sse.ts mobile/src/app/index.tsx; do
   espera 1 "prohibida $r" bash "$F" --ruta "$r"
 done
 
@@ -55,12 +56,22 @@ git commit -qm renombre; git push -q origin equipo/ui-3-renombre
 
 git switch -qc equipo/ui-4-borra main
 git rm -q README.md; git commit -qm borra; git push -q origin equipo/ui-4-borra
+
+git switch -qc equipo/ui-5-core main
+mkdir -p packages/core/src; echo b > packages/core/src/sse.ts
+git add -A; git commit -qm core; git push -q origin equipo/ui-5-core
+
+git switch -qc equipo/ui-6-mobile main
+mkdir -p mobile/src/app; echo b > mobile/src/app/index.tsx
+git add -A; git commit -qm mobile; git push -q origin equipo/ui-6-mobile
 git fetch -q origin
 
 espera 0 "rama dentro de la frontera"            bash "$F" --repo "$T/repo" equipo/ui-1-ok
 espera 1 "rama que toca lib/agent"               bash "$F" --repo "$T/repo" equipo/ui-2-mal
 espera 1 "renombre desde lib/agent cuenta"       bash "$F" --repo "$T/repo" equipo/ui-3-renombre
 espera 1 "borrar un archivo fuera también cuenta" bash "$F" --repo "$T/repo" equipo/ui-4-borra
+espera 1 "rama que toca packages/core"           bash "$F" --repo "$T/repo" equipo/ui-5-core
+espera 1 "rama que toca mobile/"                 bash "$F" --repo "$T/repo" equipo/ui-6-mobile
 espera 0 "rango explícito dentro"                bash "$F" --repo "$T/repo" origin/main...origin/equipo/ui-1-ok
 espera 2 "rama inexistente falla cerrado"        bash "$F" --repo "$T/repo" equipo/no-existe
 espera 2 "sin argumentos es error de uso"        bash "$F" --repo "$T/repo"

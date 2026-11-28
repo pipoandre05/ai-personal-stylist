@@ -102,7 +102,7 @@ else
 fi
 
 paso "6. Dependencias de la línea"
-if [ "$NPM" -eq 1 ]; then hacer sh -c "cd '$LINEA/web' && npm ci --no-audit --no-fund >/dev/null"; else echo "omitido (--sin-npm)"; fi
+if [ "$NPM" -eq 1 ]; then hacer sh -c "cd '$LINEA' && npm ci --no-audit --no-fund >/dev/null"; else echo "omitido (--sin-npm)"; fi
 
 paso "Resumen"
 echo "Torre: $TORRE · Línea 1: $LINEA · avisos: $AVISOS"

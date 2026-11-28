@@ -1,10 +1,10 @@
 name: ci
 on:
   pull_request:
-    paths: ['web/**', 'docs/**', 'agentes/**', '.claude/**', '.github/workflows/ci.yml']
+    paths: ['web/**', 'packages/**', 'package.json', 'package-lock.json', 'scripts/**', 'docs/**', 'agentes/**', '.claude/**', '.github/workflows/ci.yml']
   push:
     branches: [main]
-    paths: ['web/**']
+    paths: ['web/**', 'packages/**', 'package.json', 'package-lock.json', 'scripts/**']
 
 jobs:
   verify:
@@ -15,11 +15,9 @@ jobs:
         with:
           node-version: '24'
           cache: npm
-          cache-dependency-path: web/package-lock.json
+          cache-dependency-path: package-lock.json
       - run: npm ci
-        working-directory: web
       - run: npm run verify
-        working-directory: web
 
   # Tercer control de la frontera del equipo de bots (ademas del freno al editar y de
   # condiciones-merge.sh antes del merge): un PR de una rama equipo/* no puede tocar rutas prohibidas.

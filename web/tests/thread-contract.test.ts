@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTurnCollector } from "@/lib/chat/collector";
-import { createSSEParser, encodeSSE } from "@/lib/chat/sse";
+import { createSSEParser, encodeSSE } from "@aps/core";
 import { assembleThread, latestEventPart, shoppingBlocksOf, withEventSummary, type ThreadLookups, type ThreadRow } from "@/lib/data/thread";
 import { assistantNotes, userIntentLine } from "@/lib/agent/history-notes";
 import { toMessageParams } from "@/lib/agent/history";

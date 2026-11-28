@@ -1,4 +1,4 @@
-import { CHAT_EVENT_TYPES, type ChatEvent } from "@/lib/domain/types";
+import { CHAT_EVENT_TYPES, type ChatEvent } from "./types";
 
 /** Serializa un evento como trama SSE: `event: <tipo>` + `data: <json>`. Pura. */
 export function encodeSSE(event: ChatEvent): string {
